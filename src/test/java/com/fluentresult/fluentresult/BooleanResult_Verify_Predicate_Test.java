@@ -19,6 +19,18 @@ class BooleanResult_Verify_Predicate_Test {
     }
 
     @Test
+    void verify_predicate_success_shouldKeepSuccessResultWhenVerifiedTrueFunction() {
+        BooleanResult<String> result = BooleanResult.<String>success(false)
+                .verify(
+                        val -> !val,
+                        (b) -> "ValidationError " + b);
+        result.consumeEither(
+                () -> fail("Should not be true"),
+                () -> {},
+                err -> fail("Should not be error"));
+    }
+
+    @Test
     void verify_predicate_success_shouldChangeToProvidedErrorWhenVerifiedFalse() {
         BooleanResult<String> result = BooleanResult.<String>success(true)
                 .verify(
@@ -27,6 +39,17 @@ class BooleanResult_Verify_Predicate_Test {
         result.consumeEither(
                 val -> fail("Expected no value"),
                 err -> assertThat(err).isEqualTo("ValidationError"));
+    }
+
+    @Test
+    void verify_predicate_success_shouldChangeToProvidedErrorFunctionWhenVerifiedFalse() {
+        BooleanResult<String> result = BooleanResult.<String>success(true)
+                .verify(
+                        val -> !val,
+                        (b) -> "ValidationError " + b);
+        result.consumeEither(
+                val -> fail("Expected no value"),
+                err -> assertThat(err).isEqualTo("ValidationError " + true));
     }
 
     @Test

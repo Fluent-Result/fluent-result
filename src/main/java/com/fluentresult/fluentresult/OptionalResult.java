@@ -882,6 +882,34 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
     }
 
     /**
+     * If in success state, verifies the optional success value of this
+     * {@code OptionalResult} by testing it with the given predicate. If the
+     * predicate evaluates to false, a new {@code OptionalResult} is returned
+     * containing the error provided by mapping the value with the error function.
+     * If the predicate evaluates to true, or the {@code OptionalResult} already was
+     * in error state, the original {@code OptionalResult} is returned unaltered.
+     *
+     * @param predicate the predicate used to verify the optional success value,
+     * if success state
+     * @param errorFunction mapping the value to an error if predicate evaluates
+     * to false
+     * @return the original {@code OptionalResult} unaltered, unless the
+     * predicate evaluates to false, then a new {@code OptionalResult} in error
+     * state is returned containing the result of mapping the value to an error
+     * @throws NullPointerException if the given predicate is {@code null} or
+     * returns {@code null}, or the given error supplier is {@code null} or
+     * returns {@code null}
+     */
+    public OptionalResult<T, E> verify(Predicate<Optional<T>> predicate,
+                                       Function<Optional<T>, ? extends E> errorFunction) {
+        return Implementations.verify(
+                predicate,
+                errorFunction,
+                OptionalResult::error,
+                this);
+    }
+
+    /**
      * If in success state, verifies the success value of this
      * {@code OptionalResult} by mapping it to a {@code VoidResult}. If the
      * returned {@code VoidResult} is in error state, a new
@@ -929,6 +957,36 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
         return Implementations.verify(
                 maybeValue -> maybeValue.map(predicate::test).orElse(true),
                 errorSupplier,
+                OptionalResult::error,
+                this);
+    }
+
+    /**
+     * If in success state with a success value, verifies the success value of
+     * this {@code OptionalResult} by testing it with the given predicate. If
+     * the predicate evaluates to false, a new {@code OptionalResult} is returned
+     * containing the error value provided by mapping the value with the error function. 
+     * If the predicate evaluates to true, or the {@code OptionalResult} already was
+     * empty or in error state, the original {@code OptionalResult} is returned
+     * unaltered.
+     *
+     * @param predicate the predicate used to verify the success value, if
+     * success state with a success value
+     * @param errorFunction mapping the value to an error if predicate evaluates
+     * to false
+     * @return the original {@code OptionalResult} unaltered, unless the
+     * predicate evaluates to false, then a new {@code OptionalResult} in error
+     * state is returned containing the result of mapping the value to an error
+     * @throws NullPointerException if the given predicate is {@code null} or
+     * returns {@code null}, or the given error supplier is {@code null} or
+     * returns {@code null}
+     */
+    public OptionalResult<T, E> verifyValue(Predicate<? super T> predicate,
+                                            Function<? super T, ? extends E> errorFunction) {
+        Objects.requireNonNull(errorFunction);
+        return Implementations.verify(
+                maybeValue -> maybeValue.map(predicate::test).orElse(true),
+                maybeValue -> maybeValue.map(errorFunction).get(),
                 OptionalResult::error,
                 this);
     }
