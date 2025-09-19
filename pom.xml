@@ -21,7 +21,7 @@
     <licenses>
         <license>
             <name>MIT License</name>
-            <url>http://www.opensource.org/licenses/mit-license.php</url>
+            <url>https://www.opensource.org/licenses/mit-license.php</url>
         </license>
     </licenses>
 
@@ -40,11 +40,11 @@
         <developer>
             <name>Gøran Dalum</name>
             <email>goran.dalum@gmail.com</email>
-            <url>http://github.com/gorandalum</url>
+            <url>https://github.com/gorandalum</url>
         </developer>
         <developer>
             <name>Marvin Bredal Lillehaug</name>
-            <url>http://github.com/computerlove</url>
+            <url>https://github.com/computerlove</url>
         </developer>
     </developers>
 
@@ -201,5 +201,4 @@
             </build>
         </profile>
     </profiles>
-
 </project>

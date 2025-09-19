@@ -2,6 +2,8 @@ package com.fluentresult.fluentresult;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.function.Supplier;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.fail;
@@ -27,9 +29,27 @@ class Result_Verify_Predicate_Test {
     }
 
     @Test
+    void verify_predicate_success_shouldChangeToProvidedFunctionErrorWhenVerifiedFalse() {
+        Result<String, String> result = Result.<String, String>success("Success")
+                .verify(val -> val.length() == 5, (s) -> "ValidationError " + s);
+        result.consumeEither(
+                val -> fail("Expected no value"),
+                err -> assertThat(err).isEqualTo("ValidationError Success"));
+    }
+
+    @Test
     void verify_predicate_error_shouldKeepOriginalError() {
         Result<String, String> result = Result.<String, String>error("Error")
                 .verify(val -> val.length() == 5, () -> "ValidationError");
+        result.consumeEither(
+                val -> fail("Expected no value"),
+                err -> assertThat(err).isEqualTo("Error"));
+    }
+
+    @Test
+    void verify_predicate_error_function_shouldKeepOriginalError() {
+        Result<String, String> result = Result.<String, String>error("Error")
+                .verify(val -> val.length() == 5, (s) -> "ValidationError " + s);
         result.consumeEither(
                 val -> fail("Expected no value"),
                 err -> assertThat(err).isEqualTo("Error"));
@@ -58,7 +78,7 @@ class Result_Verify_Predicate_Test {
     @Test
     void verify_predicate_success_nullErrorSupplierGivesNPE() {
         Result<String, String> result = Result.success("Success");
-        assertThatThrownBy(() -> result.verify(val -> true, null))
+        assertThatThrownBy(() -> result.verify(val -> true, (Supplier<String>) null))
                 .isInstanceOf(NullPointerException.class);
     }
 }
