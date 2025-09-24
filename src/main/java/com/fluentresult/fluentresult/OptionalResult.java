@@ -19,18 +19,7 @@ import java.util.function.Supplier;
  * @param <T> the type of the success value
  * @param <E> the type of the error value
  */
-@SuppressWarnings({"WeakerAccess", "OptionalUsedAsFieldOrParameterType"})
-public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
-
-    /**
-     * Common instance for empty {@code OptionalResult}.
-     */
-    private static final OptionalResult<?, ?> RESULT_EMPTY =
-            new OptionalResult<>(Optional.empty(), null);
-
-    private OptionalResult(Optional<T> value, E error) {
-        super(value, error, OptionalResult.class);
-    }
+public sealed interface OptionalResult<T, E> {
 
     /**
      * Returns an {@code OptionalResult} in success state containing the given
@@ -45,7 +34,7 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * a success value or is empty
      * @throws NullPointerException if given {@code Optional} is {@code null}
      */
-    public static <T, E> OptionalResult<T, E> success(Optional<? extends T> maybeValue) {
+    static <T, E> OptionalResult<T, E> success(Optional<? extends T> maybeValue) {
         @SuppressWarnings("unchecked")
         Optional<T> t = (Optional<T>) Objects.requireNonNull(maybeValue);
         return t.map(OptionalResult::<T, E>success).orElse(empty());
@@ -62,8 +51,8 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * success value
      * @throws NullPointerException if given success value is {@code null}
      */
-    public static <T, E> OptionalResult<T, E> success(T value) {
-        return new OptionalResult<>(Optional.of(value), null);
+    static <T, E> OptionalResult<T, E> success(T value) {
+        return new Value(Objects.requireNonNull(value));
     }
 
     /**
@@ -76,11 +65,11 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @return an {@code OptionalResult} in success state containing the given
      * success value if not null, otherwise an empty {@code OptionalResult}
      */
-    public static <T, E> OptionalResult<T, E> successNullable(T value) {
+    static <T, E> OptionalResult<T, E> successNullable(T value) {
         if (value == null) {
             return empty();
         }
-        return new OptionalResult<>(Optional.of(value), null);
+        return new Value(value);
     }
 
     /**
@@ -91,10 +80,8 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @param <E> the type of the error value
      * @return an empty {@code OptionalResult} in success state
      */
-    public static <T, E> OptionalResult<T, E> empty() {
-        @SuppressWarnings("unchecked")
-        OptionalResult<T, E> res = (OptionalResult<T, E>) RESULT_EMPTY;
-        return res;
+    static <T, E> OptionalResult<T, E> empty() {
+        return new Empty<>();
     }
 
     /**
@@ -108,8 +95,8 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * error value
      * @throws NullPointerException if given error value is {@code null}
      */
-    public static <T, E> OptionalResult<T, E> error(E value) {
-        return new OptionalResult<>(null, Objects.requireNonNull(value));
+    static <T, E> OptionalResult<T, E> error(E value) {
+        return new Error(Objects.requireNonNull(value));
     }
 
     /**
@@ -128,9 +115,7 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @throws NullPointerException if the given mapping function is
      * {@code null} or returns {@code null}
      */
-    public <N> Result<N, E> map(Function<Optional<T>, ? extends N> function) {
-        return Implementations.map(function, Result::success, Result::error, this);
-    }
+    <N> Result<N, E> map(Function<Optional<T>, ? extends N> function);
 
     /**
      * If in success state, returns a {@code OptionalResult} containing the
@@ -149,11 +134,8 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @throws NullPointerException if the given mapping function is
      * {@code null} or returns {@code null}
      */
-    public <N> OptionalResult<N, E> mapToOptional(
-            Function<Optional<T>, ? extends Optional<? extends N>> function) {
-        return Implementations.map(
-                function, OptionalResult::success, OptionalResult::error, this);
-    }
+    <N> OptionalResult<N, E> mapToOptional(
+            Function<Optional<T>, ? extends Optional<? extends N>> function);
 
     /**
      * If in success state, returns a {@code BooleanResult} containing the
@@ -171,13 +153,7 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @throws NullPointerException if the given mapping function is
      * {@code null} or returns {@code null}
      */
-    public BooleanResult<E> mapToBoolean(Function<Optional<T>, Boolean> function) {
-        return Implementations.map(
-                function,
-                BooleanResult::success,
-                BooleanResult::error,
-                this);
-    }
+    BooleanResult<E> mapToBoolean(Function<Optional<T>, Boolean> function);
 
     /**
      * If in error state, returns a {@code OptionalResult} containing the result
@@ -194,9 +170,7 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @throws NullPointerException if the given mapping function is
      * {@code null} or returns {@code null}
      */
-    public <N> OptionalResult<T, N> mapError(Function<? super E, ? extends N> function) {
-        return Implementations.mapError(function, OptionalResult::error, this);
-    }
+    <N> OptionalResult<T, N> mapError(Function<? super E, ? extends N> function);
 
     /**
      * If in success state with a success value, returns an
@@ -217,14 +191,8 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @throws NullPointerException if the given mapping function is
      * {@code null}
      */
-    public <N> OptionalResult<N, E> mapValue(
-            Function<? super T, ? extends N> function) {
-        return Implementations.map(
-                maybeVal -> maybeVal.map(val -> (N) function.apply(val)),
-                OptionalResult::success,
-                OptionalResult::error,
-                this);
-    }
+    <N> OptionalResult<N, E> mapValue(
+            Function<? super T, ? extends N> function);
 
     /**
      * If in success state with a success value, returns an
@@ -249,14 +217,8 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @throws NullPointerException if the given mapping function is
      * {@code null} or returns {@code null}
      */
-    public <N> OptionalResult<N, E> mapValueToOptional(
-            Function<? super T, Optional<N>> function) {
-        return Implementations.map(
-                maybeVal -> maybeVal.flatMap(function),
-                OptionalResult::success,
-                OptionalResult::error,
-                this);
-    }
+    <N> OptionalResult<N, E> mapValueToOptional(
+            Function<? super T, Optional<N>> function);
 
     /**
      * If in success state, returns the {@code Result} from applying the given
@@ -273,13 +235,8 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @throws NullPointerException if the given mapping function is
      * {@code null} or returns {@code null}
      */
-    public <N> Result<N, E> flatMap(
-            Function<Optional<T>, Result<? extends N, ? extends E>> function) {
-        @SuppressWarnings("unchecked")
-        Result<N, E> res = (Result<N, E>) Implementations.flatMap(
-                function, this, Result::error);
-        return res;
-    }
+    <N> Result<N, E> flatMap(
+            Function<Optional<T>, Result<? extends N, ? extends E>> function);
 
     /**
      * If in success state, returns the {@code OptionalResult} from applying
@@ -296,13 +253,8 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @throws NullPointerException if the given mapping function is
      * {@code null} or returns {@code null}
      */
-    public <N> OptionalResult<N, E> flatMapToOptionalResult(
-            Function<Optional<T>, OptionalResult<? extends N, ? extends E>> function) {
-        @SuppressWarnings("unchecked")
-        OptionalResult<N, E> res = (OptionalResult<N, E>) Implementations.flatMap(
-                function, this);
-        return res;
-    }
+    <N> OptionalResult<N, E> flatMapToOptionalResult(
+            Function<Optional<T>, OptionalResult<? extends N, ? extends E>> function);
 
     /**
      * If in empty success state, returns the {@code OptionalResult} from
@@ -318,14 +270,8 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @throws NullPointerException if the given supplier is {@code null} or
      * returns {@code null}
      */
-    public <N> OptionalResult<N, E> flatReplaceEmpty(
-            Supplier<OptionalResult<N, E>> supplier) {
-        @SuppressWarnings("unchecked")
-        OptionalResult<N, E> res = Implementations.flatMap(
-                t -> t.map(value -> OptionalResult.<N, E>success((N)value)).orElseGet(supplier),
-                this);
-        return res;
-    }
+    <N> OptionalResult<N, E> flatReplaceEmpty(
+            Supplier<OptionalResult<N, E>> supplier);
 
     /**
      * If in empty success state, returns the {@code Result} from applying the
@@ -340,14 +286,8 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @throws NullPointerException if the given supplier is {@code null} or
      * returns {@code null}
      */
-    public <N> Result<N, E> flatReplaceEmptyWithResult(
-            Supplier<Result<N, E>> supplier) {
-        @SuppressWarnings("unchecked")
-        Result<N, E> res = Implementations.flatMap(
-                t -> t.map(value -> Result.<N, E>success((N)value)).orElseGet(supplier),
-                this, Result::error);
-        return res;
-    }
+    <N> Result<N, E> flatReplaceEmptyWithResult(
+            Supplier<Result<N, E>> supplier);
 
     /**
      * If in success state, returns the {@code BooleanResult} from applying
@@ -363,13 +303,8 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @throws NullPointerException if the given mapping function is
      * {@code null} or returns {@code null}
      */
-    public BooleanResult<E> flatMapToBooleanResult(
-            Function<Optional<? extends T>, BooleanResult<? extends E>> function) {
-        @SuppressWarnings("unchecked")
-        BooleanResult<E> res = (BooleanResult<E>) Implementations.flatMap(
-                function, this, BooleanResult::error);
-        return res;
-    }
+    BooleanResult<E> flatMapToBooleanResult(
+            Function<Optional<? extends T>, BooleanResult<? extends E>> function);
 
     /**
      * If in success state, returns the {@code VoidResult} from applying the
@@ -385,13 +320,8 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @throws NullPointerException if the given mapping function is
      * {@code null} or returns {@code null}
      */
-    public VoidResult<E> flatMapToVoidResult(
-            Function<Optional<? extends T>, VoidResult<? extends E>> function) {
-        @SuppressWarnings("unchecked")
-        VoidResult<E> res = (VoidResult<E>) Implementations.flatMap(
-                function, this, VoidResult::error);
-        return res;
-    }
+    VoidResult<E> flatMapToVoidResult(
+            Function<Optional<? extends T>, VoidResult<? extends E>> function);
 
     /**
      * If in success state with a success value, returns an
@@ -415,17 +345,8 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @throws NullPointerException if the given mapping function is
      * {@code null} or returns {@code null}
      */
-    public <N> OptionalResult<N, E> flatMapValueWithResult(
-            Function<? super T, Result<? extends N, ? extends E>> function) {
-        @SuppressWarnings("unchecked")
-        OptionalResult<N, E> res = (OptionalResult<N, E>) Implementations.flatMap(
-                maybeVal -> maybeVal
-                        .map(val -> Objects.requireNonNull(function.apply(val)))
-                        .map(Result::toOptionalResult)
-                        .orElseGet(OptionalResult::empty),
-                this);
-        return res;
-    }
+    <N> OptionalResult<N, E> flatMapValueWithResult(
+            Function<? super T, Result<? extends N, ? extends E>> function);
 
     /**
      * If in success state with a success value, returns the
@@ -443,17 +364,8 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @throws NullPointerException if the given mapping function is
      * {@code null} or returns {@code null}
      */
-    public <N> OptionalResult<N, E> flatMapValueWithOptionalResult(
-            Function<? super T, OptionalResult<? extends N, ? extends E>> function) {
-        @SuppressWarnings("unchecked")
-        OptionalResult<N, E> res = (OptionalResult<N, E>) Implementations.flatMap(
-                maybeVal -> maybeVal
-                        .map(val -> Objects.requireNonNull(function.apply(val)))
-                        .orElseGet(OptionalResult::empty),
-                this
-        );
-        return res;
-    }
+    <N> OptionalResult<N, E> flatMapValueWithOptionalResult(
+            Function<? super T, OptionalResult<? extends N, ? extends E>> function);
 
     /**
      * If in success state with a success value, returns an
@@ -476,17 +388,8 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @throws NullPointerException if the given mapping function is
      * {@code null} or returns {@code null}
      */
-    public OptionalResult<Boolean, E> flatMapValueWithBooleanResult(
-            Function<? super T, BooleanResult<? extends E>> function) {
-        @SuppressWarnings("unchecked")
-        OptionalResult<Boolean, E> res = (OptionalResult<Boolean, E>) Implementations.flatMap(
-                maybeVal -> maybeVal
-                        .map(val -> Objects.requireNonNull(function.apply(val)))
-                        .map(BooleanResult::toOptionalResult)
-                        .orElseGet(OptionalResult::empty),
-                this);
-        return res;
-    }
+    OptionalResult<Boolean, E> flatMapValueWithBooleanResult(
+            Function<? super T, BooleanResult<? extends E>> function);
 
     /**
      * If in error state, returns a {@code OptionalResult} with the success
@@ -499,10 +402,8 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * function, if in error state, otherwise the unaltered
      * {@code OptionalResult} in success state
      */
-    public OptionalResult<T, E> recover(
-            Function<E, Optional<T>> function) {
-        return Implementations.recover(function, OptionalResult::success, this);
-    }
+    OptionalResult<T, E> recover(
+            Function<E, Optional<T>> function);
 
     /**
      * If in error state, returns the {@code OptionalResult} from applying the
@@ -517,14 +418,8 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * in error state, otherwise the unaltered {@code OptionalResult} in success
      * state
      */
-    public <N> OptionalResult<N, E> flatRecover(
-            Function<E, OptionalResult<? extends N, ? extends E>> function) {
-        @SuppressWarnings("unchecked")
-        OptionalResult<N, E> res = (OptionalResult<N, E>) Implementations.flatRecover(
-                val -> function.apply(error()),
-                this);
-        return res;
-    }
+    <N> OptionalResult<N, E> flatRecover(
+            Function<E, OptionalResult<? extends N, ? extends E>> function);
 
     /**
      * If in success state, applies the optional success value to the given
@@ -534,9 +429,7 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @return the original {@code OptionalResult} unaltered
      * @throws NullPointerException if the given consumer is {@code null}
      */
-    public OptionalResult<T, E> consume(Consumer<Optional<T>> consumer) {
-        return Implementations.consume(consumer, this);
-    }
+    OptionalResult<T, E> consume(Consumer<Optional<T>> consumer);
 
     /**
      * If in success state with a success value, applies the success value to
@@ -546,11 +439,7 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @return the original {@code OptionalResult} unaltered
      * @throws NullPointerException if the given consumer is {@code null}
      */
-    public OptionalResult<T, E> consumeValue(Consumer<T> consumer) {
-        Objects.requireNonNull(consumer);
-        valueOpt().ifPresent(maybeVal -> maybeVal.ifPresent(consumer));
-        return this;
-    }
+    OptionalResult<T, E> consumeValue(Consumer<T> consumer);
 
     /**
      * If in error state, applies the error value to the given consumer,
@@ -560,9 +449,7 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @return the original {@code OptionalResult} unaltered
      * @throws NullPointerException if the given consumer is {@code null}
      */
-    public OptionalResult<T, E> consumeError(Consumer<? super E> errorConsumer) {
-        return Implementations.consumeError(errorConsumer, this);
-    }
+    OptionalResult<T, E> consumeError(Consumer<? super E> errorConsumer);
 
     /**
      * If in success state, applies the optional success value to the given
@@ -575,15 +462,9 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @return the original {@code OptionalResult} unaltered
      * @throws NullPointerException if one of the given consumers is {@code null}
      */
-    public OptionalResult<T, E> consumeEither(
+    OptionalResult<T, E> consumeEither(
             Consumer<Optional<T>> successConsumer,
-            Consumer<? super E> errorConsumer) {
-        return Implementations.consumeEither(
-                successConsumer,
-                errorConsumer,
-                this
-        );
-    }
+            Consumer<? super E> errorConsumer);
 
     /**
      * If in success state with a success value, applies the success value to
@@ -598,25 +479,10 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @throws NullPointerException if one of the given consumers or runnable is
      * {@code null}
      */
-    public OptionalResult<T, E> consumeEither(
+    OptionalResult<T, E> consumeEither(
             Consumer<? super T> valueConsumer,
             Runnable emptyRunnable,
-            Consumer<? super E> errorConsumer) {
-        Objects.requireNonNull(valueConsumer);
-        Objects.requireNonNull(emptyRunnable);
-
-        return Implementations.consumeEither(
-                maybeVal -> {
-                    if (maybeVal.isPresent()) {
-                        valueConsumer.accept(maybeVal.get());
-                    } else {
-                        emptyRunnable.run();
-                    }
-                },
-                errorConsumer,
-                this
-        );
-    }
+            Consumer<? super E> errorConsumer);
 
     /**
      * If in success state, applies the optional success value to the given
@@ -634,10 +500,8 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @throws NullPointerException if the given function is {@code null} or
      * returns {@code null}
      */
-    public OptionalResult<T, E> flatConsume(
-            Function<Optional<T>, ? extends VoidResult<? extends E>> function) {
-        return Implementations.flatConsume(function, OptionalResult::error, this);
-    }
+    OptionalResult<T, E> flatConsume(
+            Function<Optional<T>, ? extends VoidResult<? extends E>> function);
 
     /**
      * If in success state, applies the success value to the given function. If
@@ -655,17 +519,8 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @throws NullPointerException if the given function is {@code null} or
      * returns {@code null}
      */
-    public OptionalResult<T, E> flatConsumeValue(
-            Function<T, ? extends VoidResult<? extends E>> function) {
-        Objects.requireNonNull(function);
-        @SuppressWarnings("unchecked")
-        OptionalResult<T, E> result = Implementations.flatConsume(
-                maybeVal -> maybeVal
-                        .map(val -> (VoidResult<E>) Objects.requireNonNull(function.apply(val)))
-                        .orElseGet(VoidResult::success)
-                , OptionalResult::error, this);
-        return result;
-    }
+    OptionalResult<T, E> flatConsumeValue(
+            Function<T, ? extends VoidResult<? extends E>> function);
 
     /**
      * If in success state, runs the given runnable, otherwise does nothing.
@@ -674,9 +529,7 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @return the original {@code OptionalResult} unaltered
      * @throws NullPointerException if the given runnable is {@code null}
      */
-    public OptionalResult<T, E> runIfSuccess(Runnable runnable) {
-        return Implementations.runIfSuccess(runnable, this);
-    }
+    OptionalResult<T, E> runIfSuccess(Runnable runnable);
 
     /**
      * If in success state with a success value, runs the given runnable,
@@ -686,11 +539,7 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @return the original {@code OptionalResult} unaltered
      * @throws NullPointerException if the given runnable is {@code null}
      */
-    public OptionalResult<T, E> runIfValue(Runnable runnable) {
-        Objects.requireNonNull(runnable);
-        valueOpt().ifPresent(maybeVal -> maybeVal.ifPresent(val -> runnable.run()));
-        return this;
-    }
+    OptionalResult<T, E> runIfValue(Runnable runnable);
 
     /**
      * If in empty success state or error state, runs the given runnable,
@@ -700,10 +549,7 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @return the original {@code OptionalResult} unaltered
      * @throws NullPointerException if the given runnable is {@code null}
      */
-    public OptionalResult<T, E> runIfNoValue(Runnable runnable) {
-        Objects.requireNonNull(runnable);
-        return runIfEmpty(runnable).runIfError(runnable);
-    }
+    OptionalResult<T, E> runIfNoValue(Runnable runnable);
 
     /**
      * If in empty success state with no success value, runs the given runnable,
@@ -713,15 +559,7 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @return the original {@code OptionalResult} unaltered
      * @throws NullPointerException if the given runnable is {@code null}
      */
-    public OptionalResult<T, E> runIfEmpty(Runnable runnable) {
-        Objects.requireNonNull(runnable);
-        valueOpt().ifPresent(maybeVal -> {
-            if (!maybeVal.isPresent()) {
-                runnable.run();
-            }
-        });
-        return this;
-    }
+    OptionalResult<T, E> runIfEmpty(Runnable runnable);
 
     /**
      * If in error state, runs the given runnable, otherwise does nothing.
@@ -730,9 +568,7 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @return the original {@code OptionalResult} unaltered
      * @throws NullPointerException if the given runnable is {@code null}
      */
-    public OptionalResult<T, E> runIfError(Runnable runnable) {
-        return Implementations.runIfError(runnable, this);
-    }
+    OptionalResult<T, E> runIfError(Runnable runnable);
 
     /**
      * If in success state, runs the given success runnable. If in error state,
@@ -743,10 +579,8 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @return the original {@code OptionalResult} unaltered
      * @throws NullPointerException if one of the given runnables is {@code null}
      */
-    public OptionalResult<T, E> runEither(Runnable successRunnable,
-                                          Runnable errorRunnable) {
-        return Implementations.runEither(successRunnable, errorRunnable, this);
-    }
+    OptionalResult<T, E> runEither(Runnable successRunnable,
+                                          Runnable errorRunnable);
 
     /**
      * If in success state with a success value, runs the given value runnable.
@@ -760,34 +594,9 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @return the original {@code OptionalResult} unaltered
      * @throws NullPointerException if one of the given runnables is {@code null}
      */
-    public OptionalResult<T, E> runEither(Runnable valueRunnable,
+    OptionalResult<T, E> runEither(Runnable valueRunnable,
                                           Runnable emptyRunnable,
-                                          Runnable errorRunnable) {
-        Objects.requireNonNull(valueRunnable);
-        Objects.requireNonNull(emptyRunnable);
-        return Implementations.runEither(
-                () -> {
-                    if (value().isPresent()) {
-                        valueRunnable.run();
-                    } else {
-                        emptyRunnable.run();
-                    }
-                },
-                errorRunnable, this);
-    }
-
-    /**
-     * Runs the given runnable, no matter the state.
-     *
-     * @param runnable the runnable to run
-     * @return the original {@code OptionalResult} unaltered
-     * @throws NullPointerException if the given runnable is {@code null}
-     * @deprecated use {@link #runAlways} instead for clarity
-     */
-    @Deprecated
-    public OptionalResult<T, E> run(Runnable runnable) {
-        return runAlways(runnable);
-    }
+                                          Runnable errorRunnable);
 
     /**
      * Runs the given runnable, no matter the state.
@@ -796,9 +605,7 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @return the original {@code OptionalResult} unaltered
      * @throws NullPointerException if the given runnable is {@code null}
      */
-    public OptionalResult<T, E> runAlways(Runnable runnable) {
-        return Implementations.runAlways(runnable, this);
-    }
+    OptionalResult<T, E> runAlways(Runnable runnable);
 
     /**
      * If in success state, runs the given supplier. If the supplier returns a
@@ -816,10 +623,8 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @throws NullPointerException if the given supplier is {@code null} or
      * returns {@code null}
      */
-    public OptionalResult<T, E> flatRunIfSuccess(
-            Supplier<? extends VoidResult<? extends E>> supplier) {
-        return Implementations.flatRunIfSuccess(supplier, OptionalResult::error, this);
-    }
+    OptionalResult<T, E> flatRunIfSuccess(
+            Supplier<? extends VoidResult<? extends E>> supplier);
 
     /**
      * If in success state with a success value, runs the given supplier. If the
@@ -837,20 +642,8 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @throws NullPointerException if the given supplier is {@code null} or
      * returns {@code null}
      */
-    public OptionalResult<T, E> flatRunIfValue(
-            Supplier<? extends VoidResult<? extends E>> supplier) {
-        Objects.requireNonNull(supplier);
-        return Implementations.flatRunIfSuccess(
-                () -> {
-                    if (value() != null && value().isPresent()) {
-                        return supplier.get();
-                    } else {
-                        return VoidResult.success();
-                    }
-                },
-                OptionalResult::error,
-                this);
-    }
+    OptionalResult<T, E> flatRunIfValue(
+            Supplier<? extends VoidResult<? extends E>> supplier);
 
     /**
      * If in success state, verifies the optional success value of this
@@ -872,14 +665,8 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * returns {@code null}, or the given error supplier is {@code null} or
      * returns {@code null}
      */
-    public OptionalResult<T, E> verify(Predicate<Optional<T>> predicate,
-                                       Supplier<? extends E> errorSupplier) {
-        return Implementations.verify(
-                predicate,
-                errorSupplier,
-                OptionalResult::error,
-                this);
-    }
+    OptionalResult<T, E> verify(Predicate<Optional<T>> predicate,
+                                       Supplier<? extends E> errorSupplier);
 
     /**
      * If in success state, verifies the success value of this
@@ -899,10 +686,8 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @throws NullPointerException if the given function is {@code null} or
      * returns {@code null}
      */
-    public OptionalResult<T, E> verify(
-            Function<Optional<T>, ? extends VoidResult<? extends E>> function) {
-        return Implementations.flatConsume(function, OptionalResult::error, this);
-    }
+    OptionalResult<T, E> verify(
+            Function<Optional<T>, ? extends VoidResult<? extends E>> function);
 
     /**
      * If in success state with a success value, verifies the success value of
@@ -924,14 +709,8 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * returns {@code null}, or the given error supplier is {@code null} or
      * returns {@code null}
      */
-    public OptionalResult<T, E> verifyValue(Predicate<? super T> predicate,
-                                            Supplier<? extends E> errorSupplier) {
-        return Implementations.verify(
-                maybeValue -> maybeValue.map(predicate::test).orElse(true),
-                errorSupplier,
-                OptionalResult::error,
-                this);
-    }
+    OptionalResult<T, E> verifyValue(Predicate<? super T> predicate,
+                                            Supplier<? extends E> errorSupplier);
 
     /**
      * If in non-empty success state, verifies the success value of this
@@ -951,17 +730,8 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @throws NullPointerException if the given function is {@code null} or
      * returns {@code null}
      */
-    public OptionalResult<T, E> verifyValue(
-            Function<? super T, ? extends VoidResult<? extends E>> function) {
-        @SuppressWarnings("unchecked")
-        OptionalResult<T, E> result = Implementations.flatConsume(
-                maybeValue -> maybeValue
-                        .map(val -> (VoidResult<E>) Objects.requireNonNull(function.apply(val)))
-                        .orElseGet(VoidResult::success),
-                OptionalResult::error,
-                this);
-        return result;
-    }
+    OptionalResult<T, E> verifyValue(
+            Function<? super T, ? extends VoidResult<? extends E>> function);
 
     /**
      * Retrieve a value from this {@code OptionalResult} by folding the states.
@@ -979,10 +749,8 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @throws NullPointerException if one of the given functions is
      * {@code null}
      */
-    public <N> N fold(Function<Optional<T>, ? extends N> successFunction,
-                      Function<? super E, ? extends N> errorFunction) {
-        return Implementations.fold(successFunction, errorFunction, this);
-    }
+    <N> N fold(Function<Optional<T>, ? extends N> successFunction,
+                      Function<? super E, ? extends N> errorFunction);
 
     /**
      * Retrieve a value from this {@code OptionalResult} by folding the states.
@@ -1003,19 +771,9 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @throws NullPointerException if one of the given functions or the
      * supplier is {@code null}
      */
-    public <N> N fold(Function<? super T, ? extends N> valueFunction,
+    <N> N fold(Function<? super T, ? extends N> valueFunction,
                       Supplier<? extends N> emptySupplier,
-                      Function<? super E, ? extends N> errorFunction) {
-        Objects.requireNonNull(valueFunction);
-        Objects.requireNonNull(emptySupplier);
-        Objects.requireNonNull(errorFunction);
-        return Implementations.fold(
-                maybeVal -> maybeVal.isPresent() ?
-                        valueFunction.apply(maybeVal.get()) :
-                        emptySupplier.get(),
-                errorFunction,
-                this);
-    }
+                      Function<? super E, ? extends N> errorFunction);
 
     /**
      * If in success state, returns the optional success value, otherwise
@@ -1027,9 +785,7 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * {@code other}
      * @throws NullPointerException if the other value is {@code null}
      */
-    public Optional<T> orElse(Optional<T> other) {
-        return Implementations.orElse(other, this);
-    }
+    Optional<T> orElse(Optional<T> other);
 
     /**
      * If in success state with a success value, returns the success value,
@@ -1040,9 +796,7 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @return the success value, if success state with a success value,
      * otherwise {@code other}
      */
-    public T valueOrElse(T other) {
-        return valueOpt().flatMap(Function.identity()).orElse(other);
-    }
+    T valueOrElse(T other);
 
     /**
      * If in success state, returns the optional success value, otherwise
@@ -1055,9 +809,7 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @throws NullPointerException if the given function is {@code null} or
      * returns {@code null}
      */
-    public Optional<T> orElseGet(Function<? super E, ? extends Optional<T>> function) {
-        return Implementations.orElseGet(function, this);
-    }
+    Optional<T> orElseGet(Function<? super E, ? extends Optional<T>> function);
 
     /**
      * If in success state with a success value, returns the success value,
@@ -1069,10 +821,7 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * otherwise the result returned from the given function
      * @throws NullPointerException if the given function is {@code null}
      */
-    public T valueOrElseGet(Supplier<? extends T> supplier) {
-        Objects.requireNonNull(supplier);
-        return valueOpt().flatMap(Function.identity()).orElseGet(supplier);
-    }
+    T valueOrElseGet(Supplier<? extends T> supplier);
 
     /**
      * If in success state, returns the optional success value, otherwise throws
@@ -1086,10 +835,8 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @throws NullPointerException if the given function is {@code null} or
      * returns {@code null}
      */
-    public <X extends Throwable> Optional<T> orElseThrow(
-            Function<? super E, ? extends X> function) throws X {
-        return Implementations.orElseThrow(function, this);
-    }
+    <X extends Throwable> Optional<T> orElseThrow(
+            Function<? super E, ? extends X> function) throws X;
 
     /**
      * If in success state with a success value, returns the success value,
@@ -1103,11 +850,8 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @throws NullPointerException if the given function is {@code null} or
      * returns {@code null}
      */
-    public <X extends Throwable> T valueOrElseThrow(
-            Supplier<? extends X> supplier) throws X {
-        Objects.requireNonNull(supplier);
-        return valueOpt().flatMap(Function.identity()).orElseThrow(supplier);
-    }
+    <X extends Throwable> T valueOrElseThrow(
+            Supplier<? extends X> supplier) throws X;
 
     /**
      * Transforms this {@code OptionalResult} to a {@code Result}. If in
@@ -1127,10 +871,7 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @throws NullPointerException if the given supplier is {@code null} or
      * returns {@code null}
      */
-    public Result<T, E> toResult(Supplier<? extends E> errorSupplier) {
-        Objects.requireNonNull(errorSupplier);
-        return fold(Result::success, () -> Result.error(errorSupplier.get()), Result::error);
-    }
+    Result<T, E> toResult(Supplier<? extends E> errorSupplier);
 
     /**
      * Transforms this {@code OptionalResult} to a {@code VoidResult}. If in
@@ -1141,11 +882,7 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @return a {@code VoidResult} either in success state or in error state
      * containing the error value from this {@code OptionalResult}
      */
-    public VoidResult<E> toVoidResult() {
-        return errorOpt()
-                .map(VoidResult::error)
-                .orElseGet(VoidResult::success);
-    }
+    VoidResult<E> toVoidResult() ;
 
     /**
      * Handle the given {@code Callable}. If the {@code Callable} executes
@@ -1162,7 +899,7 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * @throws NullPointerException if the given callable is {@code null} or
      * returns {@code null}
      */
-    public static <T> OptionalResult<T, Exception> handle(Callable<Optional<T>> callable) {
+    static <T> OptionalResult<T, Exception> handle(Callable<Optional<T>> callable) {
         Objects.requireNonNull(callable);
         final Optional<T> value;
         try {
@@ -1191,10 +928,778 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * returns {@code null}, or if the given exception mapper function is
      * {@code null} or returns {@code null}
      */
-    public static <T, E> OptionalResult<T, E> handle(Callable<Optional<T>> callable,
+    static <T, E> OptionalResult<T, E> handle(Callable<Optional<T>> callable,
                                                      Function<Exception, E> exceptionMapper) {
         Objects.requireNonNull(exceptionMapper);
         return handle(callable).mapError(exceptionMapper);
+    }
+    
+    record Value<S, ERR>(S value) implements OptionalResult<S,ERR> {
+
+        @Override
+        public <N> Result<N, ERR> map(Function<Optional<S>, ? extends N> function) {
+            return Result.success(function.apply(Optional.of(value)));
+        }
+
+        @Override
+        public <N> OptionalResult<N, ERR> mapToOptional(Function<Optional<S>, ? extends Optional<? extends N>> function) {
+            return OptionalResult.success(function.apply(Optional.of(value)));
+        }
+
+        @Override
+        public BooleanResult<ERR> mapToBoolean(Function<Optional<S>, Boolean> function) {
+            return BooleanResult.success(function.apply(Optional.of(value)));
+        }
+
+        @Override
+        public <N> OptionalResult<S, N> mapError(Function<? super ERR, ? extends N> function) {
+            return safeCast();
+        }
+
+        @Override
+        public <N> OptionalResult<N, ERR> mapValue(Function<? super S, ? extends N> function) {
+            return OptionalResult.success(function.apply(value));
+        }
+
+        @Override
+        public <N> OptionalResult<N, ERR> mapValueToOptional(Function<? super S, Optional<N>> function) {
+            return OptionalResult.success(function.apply(value));
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public <N> Result<N, ERR> flatMap(Function<Optional<S>, Result<? extends N, ? extends ERR>> function) {
+            return (Result<N, ERR>) function.apply(Optional.of(value));
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public <N> OptionalResult<N, ERR> flatMapToOptionalResult(Function<Optional<S>, OptionalResult<? extends N, ? extends ERR>> function) {
+            return (OptionalResult<N, ERR>) function.apply(Optional.of(value));
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public <N> OptionalResult<N, ERR> flatReplaceEmpty(Supplier<OptionalResult<N, ERR>> supplier) {
+            return (OptionalResult<N, ERR>) this;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public <N> Result<N, ERR> flatReplaceEmptyWithResult(Supplier<Result<N, ERR>> supplier) {
+            return (Result<N, ERR>) Result.success(value);
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public BooleanResult<ERR> flatMapToBooleanResult(Function<Optional<? extends S>, BooleanResult<? extends ERR>> function) {
+            return (BooleanResult<ERR>) function.apply(Optional.of(value));
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public VoidResult<ERR> flatMapToVoidResult(Function<Optional<? extends S>, VoidResult<? extends ERR>> function) {
+            return (VoidResult<ERR>) function.apply(Optional.of(value));
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public <N> OptionalResult<N, ERR> flatMapValueWithResult(Function<? super S, Result<? extends N, ? extends ERR>> function) {
+            return (OptionalResult<N, ERR>) function.apply(value).toOptionalResult();
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public <N> OptionalResult<N, ERR> flatMapValueWithOptionalResult(Function<? super S, OptionalResult<? extends N, ? extends ERR>> function) {
+            return (OptionalResult<N, ERR>) function.apply(value);
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public OptionalResult<Boolean, ERR> flatMapValueWithBooleanResult(Function<? super S, BooleanResult<? extends ERR>> function) {
+            return (OptionalResult<Boolean, ERR>) function.apply(value).toOptionalResult();
+        }
+
+        @Override
+        public OptionalResult<S, ERR> recover(Function<ERR, Optional<S>> function) {
+            return safeCast();
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public <N> OptionalResult<N, ERR> flatRecover(Function<ERR, OptionalResult<? extends N, ? extends ERR>> function) {
+            return (OptionalResult<N, ERR>) this;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> consume(Consumer<Optional<S>> consumer) {
+            consumer.accept(Optional.of(value));
+            return safeCast();
+        }
+
+        @Override
+        public OptionalResult<S, ERR> consumeValue(Consumer<S> consumer) {
+            consumer.accept(value);
+            return safeCast();
+        }
+
+        @Override
+        public OptionalResult<S, ERR> consumeError(Consumer<? super ERR> errorConsumer) {
+            return safeCast();
+        }
+
+        @Override
+        public OptionalResult<S, ERR> consumeEither(Consumer<Optional<S>> successConsumer, Consumer<? super ERR> errorConsumer) {
+            successConsumer.accept(Optional.of(value));
+            return safeCast();
+        }
+
+        @Override
+        public OptionalResult<S, ERR> consumeEither(Consumer<? super S> valueConsumer, Runnable emptyRunnable, Consumer<? super ERR> errorConsumer) {
+            valueConsumer.accept(value);
+            return safeCast();
+        }
+
+        @Override
+        public OptionalResult<S, ERR> flatConsume(Function<Optional<S>, ? extends VoidResult<? extends ERR>> function) {
+            VoidResult<? extends ERR> apply = function.apply(Optional.of(value));
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> flatConsumeValue(Function<S, ? extends VoidResult<? extends ERR>> function) {
+            VoidResult<? extends ERR> result = function.apply(value);
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> runIfSuccess(Runnable runnable) {
+            runnable.run();
+            return safeCast();
+        }
+
+        @Override
+        public OptionalResult<S, ERR> runIfValue(Runnable runnable) {
+            runnable.run();
+            return safeCast();
+        }
+
+        @Override
+        public OptionalResult<S, ERR> runIfNoValue(Runnable runnable) {
+            return safeCast();
+        }
+
+        @Override
+        public OptionalResult<S, ERR> runIfEmpty(Runnable runnable) {
+            return safeCast();
+        }
+
+        @Override
+        public OptionalResult<S, ERR> runIfError(Runnable runnable) {
+            return safeCast();
+        }
+
+        @Override
+        public OptionalResult<S, ERR> runEither(Runnable successRunnable, Runnable errorRunnable) {
+            successRunnable.run();
+            return safeCast();
+        }
+
+        @Override
+        public OptionalResult<S, ERR> runEither(Runnable valueRunnable, Runnable emptyRunnable, Runnable errorRunnable) {
+            valueRunnable.run();
+            return safeCast();
+        }
+
+        @Override
+        public OptionalResult<S, ERR> runAlways(Runnable runnable) {
+            runnable.run();
+            return safeCast();
+        }
+
+        @Override
+        public OptionalResult<S, ERR> flatRunIfSuccess(Supplier<? extends VoidResult<? extends ERR>> supplier) {
+            VoidResult<? extends ERR> voidResult = supplier.get();
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> flatRunIfValue(Supplier<? extends VoidResult<? extends ERR>> supplier) {
+            VoidResult<? extends ERR> voidResult = supplier.get();
+            return null;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public OptionalResult<S, ERR> verify(Predicate<Optional<S>> predicate, Supplier<? extends ERR> errorSupplier) {
+            if(predicate.test(Optional.of(value))) {
+                return safeCast();
+            } else {
+                return (OptionalResult<S, ERR>) errorSupplier.get();
+            }
+        }
+
+        @Override
+        public OptionalResult<S, ERR> verify(Function<Optional<S>, ? extends VoidResult<? extends ERR>> function) {
+            VoidResult<? extends ERR> apply = function.apply(Optional.of(value));
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> verifyValue(Predicate<? super S> predicate, Supplier<? extends ERR> errorSupplier) {
+            if(predicate.test(value)) {
+                return safeCast();
+            } else {
+                return OptionalResult.error(errorSupplier.get());
+            }
+        }
+
+        @Override
+        public OptionalResult<S, ERR> verifyValue(Function<? super S, ? extends VoidResult<? extends ERR>> function) {
+            VoidResult<? extends ERR> apply = function.apply(value);
+            return null;
+        }
+
+        @Override
+        public <N> N fold(Function<Optional<S>, ? extends N> successFunction, Function<? super ERR, ? extends N> errorFunction) {
+            return successFunction.apply(Optional.of(value));
+        }
+
+        @Override
+        public <N> N fold(Function<? super S, ? extends N> valueFunction, Supplier<? extends N> emptySupplier, Function<? super ERR, ? extends N> errorFunction) {
+            return valueFunction.apply(value);
+        }
+
+        @Override
+        public Optional<S> orElse(Optional<S> other) {
+            return Optional.of(value);
+        }
+
+        @Override
+        public S valueOrElse(S other) {
+            return value;
+        }
+
+        @Override
+        public Optional<S> orElseGet(Function<? super ERR, ? extends Optional<S>> function) {
+            return Optional.of(value);
+        }
+
+        @Override
+        public S valueOrElseGet(Supplier<? extends S> supplier) {
+            return value;
+        }
+
+        @Override
+        public <X extends Throwable> Optional<S> orElseThrow(Function<? super ERR, ? extends X> function) throws X {
+            return Optional.of(value);
+        }
+
+        @Override
+        public <X extends Throwable> S valueOrElseThrow(Supplier<? extends X> supplier) throws X {
+            return value;
+        }
+
+        @Override
+        public Result<S, ERR> toResult(Supplier<? extends ERR> errorSupplier) {
+            return Result.success(value);
+        }
+
+        @Override
+        public VoidResult<ERR> toVoidResult() {
+            return VoidResult.success();
+        }
+
+        @SuppressWarnings("unchecked")
+        private <E1> OptionalResult.Value<S, E1> safeCast() {
+            return (OptionalResult.Value<S, E1>) this;
+        }
+    }
+
+    record Empty<S, ERR>() implements OptionalResult<S, ERR> {
+
+        @Override
+        public <N> Result<N, ERR> map(Function<Optional<S>, ? extends N> function) {
+            return null;
+        }
+
+        @Override
+        public <N> OptionalResult<N, ERR> mapToOptional(Function<Optional<S>, ? extends Optional<? extends N>> function) {
+            return null;
+        }
+
+        @Override
+        public BooleanResult<ERR> mapToBoolean(Function<Optional<S>, Boolean> function) {
+            return null;
+        }
+
+        @Override
+        public <N> OptionalResult<S, N> mapError(Function<? super ERR, ? extends N> function) {
+            return null;
+        }
+
+        @Override
+        public <N> OptionalResult<N, ERR> mapValue(Function<? super S, ? extends N> function) {
+            return null;
+        }
+
+        @Override
+        public <N> OptionalResult<N, ERR> mapValueToOptional(Function<? super S, Optional<N>> function) {
+            return null;
+        }
+
+        @Override
+        public <N> Result<N, ERR> flatMap(Function<Optional<S>, Result<? extends N, ? extends ERR>> function) {
+            return null;
+        }
+
+        @Override
+        public <N> OptionalResult<N, ERR> flatMapToOptionalResult(Function<Optional<S>, OptionalResult<? extends N, ? extends ERR>> function) {
+            return null;
+        }
+
+        @Override
+        public <N> OptionalResult<N, ERR> flatReplaceEmpty(Supplier<OptionalResult<N, ERR>> supplier) {
+            return null;
+        }
+
+        @Override
+        public <N> Result<N, ERR> flatReplaceEmptyWithResult(Supplier<Result<N, ERR>> supplier) {
+            return null;
+        }
+
+        @Override
+        public BooleanResult<ERR> flatMapToBooleanResult(Function<Optional<? extends S>, BooleanResult<? extends ERR>> function) {
+            return null;
+        }
+
+        @Override
+        public VoidResult<ERR> flatMapToVoidResult(Function<Optional<? extends S>, VoidResult<? extends ERR>> function) {
+            return null;
+        }
+
+        @Override
+        public <N> OptionalResult<N, ERR> flatMapValueWithResult(Function<? super S, Result<? extends N, ? extends ERR>> function) {
+            return null;
+        }
+
+        @Override
+        public <N> OptionalResult<N, ERR> flatMapValueWithOptionalResult(Function<? super S, OptionalResult<? extends N, ? extends ERR>> function) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<Boolean, ERR> flatMapValueWithBooleanResult(Function<? super S, BooleanResult<? extends ERR>> function) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> recover(Function<ERR, Optional<S>> function) {
+            return null;
+        }
+
+        @Override
+        public <N> OptionalResult<N, ERR> flatRecover(Function<ERR, OptionalResult<? extends N, ? extends ERR>> function) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> consume(Consumer<Optional<S>> consumer) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> consumeValue(Consumer<S> consumer) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> consumeError(Consumer<? super ERR> errorConsumer) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> consumeEither(Consumer<Optional<S>> successConsumer, Consumer<? super ERR> errorConsumer) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> consumeEither(Consumer<? super S> valueConsumer, Runnable emptyRunnable, Consumer<? super ERR> errorConsumer) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> flatConsume(Function<Optional<S>, ? extends VoidResult<? extends ERR>> function) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> flatConsumeValue(Function<S, ? extends VoidResult<? extends ERR>> function) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> runIfSuccess(Runnable runnable) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> runIfValue(Runnable runnable) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> runIfNoValue(Runnable runnable) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> runIfEmpty(Runnable runnable) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> runIfError(Runnable runnable) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> runEither(Runnable successRunnable, Runnable errorRunnable) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> runEither(Runnable valueRunnable, Runnable emptyRunnable, Runnable errorRunnable) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> runAlways(Runnable runnable) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> flatRunIfSuccess(Supplier<? extends VoidResult<? extends ERR>> supplier) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> flatRunIfValue(Supplier<? extends VoidResult<? extends ERR>> supplier) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> verify(Predicate<Optional<S>> predicate, Supplier<? extends ERR> errorSupplier) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> verify(Function<Optional<S>, ? extends VoidResult<? extends ERR>> function) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> verifyValue(Predicate<? super S> predicate, Supplier<? extends ERR> errorSupplier) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> verifyValue(Function<? super S, ? extends VoidResult<? extends ERR>> function) {
+            return null;
+        }
+
+        @Override
+        public <N> N fold(Function<Optional<S>, ? extends N> successFunction, Function<? super ERR, ? extends N> errorFunction) {
+            return null;
+        }
+
+        @Override
+        public <N> N fold(Function<? super S, ? extends N> valueFunction, Supplier<? extends N> emptySupplier, Function<? super ERR, ? extends N> errorFunction) {
+            return null;
+        }
+
+        @Override
+        public Optional<S> orElse(Optional<S> other) {
+            return Optional.empty();
+        }
+
+        @Override
+        public S valueOrElse(S other) {
+            return null;
+        }
+
+        @Override
+        public Optional<S> orElseGet(Function<? super ERR, ? extends Optional<S>> function) {
+            return Optional.empty();
+        }
+
+        @Override
+        public S valueOrElseGet(Supplier<? extends S> supplier) {
+            return null;
+        }
+
+        @Override
+        public <X extends Throwable> Optional<S> orElseThrow(Function<? super ERR, ? extends X> function) throws X {
+            return Optional.empty();
+        }
+
+        @Override
+        public <X extends Throwable> S valueOrElseThrow(Supplier<? extends X> supplier) throws X {
+            return null;
+        }
+
+        @Override
+        public Result<S, ERR> toResult(Supplier<? extends ERR> errorSupplier) {
+            return null;
+        }
+
+        @Override
+        public VoidResult<ERR> toVoidResult() {
+            return null;
+        }
+    }
+    
+    record Error<S, ERR>(ERR error) implements OptionalResult<S, ERR> {
+
+        @Override
+        public <N> Result<N, ERR> map(Function<Optional<S>, ? extends N> function) {
+            return null;
+        }
+
+        @Override
+        public <N> OptionalResult<N, ERR> mapToOptional(Function<Optional<S>, ? extends Optional<? extends N>> function) {
+            return null;
+        }
+
+        @Override
+        public BooleanResult<ERR> mapToBoolean(Function<Optional<S>, Boolean> function) {
+            return null;
+        }
+
+        @Override
+        public <N> OptionalResult<S, N> mapError(Function<? super ERR, ? extends N> function) {
+            return null;
+        }
+
+        @Override
+        public <N> OptionalResult<N, ERR> mapValue(Function<? super S, ? extends N> function) {
+            return null;
+        }
+
+        @Override
+        public <N> OptionalResult<N, ERR> mapValueToOptional(Function<? super S, Optional<N>> function) {
+            return null;
+        }
+
+        @Override
+        public <N> Result<N, ERR> flatMap(Function<Optional<S>, Result<? extends N, ? extends ERR>> function) {
+            return null;
+        }
+
+        @Override
+        public <N> OptionalResult<N, ERR> flatMapToOptionalResult(Function<Optional<S>, OptionalResult<? extends N, ? extends ERR>> function) {
+            return null;
+        }
+
+        @Override
+        public <N> OptionalResult<N, ERR> flatReplaceEmpty(Supplier<OptionalResult<N, ERR>> supplier) {
+            return null;
+        }
+
+        @Override
+        public <N> Result<N, ERR> flatReplaceEmptyWithResult(Supplier<Result<N, ERR>> supplier) {
+            return null;
+        }
+
+        @Override
+        public BooleanResult<ERR> flatMapToBooleanResult(Function<Optional<? extends S>, BooleanResult<? extends ERR>> function) {
+            return null;
+        }
+
+        @Override
+        public VoidResult<ERR> flatMapToVoidResult(Function<Optional<? extends S>, VoidResult<? extends ERR>> function) {
+            return null;
+        }
+
+        @Override
+        public <N> OptionalResult<N, ERR> flatMapValueWithResult(Function<? super S, Result<? extends N, ? extends ERR>> function) {
+            return null;
+        }
+
+        @Override
+        public <N> OptionalResult<N, ERR> flatMapValueWithOptionalResult(Function<? super S, OptionalResult<? extends N, ? extends ERR>> function) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<Boolean, ERR> flatMapValueWithBooleanResult(Function<? super S, BooleanResult<? extends ERR>> function) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> recover(Function<ERR, Optional<S>> function) {
+            return null;
+        }
+
+        @Override
+        public <N> OptionalResult<N, ERR> flatRecover(Function<ERR, OptionalResult<? extends N, ? extends ERR>> function) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> consume(Consumer<Optional<S>> consumer) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> consumeValue(Consumer<S> consumer) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> consumeError(Consumer<? super ERR> errorConsumer) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> consumeEither(Consumer<Optional<S>> successConsumer, Consumer<? super ERR> errorConsumer) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> consumeEither(Consumer<? super S> valueConsumer, Runnable emptyRunnable, Consumer<? super ERR> errorConsumer) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> flatConsume(Function<Optional<S>, ? extends VoidResult<? extends ERR>> function) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> flatConsumeValue(Function<S, ? extends VoidResult<? extends ERR>> function) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> runIfSuccess(Runnable runnable) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> runIfValue(Runnable runnable) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> runIfNoValue(Runnable runnable) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> runIfEmpty(Runnable runnable) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> runIfError(Runnable runnable) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> runEither(Runnable successRunnable, Runnable errorRunnable) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> runEither(Runnable valueRunnable, Runnable emptyRunnable, Runnable errorRunnable) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> runAlways(Runnable runnable) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> flatRunIfSuccess(Supplier<? extends VoidResult<? extends ERR>> supplier) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> flatRunIfValue(Supplier<? extends VoidResult<? extends ERR>> supplier) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> verify(Predicate<Optional<S>> predicate, Supplier<? extends ERR> errorSupplier) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> verify(Function<Optional<S>, ? extends VoidResult<? extends ERR>> function) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> verifyValue(Predicate<? super S> predicate, Supplier<? extends ERR> errorSupplier) {
+            return null;
+        }
+
+        @Override
+        public OptionalResult<S, ERR> verifyValue(Function<? super S, ? extends VoidResult<? extends ERR>> function) {
+            return null;
+        }
+
+        @Override
+        public <N> N fold(Function<Optional<S>, ? extends N> successFunction, Function<? super ERR, ? extends N> errorFunction) {
+            return null;
+        }
+
+        @Override
+        public <N> N fold(Function<? super S, ? extends N> valueFunction, Supplier<? extends N> emptySupplier, Function<? super ERR, ? extends N> errorFunction) {
+            return null;
+        }
+
+        @Override
+        public Optional<S> orElse(Optional<S> other) {
+            return Optional.empty();
+        }
+
+        @Override
+        public S valueOrElse(S other) {
+            return null;
+        }
+
+        @Override
+        public Optional<S> orElseGet(Function<? super ERR, ? extends Optional<S>> function) {
+            return Optional.empty();
+        }
+
+        @Override
+        public S valueOrElseGet(Supplier<? extends S> supplier) {
+            return null;
+        }
+
+        @Override
+        public <X extends Throwable> Optional<S> orElseThrow(Function<? super ERR, ? extends X> function) throws X {
+            return Optional.empty();
+        }
+
+        @Override
+        public <X extends Throwable> S valueOrElseThrow(Supplier<? extends X> supplier) throws X {
+            return null;
+        }
+
+        @Override
+        public Result<S, ERR> toResult(Supplier<? extends ERR> errorSupplier) {
+            return null;
+        }
+
+        @Override
+        public VoidResult<ERR> toVoidResult() {
+            return null;
+        }
     }
 }
 
