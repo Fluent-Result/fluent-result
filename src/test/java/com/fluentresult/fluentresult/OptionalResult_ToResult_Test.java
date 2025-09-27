@@ -3,7 +3,7 @@ package com.fluentresult.fluentresult;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Java6Assertions.fail;
+import static org.assertj.core.api.AssertionsForClassTypes.fail;
 
 class OptionalResult_ToResult_Test {
 
