@@ -31,7 +31,7 @@ public sealed interface BooleanResult<E> {
      * @throws NullPointerException if given success value is {@code null}
      */
     static <E> BooleanResult<E> success(boolean value) {
-        return BooleanResult.success(value);
+        return new Success<>(value);
     }
 
     /**
@@ -69,7 +69,7 @@ public sealed interface BooleanResult<E> {
      * @throws NullPointerException if given error value is {@code null}
      */
     static <E> BooleanResult<E> error(E value) {
-        return BooleanResult.error(Objects.requireNonNull(value));
+        return new Error<>(Objects.requireNonNull(value));
     }
 
     /**

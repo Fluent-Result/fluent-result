@@ -96,7 +96,7 @@ public sealed interface OptionalResult<T, E> {
      * @throws NullPointerException if given error value is {@code null}
      */
     static <T, E> OptionalResult<T, E> error(E value) {
-        return new Error(Objects.requireNonNull(value));
+        return new Error<>(Objects.requireNonNull(value));
     }
 
     /**
@@ -1225,7 +1225,7 @@ public sealed interface OptionalResult<T, E> {
 
         @Override
         public <N> OptionalResult<N, ERR> mapToOptional(Function<Optional<S>, ? extends Optional<? extends N>> function) {
-            return null;
+            return OptionalResult.empty();
         }
 
         @Override
@@ -1235,47 +1235,47 @@ public sealed interface OptionalResult<T, E> {
 
         @Override
         public <N> OptionalResult<S, N> mapError(Function<? super ERR, ? extends N> function) {
-            return null;
+            return safeCast();
         }
 
         @Override
         public <N> OptionalResult<N, ERR> mapValue(Function<? super S, ? extends N> function) {
-            return null;
+            return (OptionalResult<N, ERR>) this;
         }
 
         @Override
         public <N> OptionalResult<N, ERR> mapValueToOptional(Function<? super S, Optional<N>> function) {
-            return null;
+            return (OptionalResult<N, ERR>) this;
         }
 
         @Override
         public <N> Result<N, ERR> flatMap(Function<Optional<S>, Result<? extends N, ? extends ERR>> function) {
-            return null;
+            return (Result<N, ERR>) function.apply(Optional.empty());
         }
 
         @Override
         public <N> OptionalResult<N, ERR> flatMapToOptionalResult(Function<Optional<S>, OptionalResult<? extends N, ? extends ERR>> function) {
-            return null;
+            return (OptionalResult<N, ERR>) function.apply(Optional.empty());
         }
 
         @Override
         public <N> OptionalResult<N, ERR> flatReplaceEmpty(Supplier<OptionalResult<N, ERR>> supplier) {
-            return null;
+            return supplier.get();
         }
 
         @Override
         public <N> Result<N, ERR> flatReplaceEmptyWithResult(Supplier<Result<N, ERR>> supplier) {
-            return null;
+            return supplier.get();
         }
 
         @Override
         public BooleanResult<ERR> flatMapToBooleanResult(Function<Optional<? extends S>, BooleanResult<? extends ERR>> function) {
-            return null;
+            return (BooleanResult<ERR>) function.apply(Optional.empty());
         }
 
         @Override
         public VoidResult<ERR> flatMapToVoidResult(Function<Optional<? extends S>, VoidResult<? extends ERR>> function) {
-            return null;
+            return (VoidResult<ERR>) function.apply(Optional.empty());
         }
 
         @Override
@@ -1295,127 +1295,143 @@ public sealed interface OptionalResult<T, E> {
 
         @Override
         public OptionalResult<S, ERR> recover(Function<ERR, Optional<S>> function) {
-            return null;
+            return safeCast();
         }
 
         @Override
         public <N> OptionalResult<N, ERR> flatRecover(Function<ERR, OptionalResult<? extends N, ? extends ERR>> function) {
-            return null;
+            return (OptionalResult<N, ERR>) this;
         }
 
         @Override
         public OptionalResult<S, ERR> consume(Consumer<Optional<S>> consumer) {
-            return null;
+            consumer.accept(Optional.empty());
+            return safeCast();
         }
 
         @Override
         public OptionalResult<S, ERR> consumeValue(Consumer<S> consumer) {
-            return null;
+            return safeCast();
         }
 
         @Override
         public OptionalResult<S, ERR> consumeError(Consumer<? super ERR> errorConsumer) {
-            return null;
+            return safeCast();
         }
 
         @Override
         public OptionalResult<S, ERR> consumeEither(Consumer<Optional<S>> successConsumer, Consumer<? super ERR> errorConsumer) {
-            return null;
+            successConsumer.accept(Optional.empty());
+            return safeCast();
         }
 
         @Override
         public OptionalResult<S, ERR> consumeEither(Consumer<? super S> valueConsumer, Runnable emptyRunnable, Consumer<? super ERR> errorConsumer) {
-            return null;
+            emptyRunnable.run();
+            return safeCast();
         }
 
         @Override
         public OptionalResult<S, ERR> flatConsume(Function<Optional<S>, ? extends VoidResult<? extends ERR>> function) {
-            return null;
+            VoidResult<? extends ERR> apply = function.apply(Optional.empty());
+            return safeCast();
         }
 
         @Override
         public OptionalResult<S, ERR> flatConsumeValue(Function<S, ? extends VoidResult<? extends ERR>> function) {
-            return null;
+            return safeCast();
         }
 
         @Override
         public OptionalResult<S, ERR> runIfSuccess(Runnable runnable) {
-            return null;
+            runnable.run();
+            return safeCast();
         }
 
         @Override
         public OptionalResult<S, ERR> runIfValue(Runnable runnable) {
-            return null;
+            return safeCast();
         }
 
         @Override
         public OptionalResult<S, ERR> runIfNoValue(Runnable runnable) {
-            return null;
+            runnable.run();
+            return safeCast();
         }
 
         @Override
         public OptionalResult<S, ERR> runIfEmpty(Runnable runnable) {
-            return null;
+            runnable.run();
+            return safeCast();
         }
 
         @Override
         public OptionalResult<S, ERR> runIfError(Runnable runnable) {
-            return null;
+            return safeCast();
         }
 
         @Override
         public OptionalResult<S, ERR> runEither(Runnable successRunnable, Runnable errorRunnable) {
-            return null;
+            successRunnable.run();
+            return safeCast();
         }
 
         @Override
         public OptionalResult<S, ERR> runEither(Runnable valueRunnable, Runnable emptyRunnable, Runnable errorRunnable) {
-            return null;
+            emptyRunnable.run();
+            return safeCast();
         }
 
         @Override
         public OptionalResult<S, ERR> runAlways(Runnable runnable) {
-            return null;
+            runnable.run();
+            return safeCast();
         }
 
         @Override
         public OptionalResult<S, ERR> flatRunIfSuccess(Supplier<? extends VoidResult<? extends ERR>> supplier) {
-            return null;
+            VoidResult<? extends ERR> voidResult = supplier.get();
+            return safeCast();
         }
 
         @Override
         public OptionalResult<S, ERR> flatRunIfValue(Supplier<? extends VoidResult<? extends ERR>> supplier) {
-            return null;
+            return safeCast();
         }
 
         @Override
         public OptionalResult<S, ERR> verify(Predicate<Optional<S>> predicate, Supplier<? extends ERR> errorSupplier) {
-            return null;
+            if(predicate.test(Optional.empty())) {
+                return safeCast();
+            } else {
+                return OptionalResult.error(errorSupplier.get());
+            }
         }
 
         @Override
         public OptionalResult<S, ERR> verify(Function<Optional<S>, ? extends VoidResult<? extends ERR>> function) {
+            VoidResult<? extends ERR> apply = function.apply(Optional.empty());
             return null;
         }
 
         @Override
         public OptionalResult<S, ERR> verifyValue(Predicate<? super S> predicate, Supplier<? extends ERR> errorSupplier) {
-            return null;
+            return safeCast();
         }
 
         @Override
         public OptionalResult<S, ERR> verifyValue(Function<? super S, ? extends VoidResult<? extends ERR>> function) {
-            return null;
+            return safeCast();
         }
 
         @Override
         public <N> N fold(Function<Optional<S>, ? extends N> successFunction, Function<? super ERR, ? extends N> errorFunction) {
-            return null;
+            return successFunction.apply(Optional.empty());
         }
 
         @Override
         public <N> N fold(Function<? super S, ? extends N> valueFunction, Supplier<? extends N> emptySupplier, Function<? super ERR, ? extends N> errorFunction) {
-            return null;
+            return emptySupplier.get();
         }
 
         @Override
@@ -1425,7 +1441,7 @@ public sealed interface OptionalResult<T, E> {
 
         @Override
         public S valueOrElse(S other) {
-            return null;
+            return other;
         }
 
         @Override
@@ -1435,7 +1451,7 @@ public sealed interface OptionalResult<T, E> {
 
         @Override
         public S valueOrElseGet(Supplier<? extends S> supplier) {
-            return null;
+            return supplier.get();
         }
 
         @Override
@@ -1445,17 +1461,22 @@ public sealed interface OptionalResult<T, E> {
 
         @Override
         public <X extends Throwable> S valueOrElseThrow(Supplier<? extends X> supplier) throws X {
-            return null;
+            throw supplier.get();
         }
 
         @Override
         public Result<S, ERR> toResult(Supplier<? extends ERR> errorSupplier) {
-            return null;
+            return Result.error(errorSupplier.get());
         }
 
         @Override
         public VoidResult<ERR> toVoidResult() {
-            return null;
+            return VoidResult.success();
+        }
+
+        @SuppressWarnings("unchecked")
+        private <E1> OptionalResult.Empty<S, E1> safeCast() {
+            return (OptionalResult.Empty<S, E1>) this;
         }
     }
     
