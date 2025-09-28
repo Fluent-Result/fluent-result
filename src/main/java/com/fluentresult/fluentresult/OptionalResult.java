@@ -1142,7 +1142,8 @@ public sealed interface OptionalResult<T, E> {
         @Override
         public OptionalResult<S, ERR> verify(Function<Optional<S>, ? extends VoidResult<? extends ERR>> function) {
             VoidResult<? extends ERR> apply = function.apply(Optional.of(value));
-            return null;
+            var instance = this;
+            return apply.fold(() -> instance, OptionalResult::error);
         }
 
         @Override
@@ -1484,242 +1485,254 @@ public sealed interface OptionalResult<T, E> {
 
         @Override
         public <N> Result<N, ERR> map(Function<Optional<S>, ? extends N> function) {
-            return null;
+            return Result.error(error);
         }
 
         @Override
         public <N> OptionalResult<N, ERR> mapToOptional(Function<Optional<S>, ? extends Optional<? extends N>> function) {
-            return null;
+            return OptionalResult.error(error);
         }
 
         @Override
         public BooleanResult<ERR> mapToBoolean(Function<Optional<S>, Boolean> function) {
-            return null;
+            return BooleanResult.error(error);
         }
 
         @Override
         public <N> OptionalResult<S, N> mapError(Function<? super ERR, ? extends N> function) {
-            return null;
+            return OptionalResult.error(function.apply(error));
         }
 
         @Override
         public <N> OptionalResult<N, ERR> mapValue(Function<? super S, ? extends N> function) {
-            return null;
+            return OptionalResult.error(error);
         }
 
         @Override
         public <N> OptionalResult<N, ERR> mapValueToOptional(Function<? super S, Optional<N>> function) {
-            return null;
+            return OptionalResult.error(error);
         }
 
         @Override
         public <N> Result<N, ERR> flatMap(Function<Optional<S>, Result<? extends N, ? extends ERR>> function) {
-            return null;
+            return Result.error(error);
         }
 
         @Override
         public <N> OptionalResult<N, ERR> flatMapToOptionalResult(Function<Optional<S>, OptionalResult<? extends N, ? extends ERR>> function) {
-            return null;
+            return OptionalResult.error(error);
         }
 
         @Override
         public <N> OptionalResult<N, ERR> flatReplaceEmpty(Supplier<OptionalResult<N, ERR>> supplier) {
-            return null;
+            return OptionalResult.error(error);
         }
 
         @Override
         public <N> Result<N, ERR> flatReplaceEmptyWithResult(Supplier<Result<N, ERR>> supplier) {
-            return null;
+            return Result.error(error);
         }
 
         @Override
         public BooleanResult<ERR> flatMapToBooleanResult(Function<Optional<? extends S>, BooleanResult<? extends ERR>> function) {
-            return null;
+            return BooleanResult.error(error);
         }
 
         @Override
         public VoidResult<ERR> flatMapToVoidResult(Function<Optional<? extends S>, VoidResult<? extends ERR>> function) {
-            return null;
+            return VoidResult.error(error);
         }
 
         @Override
         public <N> OptionalResult<N, ERR> flatMapValueWithResult(Function<? super S, Result<? extends N, ? extends ERR>> function) {
-            return null;
+            return OptionalResult.error(error);
         }
 
         @Override
         public <N> OptionalResult<N, ERR> flatMapValueWithOptionalResult(Function<? super S, OptionalResult<? extends N, ? extends ERR>> function) {
-            return null;
+            return OptionalResult.error(error);
         }
 
         @Override
         public OptionalResult<Boolean, ERR> flatMapValueWithBooleanResult(Function<? super S, BooleanResult<? extends ERR>> function) {
-            return null;
+            return OptionalResult.error(error);
         }
 
         @Override
         public OptionalResult<S, ERR> recover(Function<ERR, Optional<S>> function) {
-            return null;
+            return OptionalResult.success(function.apply(error));
         }
 
         @Override
         public <N> OptionalResult<N, ERR> flatRecover(Function<ERR, OptionalResult<? extends N, ? extends ERR>> function) {
-            return null;
+            return (OptionalResult<N, ERR>) function.apply(error);
         }
 
         @Override
         public OptionalResult<S, ERR> consume(Consumer<Optional<S>> consumer) {
-            return null;
+            return safeCast();
         }
 
         @Override
         public OptionalResult<S, ERR> consumeValue(Consumer<S> consumer) {
-            return null;
+            return safeCast();
         }
 
         @Override
         public OptionalResult<S, ERR> consumeError(Consumer<? super ERR> errorConsumer) {
-            return null;
+            errorConsumer.accept(error);
+            return safeCast();
         }
 
         @Override
         public OptionalResult<S, ERR> consumeEither(Consumer<Optional<S>> successConsumer, Consumer<? super ERR> errorConsumer) {
-            return null;
+            errorConsumer.accept(error);
+            return safeCast();
         }
 
         @Override
         public OptionalResult<S, ERR> consumeEither(Consumer<? super S> valueConsumer, Runnable emptyRunnable, Consumer<? super ERR> errorConsumer) {
-            return null;
+            errorConsumer.accept(error);
+            return safeCast();
         }
 
         @Override
         public OptionalResult<S, ERR> flatConsume(Function<Optional<S>, ? extends VoidResult<? extends ERR>> function) {
-            return null;
+            return safeCast();
         }
 
         @Override
         public OptionalResult<S, ERR> flatConsumeValue(Function<S, ? extends VoidResult<? extends ERR>> function) {
-            return null;
+            return safeCast();
         }
 
         @Override
         public OptionalResult<S, ERR> runIfSuccess(Runnable runnable) {
-            return null;
+            return safeCast();
         }
 
         @Override
         public OptionalResult<S, ERR> runIfValue(Runnable runnable) {
-            return null;
+            return safeCast();
         }
 
         @Override
         public OptionalResult<S, ERR> runIfNoValue(Runnable runnable) {
-            return null;
+            return safeCast();
         }
 
         @Override
         public OptionalResult<S, ERR> runIfEmpty(Runnable runnable) {
-            return null;
+            return safeCast();
         }
 
         @Override
         public OptionalResult<S, ERR> runIfError(Runnable runnable) {
-            return null;
+            runnable.run();
+            return safeCast();
         }
 
         @Override
         public OptionalResult<S, ERR> runEither(Runnable successRunnable, Runnable errorRunnable) {
-            return null;
+            errorRunnable.run();
+            return safeCast();
         }
 
         @Override
         public OptionalResult<S, ERR> runEither(Runnable valueRunnable, Runnable emptyRunnable, Runnable errorRunnable) {
-            return null;
+            errorRunnable.run();
+            return safeCast();
         }
 
         @Override
         public OptionalResult<S, ERR> runAlways(Runnable runnable) {
-            return null;
+            runnable.run();
+            return safeCast();
         }
 
         @Override
         public OptionalResult<S, ERR> flatRunIfSuccess(Supplier<? extends VoidResult<? extends ERR>> supplier) {
-            return null;
+            return safeCast();
         }
 
         @Override
         public OptionalResult<S, ERR> flatRunIfValue(Supplier<? extends VoidResult<? extends ERR>> supplier) {
-            return null;
+            return safeCast();
         }
 
         @Override
         public OptionalResult<S, ERR> verify(Predicate<Optional<S>> predicate, Supplier<? extends ERR> errorSupplier) {
-            return null;
+            return safeCast();
         }
 
         @Override
         public OptionalResult<S, ERR> verify(Function<Optional<S>, ? extends VoidResult<? extends ERR>> function) {
-            return null;
+            return safeCast();
         }
 
         @Override
         public OptionalResult<S, ERR> verifyValue(Predicate<? super S> predicate, Supplier<? extends ERR> errorSupplier) {
-            return null;
+            return safeCast();
         }
 
         @Override
         public OptionalResult<S, ERR> verifyValue(Function<? super S, ? extends VoidResult<? extends ERR>> function) {
-            return null;
+            return safeCast();
         }
 
         @Override
         public <N> N fold(Function<Optional<S>, ? extends N> successFunction, Function<? super ERR, ? extends N> errorFunction) {
-            return null;
+            return errorFunction.apply(error);
         }
 
         @Override
         public <N> N fold(Function<? super S, ? extends N> valueFunction, Supplier<? extends N> emptySupplier, Function<? super ERR, ? extends N> errorFunction) {
-            return null;
+            return errorFunction.apply(error);
         }
 
         @Override
         public Optional<S> orElse(Optional<S> other) {
-            return Optional.empty();
+            return other;
         }
 
         @Override
         public S valueOrElse(S other) {
-            return null;
+            return other;
         }
 
         @Override
         public Optional<S> orElseGet(Function<? super ERR, ? extends Optional<S>> function) {
-            return Optional.empty();
+            return function.apply(error);
         }
 
         @Override
         public S valueOrElseGet(Supplier<? extends S> supplier) {
-            return null;
+            return supplier.get();
         }
 
         @Override
         public <X extends Throwable> Optional<S> orElseThrow(Function<? super ERR, ? extends X> function) throws X {
-            return Optional.empty();
+            throw function.apply(error);
         }
 
         @Override
         public <X extends Throwable> S valueOrElseThrow(Supplier<? extends X> supplier) throws X {
-            return null;
+            throw supplier.get();
         }
 
         @Override
         public Result<S, ERR> toResult(Supplier<? extends ERR> errorSupplier) {
-            return null;
+            return Result.error(error);
         }
 
         @Override
         public VoidResult<ERR> toVoidResult() {
-            return null;
+            return VoidResult.error(error);
+        }
+
+        @SuppressWarnings("unchecked")
+        private <E1> OptionalResult.Error<S, E1> safeCast() {
+            return (OptionalResult.Error<S, E1>) this;
         }
     }
 }
