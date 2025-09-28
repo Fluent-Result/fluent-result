@@ -491,6 +491,9 @@ public sealed interface Result<T, E> {
     }
 
     record Success<S, ERR>(S value) implements Result<S,ERR> {
+        public Success(S value) {
+            this.value = Objects.requireNonNull(value);
+        }
 
         @Override
         public <N> Result<N, ERR> map(Function<? super S, ? extends N> function) {
@@ -509,13 +512,14 @@ public sealed interface Result<T, E> {
 
         @Override
         public <N> Result<S, N> mapError(Function<? super ERR, ? extends N> function) {
+            Objects.requireNonNull(function);
             return safeCast();
         }
 
         @SuppressWarnings("unchecked")
         @Override
         public <N> Result<N, ERR> flatMap(Function<? super S, ? extends Result<? extends N, ? extends ERR>> function) {
-            return (Result<N, ERR>) function.apply(value);
+            return (Result<N, ERR>) Objects.requireNonNull(function.apply(value));
         }
 
         @Override
@@ -546,17 +550,20 @@ public sealed interface Result<T, E> {
 
         @Override
         public Result<S, ERR> consume(Consumer<? super S> consumer) {
+            Objects.requireNonNull(consumer);
             consumer.accept(value);
             return safeCast();
         }
 
         @Override
         public Result<S, ERR> consumeError(Consumer<? super ERR> errorConsumer) {
+            Objects.requireNonNull(errorConsumer);
             return safeCast();
         }
 
         @Override
         public Result<S, ERR> consumeEither(Consumer<? super S> valueConsumer, Consumer<? super ERR> errorConsumer) {
+            Objects.requireNonNull(errorConsumer);
             valueConsumer.accept(value);
             return safeCast();
         }
@@ -564,7 +571,7 @@ public sealed interface Result<T, E> {
         @Override
         public Result<S, ERR> flatConsume(Function<? super S, ? extends VoidResult<? extends ERR>> function) {
             VoidResult<? extends ERR> apply = function.apply(value);
-            return null;
+            return apply.fold(() -> this, Result::error);
         }
 
         @Override
@@ -575,6 +582,7 @@ public sealed interface Result<T, E> {
 
         @Override
         public Result<S, ERR> runIfError(Runnable runnable) {
+            Objects.requireNonNull(runnable);
             return safeCast();
         }
 
@@ -593,11 +601,12 @@ public sealed interface Result<T, E> {
         @Override
         public Result<S, ERR> flatRunIfSuccess(Supplier<? extends VoidResult<? extends ERR>> supplier) {
             VoidResult<? extends ERR> voidResult = supplier.get();
-            return null;
+            return voidResult.fold(() -> this, Result::error);
         }
 
         @Override
         public Result<S, ERR> verify(Predicate<? super S> predicate, Supplier<? extends ERR> errorSupplier) {
+            Objects.requireNonNull(errorSupplier);
             if(predicate.test(value)) {
                 return safeCast();
             } else {
@@ -608,27 +617,30 @@ public sealed interface Result<T, E> {
         @Override
         public Result<S, ERR> verify(Function<? super S, ? extends VoidResult<? extends ERR>> function) {
             VoidResult<? extends ERR> apply = function.apply(value);
-
-            return null;
+            return apply.fold(() -> this, Result::error);
         }
 
         @Override
         public <N> N fold(Function<? super S, ? extends N> valueFunction, Function<? super ERR, ? extends N> errorFunction) {
+            Objects.requireNonNull(errorFunction);
             return valueFunction.apply(value);
         }
 
         @Override
         public S orElse(S other) {
+            Objects.requireNonNull(other);
             return value;
         }
 
         @Override
         public S orElseGet(Function<? super ERR, ? extends S> function) {
+            Objects.requireNonNull(function);
             return value;
         }
 
         @Override
         public <X extends Throwable> S orElseThrow(Function<? super ERR, ? extends X> function) throws X {
+            Objects.requireNonNull(function);
             return value;
         }
 
@@ -650,9 +662,13 @@ public sealed interface Result<T, E> {
     }
 
     record Error<S, ERR>(ERR error) implements Result<S,ERR> {
+        public Error(ERR error) {
+            this.error = Objects.requireNonNull(error);
+        }
 
         @Override
         public <N> Result<N, ERR> map(Function<? super S, ? extends N> function) {
+            Objects.requireNonNull(function);
             return safeCast();
         }
 
@@ -673,6 +689,7 @@ public sealed interface Result<T, E> {
 
         @Override
         public <N> Result<N, ERR> flatMap(Function<? super S, ? extends Result<? extends N, ? extends ERR>> function) {
+            Objects.requireNonNull(function);
             return safeCast();
         }
 
@@ -704,6 +721,7 @@ public sealed interface Result<T, E> {
 
         @Override
         public Result<S, ERR> consume(Consumer<? super S> consumer) {
+            Objects.requireNonNull(consumer);
             return safeCast();
         }
 
@@ -715,6 +733,7 @@ public sealed interface Result<T, E> {
 
         @Override
         public Result<S, ERR> consumeEither(Consumer<? super S> valueConsumer, Consumer<? super ERR> errorConsumer) {
+            Objects.requireNonNull(valueConsumer);
             errorConsumer.accept(error);
             return safeCast();
         }
@@ -726,6 +745,7 @@ public sealed interface Result<T, E> {
 
         @Override
         public Result<S, ERR> runIfSuccess(Runnable runnable) {
+            Objects.requireNonNull(runnable);
             return safeCast();
         }
 
@@ -737,6 +757,7 @@ public sealed interface Result<T, E> {
 
         @Override
         public Result<S, ERR> runEither(Runnable successRunnable, Runnable errorRunnable) {
+            Objects.requireNonNull(successRunnable);
             errorRunnable.run();
             return safeCast();
         }
@@ -754,11 +775,13 @@ public sealed interface Result<T, E> {
 
         @Override
         public Result<S, ERR> verify(Predicate<? super S> predicate, Supplier<? extends ERR> errorSupplier) {
+            Objects.requireNonNull(errorSupplier);
             return safeCast();
         }
 
         @Override
         public Result<S, ERR> verify(Function<? super S, ? extends VoidResult<? extends ERR>> function) {
+            Objects.requireNonNull(function);
             return safeCast();
         }
 

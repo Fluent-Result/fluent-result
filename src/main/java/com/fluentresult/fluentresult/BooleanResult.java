@@ -644,6 +644,7 @@ public sealed interface BooleanResult<E> {
 
         @Override
         public <N> BooleanResult<N> mapError(Function<? super ERR, ? extends N> function) {
+            Objects.requireNonNull(function);
             return safeCast();
         }
 
@@ -696,13 +697,23 @@ public sealed interface BooleanResult<E> {
 
         @Override
         public BooleanResult<ERR> consumeEither(Runnable trueRunnable, Runnable falseRunnable, Consumer<? super ERR> errorConsumer) {
-            trueRunnable.run();
+            Objects.requireNonNull(trueRunnable);
+            Objects.requireNonNull(falseRunnable);
+            Objects.requireNonNull(errorConsumer);
+
+            if (value) {
+                trueRunnable.run();
+            } else {
+                falseRunnable.run();
+            }
             return safeCast();
         }
 
         @Override
         public BooleanResult<ERR> flatConsume(Function<Boolean, ? extends VoidResult<? extends ERR>> function) {
-            return null;
+            Objects.requireNonNull(function);
+            VoidResult<? extends ERR> apply = function.apply(value);
+            return apply.fold(() -> this, BooleanResult::error);
         }
 
         @Override
@@ -724,7 +735,7 @@ public sealed interface BooleanResult<E> {
             if(!value) {
                 runnable.run();
             }
-            return null;
+            return safeCast();
         }
 
         @Override
@@ -756,8 +767,8 @@ public sealed interface BooleanResult<E> {
 
         @Override
         public BooleanResult<ERR> flatRunIfSuccess(Supplier<? extends VoidResult<? extends ERR>> supplier) {
-            VoidResult<? extends ERR> voidResult = supplier.get();
-            return null;
+            VoidResult<? extends ERR> result = supplier.get();
+            return result.fold(() -> this, BooleanResult::error);
         }
 
         @Override
@@ -772,7 +783,7 @@ public sealed interface BooleanResult<E> {
         @Override
         public BooleanResult<ERR> verify(Function<Boolean, ? extends VoidResult<? extends ERR>> function) {
             VoidResult<? extends ERR> apply = function.apply(value);
-            return null;
+            return apply.fold(() -> this, BooleanResult::error);
         }
 
         @Override
@@ -782,6 +793,9 @@ public sealed interface BooleanResult<E> {
 
         @Override
         public <N> N fold(Supplier<? extends N> trueSupplier, Supplier<? extends N> falseSupplier, Function<? super ERR, ? extends N> errorFunction) {
+            Objects.requireNonNull(falseSupplier);
+            Objects.requireNonNull(trueSupplier);
+            Objects.requireNonNull(errorFunction);
             if(value) {
                 return trueSupplier.get();
             } else {
@@ -850,6 +864,7 @@ public sealed interface BooleanResult<E> {
 
         @Override
         public <N> BooleanResult<N> mapError(Function<? super ERR, ? extends N> function) {
+            Objects.requireNonNull(function);
             return BooleanResult.error(function.apply(error));
         }
 
@@ -880,7 +895,7 @@ public sealed interface BooleanResult<E> {
 
         @Override
         public BooleanResult<ERR> flatRecover(Function<ERR, BooleanResult<? extends ERR>> function) {
-            return BooleanResult.error(error);
+            return (BooleanResult<ERR>) function.apply(error);
         }
 
         @Override
@@ -940,6 +955,8 @@ public sealed interface BooleanResult<E> {
 
         @Override
         public BooleanResult<ERR> runEither(Runnable trueRunnable, Runnable falseRunnable, Runnable errorRunnable) {
+            Objects.requireNonNull(trueRunnable);
+            Objects.requireNonNull(falseRunnable);
             errorRunnable.run();
             return safeCast();
         }
@@ -972,6 +989,8 @@ public sealed interface BooleanResult<E> {
 
         @Override
         public <N> N fold(Supplier<? extends N> trueSupplier, Supplier<? extends N> falseSupplier, Function<? super ERR, ? extends N> errorFunction) {
+            Objects.requireNonNull(trueSupplier);
+            Objects.requireNonNull(falseSupplier);
             return errorFunction.apply(error);
         }
 
