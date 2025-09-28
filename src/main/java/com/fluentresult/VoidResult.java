@@ -377,6 +377,7 @@ public sealed interface VoidResult<E> {
 
         @Override
         public <N> VoidResult<N> mapError(Function<? super ERR, ? extends N> function) {
+            Objects.requireNonNull(function);
             return safeCast();
         }
 
@@ -461,7 +462,7 @@ public sealed interface VoidResult<E> {
 
         @Override
         public VoidResult<ERR> flatRunIfSuccess(Supplier<? extends VoidResult<? extends ERR>> supplier) {
-            return (VoidResult<ERR>) supplier.get();
+            return (VoidResult<ERR>) Objects.requireNonNull(supplier.get());
         }
 
         @Override
@@ -487,8 +488,13 @@ public sealed interface VoidResult<E> {
     
     record Error<ERR>(ERR error) implements VoidResult<ERR> {
 
+        public Error(ERR error) {
+            this.error = Objects.requireNonNull(error);
+        }
+
         @Override
         public <N> VoidResult<N> mapError(Function<? super ERR, ? extends N> function) {
+            Objects.requireNonNull(function);
             return VoidResult.error(function.apply(error));
         }
 
@@ -574,6 +580,7 @@ public sealed interface VoidResult<E> {
 
         @Override
         public VoidResult<ERR> flatRunIfSuccess(Supplier<? extends VoidResult<? extends ERR>> supplier) {
+            Objects.requireNonNull(supplier);
             return safeCast();
         }
 
