@@ -2,9 +2,8 @@ name: Build Fluent Result
 
 on:
   push:
-    branches: [ master]
-  pull_request:
-    branches: [ master ]
+    branches:
+      - '**'
   workflow_dispatch:  # Allows manual triggering
 
 jobs:
