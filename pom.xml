@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>no.gorandalum</groupId>
+    <groupId>com.fluent-result</groupId>
     <artifactId>fluent-result</artifactId>
     <version>1.7.0-SNAPSHOT</version>
 
@@ -12,7 +12,7 @@
     <description>
         A result library helping you get rid of your exceptions, handling errors in a more fluent way.
     </description>
-    <url>http://github.com/gorandalum/fluent-result</url>
+    <url>https://github.com/fluent-result/fluent-result</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -42,12 +42,16 @@
             <email>goran.dalum@gmail.com</email>
             <url>http://github.com/gorandalum</url>
         </developer>
+        <developer>
+            <name>Marvin Bredal Lillehaug</name>
+            <url>http://github.com/computerlove</url>
+        </developer>
     </developers>
 
     <scm>
-        <connection>scm:git:git://github.com/gorandalum/fluent-result.git</connection>
-        <developerConnection>scm:git:ssh://github.com:gorandalum/fluent-result.git</developerConnection>
-        <url>http://github.com/gorandalum/fluent-result/tree/master</url>
+        <connection>scm:git:https://github.com/fluent-result/fluent-result.git</connection>
+        <developerConnection>scm:git:git@github.com:fluent-result/fluent-result.git</developerConnection>
+        <url>https://github.com/fluent-result/fluent-result/tree/main</url>
     </scm>
 
     <dependencies>
@@ -90,7 +94,7 @@
                 <configuration>
                     <archive>
                         <manifestEntries>
-                            <Automatic-Module-Name>no.gorandalum.fluentresult</Automatic-Module-Name>
+                            <Automatic-Module-Name>com.fluentresult.fluentresult</Automatic-Module-Name>
                         </manifestEntries>
                     </archive>
                 </configuration>
