@@ -659,6 +659,22 @@ public sealed interface Result<T, E> {
             return (Success<S, E1>) this;
         }
 
+        @Override
+        public boolean equals(Object o) {
+            if (o == null || getClass() != o.getClass()) return false;
+            Success<?, ?> success = (Success<?, ?>) o;
+            return Objects.equals(value, success.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(getClass(), value);
+        }
+
+        @Override
+        public String toString() {
+            return "Result[Value: %s]".formatted(value);
+        }
     }
 
     record Error<S, ERR>(ERR error) implements Result<S,ERR> {
@@ -818,6 +834,23 @@ public sealed interface Result<T, E> {
         @SuppressWarnings("unchecked")
         private <R1> Error<R1, ERR> safeCast() {
             return (Error<R1, ERR>) this;
+        }
+
+        @Override
+        public String toString() {
+            return "Result[Error: %s]".formatted(error);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == null || getClass() != o.getClass()) return false;
+            Error<?, ?> error1 = (Error<?, ?>) o;
+            return Objects.equals(error, error1.error);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(getClass(), error);
         }
     }
 }
