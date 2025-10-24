@@ -75,4 +75,23 @@ class OptionalResult_FlatMapValueWithOptionalResult_Test {
         assertThatThrownBy(() -> result.flatMapValueWithOptionalResult(val -> null))
                 .isInstanceOf(NullPointerException.class);
     }
+
+    @Test
+    void flatMapToOptional_empty_successfullyMapValue() {
+        OptionalResult<Integer, String> result = OptionalResult.empty();
+        OptionalResult<Integer, String> flatmapped = result
+                .flatMapToOptionalResult(integer -> OptionalResult.success(123));
+        assertThat(flatmapped).isNotNull();
+        switch (flatmapped) {
+            case OptionalResult.Empty<Integer, String> v -> {
+                fail("Expected value");
+            }
+            case OptionalResult.Error<Integer, String> v -> {
+                fail("Expected value");
+            }
+            case OptionalResult.Value<Integer, String>(Integer value) -> {
+                assertThat(value).isEqualTo(123);
+            }
+        }
+    }
 }

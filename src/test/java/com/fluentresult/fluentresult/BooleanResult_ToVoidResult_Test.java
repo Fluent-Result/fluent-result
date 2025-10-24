@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.fail;
 
-class BooleanResult_ToVoidResult_Test {
+    class BooleanResult_ToVoidResult_Test {
 
     @Test
     void toVoidResult_success_shouldCreateEmptyVoidResultWhenTrue() {

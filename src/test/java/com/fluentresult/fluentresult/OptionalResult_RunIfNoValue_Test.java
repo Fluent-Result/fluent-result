@@ -14,7 +14,8 @@ class OptionalResult_RunIfNoValue_Test {
     @Test
     void runIfNoValue_success_runnableShouldNotRun() {
         OptionalResult<String, String> result = OptionalResult.success("Success");
-        result.runIfNoValue(() -> fail("Should not be run"));
+        OptionalResult<String, String> r = result.runIfNoValue(() -> fail("Should not be run"));
+        assertThat(r).isNotNull();
     }
 
     @Test
