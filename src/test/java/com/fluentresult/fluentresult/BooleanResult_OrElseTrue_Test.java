@@ -12,4 +12,18 @@ class BooleanResult_OrElseTrue_Test {
         boolean orElse = result.orElseTrue();
         assertThat(orElse).isTrue();
     }
+
+    @Test
+    void orElseTrue_success_TrueReturnTrue() {
+        BooleanResult<String> result = BooleanResult.success(true);
+        boolean orElse = result.orElseTrue();
+        assertThat(orElse).isTrue();;
+    }
+
+    @Test
+    void orElseTrue_success_FalseReturnFalse() {
+        BooleanResult<String> result = BooleanResult.success(false);
+        boolean orElse = result.orElseTrue();
+        assertThat(orElse).isFalse();;
+    }
 }

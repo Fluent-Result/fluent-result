@@ -1246,7 +1246,7 @@ public sealed interface OptionalResult<T, E> {
 
         @Override
         public <N> Result<N, ERR> map(Function<Optional<S>, ? extends N> function) {
-            return null;
+            return Result.success(function.apply(Optional.empty()));
         }
 
         @Override
@@ -1256,7 +1256,7 @@ public sealed interface OptionalResult<T, E> {
 
         @Override
         public BooleanResult<ERR> mapToBoolean(Function<Optional<S>, Boolean> function) {
-            return null;
+            return BooleanResult.success(function.apply(Optional.empty()));
         }
 
         @Override

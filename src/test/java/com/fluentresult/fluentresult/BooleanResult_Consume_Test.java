@@ -18,4 +18,11 @@ class BooleanResult_Consume_Test {
         assertThat(resultList.get(0)).isTrue();
         assertThat(finalResult).isNotNull();
     }
+
+    @Test
+    void consume_error_notNull() {
+        BooleanResult<String> result = BooleanResult.error("Error")
+                .consume(value -> fail("Expected error"));
+        assertThat(result).isNotNull();
+    }
 }
