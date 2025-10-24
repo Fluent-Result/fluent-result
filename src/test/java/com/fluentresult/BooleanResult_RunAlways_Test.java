@@ -19,4 +19,15 @@ class BooleanResult_RunAlways_Test {
         assertThat(resultList.get(0)).isEqualTo("Ran");
         assertThat(finalResult).isNotNull();
     }
+
+    @Test
+    void runAlways_error_consumerSHouldRun() {
+        List<String> resultList = new ArrayList<>();
+
+        BooleanResult<String> result = BooleanResult.error("Error")
+                .runAlways(() -> resultList.add("Ran"));
+        assertThat(result).isNotNull();
+        assertThat(resultList).isEqualTo(List.of("Ran"));
+
+    }
 }

@@ -16,4 +16,17 @@ class BooleanResult_Map_Test {
                 val -> assertThat(val).isEqualTo(5),
                 err -> fail("Should not be error"));
     }
+
+    @Test
+    void map_error_not_null() {
+        Result<String, String> error = BooleanResult.error("Error")
+                .map(value -> value.toString());
+        assertThat(error).isNotNull();
+        switch (error) {
+            case Result.Success<String,String> ignored -> fail("Should be error");
+            case Result.Error<String, String>(String e)  -> {
+                assertThat(e).isEqualTo("Error");
+            }
+        }
+    }
 }

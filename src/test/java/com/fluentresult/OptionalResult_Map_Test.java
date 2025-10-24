@@ -16,4 +16,19 @@ class OptionalResult_Map_Test {
                 val -> assertThat(val).isEqualTo(7),
                 err -> fail("Should not be error"));
     }
+
+    @Test
+    void map_empty_successfullyMap() {
+        Result<String, String> result = OptionalResult.<String,String>empty()
+                .map(o -> o.orElse("OrElse"));
+        assertThat(result).isNotNull();
+        switch (result) {
+            case Result.Error<String, String> v -> {
+                fail("Expected value");
+            }
+            case Result.Success<String, String>(String value) -> {
+                assertThat(value).isEqualTo("OrElse");
+            }
+        }
+    }
 }
