@@ -12,4 +12,11 @@ class VoidResult_OrElseThrow_Test {
         VoidResult<String> result = VoidResult.success();
         result.orElseThrow(IllegalArgumentException::new);
     }
+
+    @Test
+    void orElseThrow_error_shouldThrow() {
+        VoidResult<String> result = VoidResult.error("Error");
+        assertThatThrownBy(() -> result.orElseThrow(IllegalArgumentException::new))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
 }

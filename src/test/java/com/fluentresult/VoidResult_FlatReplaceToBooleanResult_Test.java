@@ -28,4 +28,12 @@ class VoidResult_FlatReplaceToBooleanResult_Test {
                 () -> fail("Should not be empty"),
                 err -> assertThat(err).isEqualTo("Error"));
     }
+
+    @Test
+    void flatReplaceToBooleanResult_Error_notNull() {
+        BooleanResult<String> result = VoidResult.error("Error")
+                .flatReplaceToBooleanResult(() -> BooleanResult.success(true));
+        assertThat(result).isNotNull();
+
+    }
 }
