@@ -15,4 +15,12 @@ class Result_MapToBoolean_Test {
                 err -> fail("Should not be error")
         );
     }
+
+    @Test
+    void mapToBoolean_error_notNull() {
+        BooleanResult<String> result = Result.error("Error")
+                .mapToBoolean(val -> true);
+        assertThat(result).isNotNull();
+
+    }
 }

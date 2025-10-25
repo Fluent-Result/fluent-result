@@ -11,6 +11,11 @@ class EqualsAndHashcodeTest {
         Result<String, String> result = Result.success("Success");
         assertThat(result.equals(result)).isTrue();
     }
+    @Test
+    void error_equals_sameObject() {
+        Result<String, String> result = Result.error("Error");
+        assertThat(result.equals(result)).isTrue();
+    }
 
     @Test
     void equals_afterConsume() {
@@ -27,9 +32,23 @@ class EqualsAndHashcodeTest {
     }
 
     @Test
+    void error_equals_differentObjectsSameContent() {
+        Result<String, String> result = Result.error("Error");
+        Result<String, String> result2 = Result.error("Error");
+        assertThat(result.equals(result2)).isTrue();
+    }
+
+    @Test
     void equals_differentObjectsDifferentContent() {
         Result<String, String> result = Result.success("Success");
         Result<String, String> result2 = Result.success("Another success");
+        assertThat(result.equals(result2)).isFalse();
+    }
+
+    @Test
+    void error_equals_differentObjectsDifferentContent() {
+        Result<String, String> result = Result.error("Success");
+        Result<String, String> result2 = Result.error("Another error");
         assertThat(result.equals(result2)).isFalse();
     }
 
@@ -43,6 +62,13 @@ class EqualsAndHashcodeTest {
     @Test
     void equals_sameValueButDifferentResultClass() {
         Result<Boolean, String> result = Result.success(true);
+        BooleanResult<String> result2 = BooleanResult.success(true);
+        assertThat(result.equals(result2)).isFalse();
+    }
+
+    @Test
+    void error_equals_sameValueButDifferentResultClass() {
+        Result<Boolean, String> result = Result.error("Error");
         BooleanResult<String> result2 = BooleanResult.success(true);
         assertThat(result.equals(result2)).isFalse();
     }
@@ -70,6 +96,27 @@ class EqualsAndHashcodeTest {
     @Test
     void hashCode_notEqualForDifferentResultClass() {
         Result<Boolean, String> result = Result.success(true);
+        BooleanResult<String> result2 = BooleanResult.success(true);
+        assertThat(result.hashCode()).isNotEqualTo(result2.hashCode());
+    }
+
+    @Test
+    void error_hashCode_equalForSameValue() {
+        Result<String, String> result = Result.error("Hashcode");
+        Result<String, String> result2 = Result.error("Hashcode");
+        assertThat(result.hashCode()).isEqualTo(result2.hashCode());
+    }
+
+    @Test
+    void error_hashCode_notEqualForDifferentValue() {
+        Result<String, String> result = Result.error("Hashcode");
+        Result<String, String> result2 = Result.error("HashcodeOther");
+        assertThat(result.hashCode()).isNotEqualTo(result2.hashCode());
+    }
+
+    @Test
+    void error_hashCode_notEqualForDifferentResultClass() {
+        Result<Boolean, String> result = Result.error("Error");
         BooleanResult<String> result2 = BooleanResult.success(true);
         assertThat(result.hashCode()).isNotEqualTo(result2.hashCode());
     }
