@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 class VoidResult_ConsumeError_Test {
 
@@ -17,5 +18,12 @@ class VoidResult_ConsumeError_Test {
         assertThat(resultList.size()).isOne();
         assertThat(resultList.get(0)).isEqualTo("Error");
         assertThat(finalResult).isNotNull();
+    }
+
+    @Test
+    void consumeError_success_notNull() {
+        VoidResult<Object> result = VoidResult.success()
+                .consumeError(o -> fail("Expected success"));
+        assertThat(result).isNotNull();
     }
 }
