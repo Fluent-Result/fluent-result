@@ -26,4 +26,13 @@ class VoidResult_FlatReplaceToVoidResult_Test {
                 () -> fail("Should not be success"),
                 err -> assertThat(err).isEqualTo("Error"));
     }
+
+
+    @Test
+    void flatReplaceToViodResult_Error_notNull() {
+        VoidResult<String> result = VoidResult.error("Error")
+                .flatReplaceToVoidResult(() -> VoidResult.success());
+        assertThat(result).isNotNull();
+
+    }
 }
