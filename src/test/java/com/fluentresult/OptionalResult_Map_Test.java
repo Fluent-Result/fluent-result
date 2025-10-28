@@ -31,4 +31,18 @@ class OptionalResult_Map_Test {
             }
         }
     }
+    @Test
+    void map_error_successfullyMap() {
+        Result<String, String> result = OptionalResult.<String,String>error("Error")
+                .map(o -> o.orElse("OrElse"));
+        assertThat(result).isNotNull();
+        switch (result) {
+            case Result.Error<String, String>(String error) -> {
+                assertThat(error).isEqualTo("Error");
+            }
+            case Result.Success<String, String>(String value) -> {
+                fail("Expected error");
+            }
+        }
+    }
 }

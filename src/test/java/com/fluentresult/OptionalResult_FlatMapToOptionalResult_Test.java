@@ -18,4 +18,11 @@ class OptionalResult_FlatMapToOptionalResult_Test {
                         err -> fail("Should not be error")
                 );
     }
+
+    @Test
+    void flatMapToOptionalResult_error_shouldBeError() {
+        OptionalResult<String, String> result = OptionalResult.error("Error");
+        OptionalResult<String, String> flatMapped = result.flatMapToOptionalResult(OptionalResult::success);
+        assertThat(flatMapped).isNotNull();
+    }
 }

@@ -26,6 +26,12 @@ class OptionalResult_ValueOrElseGet_Test {
     }
 
     @Test
+    void orElse_empty_shouldRespondWithNullValue() {
+        OptionalResult<String, String> result = OptionalResult.empty();
+        assertThat(result.valueOrElseGet(() -> "Empty")).isEqualTo("Empty");
+    }
+
+    @Test
     void orElse_success_nullFunctionGivesNPE() {
         OptionalResult<String, Object> result = OptionalResult.success("Success");
         assertThatThrownBy(() -> result.valueOrElseGet(null))

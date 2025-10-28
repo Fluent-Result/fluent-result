@@ -22,6 +22,13 @@ class OptionalResult_ValueOrElseThrow_Test {
     }
 
     @Test
+    void orElseThrow_empty_shouldThrowGivenException() {
+        OptionalResult<String, String> result = OptionalResult.empty();
+        assertThatThrownBy(() -> result.valueOrElseThrow(IllegalArgumentException::new))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
     void orElseThrow_error_nullExceptionSupplierGivesNPE() {
         OptionalResult<String, String> result = OptionalResult.error("Error");
         assertThatThrownBy(() -> result.valueOrElseThrow(null))
