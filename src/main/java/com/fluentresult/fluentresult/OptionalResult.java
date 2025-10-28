@@ -1451,7 +1451,8 @@ public sealed interface OptionalResult<T, E> {
         @Override
         public OptionalResult<S, ERR> verify(Function<Optional<S>, ? extends VoidResult<? extends ERR>> function) {
             VoidResult<? extends ERR> apply = function.apply(Optional.empty());
-            return null;
+            var instance = this;
+            return apply.fold(() -> instance, OptionalResult::error);
         }
 
         @Override

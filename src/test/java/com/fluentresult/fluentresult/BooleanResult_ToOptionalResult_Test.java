@@ -1,4 +1,4 @@
-package no.gorandalum.fluentresult;
+package com.fluentresult.fluentresult;
 
 import org.junit.jupiter.api.Test;
 

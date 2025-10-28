@@ -25,4 +25,20 @@ class OptionalResult_ConsumeEither_2Args_Test {
         assertThat(finalResult).isNotNull();
     }
 
+    @Test
+    void consumeEither_2Args_empty_shouldRunValueConsumer() {
+        List<Optional<String>> resultList = new ArrayList<>();
+        OptionalResult<String, String> result = OptionalResult.empty();
+        OptionalResult<String, String> consumedEither = result.consumeEither(resultList::add, e -> fail("Expected empty"));
+        assertThat(consumedEither).isNotNull();
+        assertThat(resultList).isEqualTo(List.of(Optional.empty()));
+    }
+    @Test
+    void consumeEither_2Args_error_shouldRunErrorConsumer() {
+        List<String> resultList = new ArrayList<>();
+        OptionalResult<String, String> result = OptionalResult.error("Error");
+        OptionalResult<String, String> consumedEither = result.consumeEither(v -> fail("Expected error"), resultList::add);
+        assertThat(consumedEither).isNotNull();
+        assertThat(resultList).isEqualTo(List.of("Error"));
+    }
 }
