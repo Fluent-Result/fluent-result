@@ -16,4 +16,20 @@ class OptionalResult_FlatMapValueWithBooleanResult_Test {
                 () -> fail("Should not be empty"),
                 err -> fail("Expected no error"));
     }
+
+    @Test
+    void flatMapValueWithBooleanResult_empty_notNull() {
+        OptionalResult<Integer, String> result = OptionalResult.empty();
+        OptionalResult<Boolean, String> flatmapped = result.flatMapValueWithBooleanResult(integer -> BooleanResult.success(integer == 2));
+        assertThat(flatmapped).isNotNull();
+    }
+
+    @Test
+    void flatMapValueWithBooleanResult_error_notNull() {
+        OptionalResult<Integer, String> result = OptionalResult.error("Error");
+        OptionalResult<Boolean, String> flatmapped = result.flatMapValueWithBooleanResult(integer -> BooleanResult.success(integer == 2));
+        assertThat(flatmapped).isNotNull();
+    }
+
+
 }

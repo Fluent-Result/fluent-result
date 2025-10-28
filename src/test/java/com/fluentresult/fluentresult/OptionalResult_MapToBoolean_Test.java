@@ -43,4 +43,15 @@ class OptionalResult_MapToBoolean_Test {
             }
         }
     }
+
+
+    @Test
+    void mapToBoolean_error_is_error() {
+        BooleanResult<String> result =
+                OptionalResult.<String, String>error("Error")
+                        .mapToBoolean(maybeVal -> true);
+        result.consumeEither(
+                val -> fail("Should be error"),
+                err -> assertThat(err).isEqualTo("Error"));
+    }
 }

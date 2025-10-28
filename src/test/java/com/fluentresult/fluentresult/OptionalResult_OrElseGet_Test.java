@@ -16,4 +16,18 @@ class OptionalResult_OrElseGet_Test {
         assertThat(orElse).isPresent();
         orElse.ifPresent(val -> assertThat(val).isEqualTo("Success"));
     }
+
+    @Test
+    void orElseGet_empty_shouldRespondWithEmptyValue() {
+        OptionalResult<String, Object> result = OptionalResult.empty();
+        Optional<String> orElse = result.orElseGet(err -> Optional.of("Other"));
+        assertThat(orElse).isEmpty();
+    }
+
+    @Test
+    void orElseGet_error_shouldRespondWithEmptyValue() {
+        OptionalResult<String, Object> result = OptionalResult.error("Error");
+        Optional<String> orElse = result.orElseGet(err -> Optional.of("Other"));
+        assertThat(orElse).isEqualTo(Optional.of("Other"));
+    }
 }

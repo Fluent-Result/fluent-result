@@ -20,4 +20,20 @@ class OptionalResult_Consume_Test {
         resultList.get(0).ifPresent(val -> assertThat(val).isEqualTo("Success"));
         assertThat(finalResult).isNotNull();
     }
+
+    @Test
+    void consume_error_consumerNotRun() {
+        OptionalResult<String, String> result = OptionalResult.error("Error");
+        OptionalResult<String, String> consumed = result.consume(s -> fail("Expected error"));
+        assertThat(consumed).isNotNull();
+    }
+
+    @Test
+    void consume_empty_consumerNotRun() {
+        List<Optional<String>> resultList = new ArrayList<>();
+        OptionalResult<String, String> result = OptionalResult.empty();
+        OptionalResult<String, String> consumed = result.consume(resultList::add);
+        assertThat(consumed).isNotNull();
+        assertThat(resultList).isEqualTo(List.of(Optional.empty()));
+    }
 }

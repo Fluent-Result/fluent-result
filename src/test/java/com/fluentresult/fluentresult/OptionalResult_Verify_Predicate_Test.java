@@ -2,6 +2,10 @@ package com.fluentresult.fluentresult;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.*;
@@ -25,6 +29,30 @@ class OptionalResult_Verify_Predicate_Test {
         OptionalResult<String, String> result = OptionalResult.<String, String>success("Success")
                 .verify(
                         maybeVal -> maybeVal.map(val -> val.length() == 5).orElse(false),
+                        () -> "ValidationError");
+        result.consumeEither(
+                val -> fail("Expected no value"),
+                err -> assertThat(err).isEqualTo("ValidationError"));
+    }
+    @Test
+    void verify_predicate_empty_shouldKeepSuccessResultWhenVerifiedTrue() {
+        OptionalResult<String, String> result = OptionalResult.<String, String>empty()
+                .verify(
+                        Optional::isEmpty,
+                        () -> "ValidationError");
+        List<String> results = new ArrayList<>();
+        OptionalResult<String, String> consumed = result.consumeEither(
+                val -> fail("Expected empty"),
+                () -> results.add("Empty"),
+                err -> fail("Should not be error"));
+        assertThat(consumed).isNotNull();
+    }
+
+    @Test
+    void verify_predicate_empty_shouldChangeToProvidedErrorWhenVerifiedFalse() {
+        OptionalResult<String, String> result = OptionalResult.<String, String>empty()
+                .verify(
+                        Optional::isPresent,
                         () -> "ValidationError");
         result.consumeEither(
                 val -> fail("Expected no value"),
