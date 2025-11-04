@@ -28,6 +28,14 @@ class OptionalResult_ConsumeValue_Test {
     }
 
     @Test
+    void consumeValue_empty_consumerShouldNotBeRun() {
+        OptionalResult<String, String> result = OptionalResult.empty();
+        OptionalResult<String, String> finalResult =
+                result.consumeValue(val -> fail("Should not be run"));
+        assertThat(finalResult).isNotNull();
+    }
+
+    @Test
     void consumeValue_error_nullConsumerGivesNPE() {
         OptionalResult<String, String> result = OptionalResult.error("Error");
         assertThatThrownBy(() -> result.consumeValue(null))

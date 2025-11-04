@@ -16,4 +16,11 @@ class VoidResult_Replace_Test {
                 val -> assertThat(val).isEqualTo("Success"),
                 err -> fail("Expected no error"));
     }
+
+    @Test
+    void replace_error_notNull() {
+        VoidResult<String> result = VoidResult.error("Error");
+        Result<String, String> replaced = result.replace(() -> "Replaced");
+        assertThat(replaced).isNotNull();
+    }
 }

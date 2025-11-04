@@ -17,4 +17,19 @@ class BooleanResult_MapToBoolean_Test {
                 () -> {},
                 err -> fail("Expected no error"));
     }
+
+    @Test
+    void mapToBoolean_failure_notMapped() {
+        BooleanResult<String> result = BooleanResult.error("Error")
+                .mapToBoolean(val -> !val);
+        assertThat(result).isNotNull();
+        switch (result) {
+            case BooleanResult.Error<String>(String error) -> {
+                assertThat(error).isEqualTo("Error");
+            }
+            case BooleanResult.Success<String> v -> {
+                fail("Expected failure");
+            }
+        }
+    }
 }

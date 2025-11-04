@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.fail;
 
 class BooleanResult_RunIfTrue_Test {
 
@@ -18,5 +19,12 @@ class BooleanResult_RunIfTrue_Test {
         assertThat(resultList.size()).isOne();
         assertThat(resultList.get(0)).isEqualTo("Ran");
         assertThat(finalResult).isNotNull();
+    }
+
+    @Test
+    void runIfTrue_error_notNull() {
+        BooleanResult<String> result = BooleanResult.error("Error")
+                .runIfTrue(() -> fail("Expected error"));
+        assertThat(result).isNotNull();
     }
 }

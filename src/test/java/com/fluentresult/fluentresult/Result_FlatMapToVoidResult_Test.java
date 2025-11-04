@@ -16,4 +16,11 @@ class Result_FlatMapToVoidResult_Test {
                         err -> fail("Should not be error")
                 );
     }
+
+    @Test
+    void flatMapToVoidResult_error_notNull() {
+        VoidResult<String> result = Result.error("Error")
+                .flatMapToVoidResult(o -> VoidResult.success());
+        assertThat(result).isNotNull();
+    }
 }

@@ -16,4 +16,11 @@ class BooleanResult_FlatMap_Test {
                         err -> fail("Should not be error")
                 );
     }
+
+    @Test
+    void flatMap_error_shouldNotMapValue() {
+        Result<Boolean, String> result = BooleanResult.error("Error")
+                .flatMap(value -> Result.success(!value));
+        assertThat(result).isNotNull();
+    }
 }

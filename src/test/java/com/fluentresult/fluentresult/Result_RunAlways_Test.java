@@ -27,6 +27,7 @@ class Result_RunAlways_Test {
         Result<String, String> result = Result.error("Error");
         Result<String, String> finalResult =
                 result.runAlways(() -> resultList.add("Ran"));
+        assertThat(finalResult).isNotNull();
         assertThat(resultList.size()).isOne();
         assertThat(resultList.get(0)).isEqualTo("Ran");
     }

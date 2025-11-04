@@ -17,4 +17,18 @@ class OptionalResult_FlatMapToVoidResult_Test {
                         err -> fail("Should not be error")
                 );
     }
+
+    @Test
+    void flatMapToVoidResult_empty_notNull() {
+        OptionalResult<Integer, String> result = OptionalResult.empty();
+        VoidResult<String> flatmapped = result.flatMapToVoidResult(integer -> VoidResult.success());
+        assertThat(flatmapped).isNotNull();
+    }
+
+    @Test
+    void flatMapToVoidResult_error_shouldBeError() {
+        OptionalResult<String, String> result = OptionalResult.error("Error");
+        VoidResult<String> flatMapped = result.flatMapToVoidResult(s -> VoidResult.success());
+        assertThat(flatMapped).isNotNull();
+    }
 }

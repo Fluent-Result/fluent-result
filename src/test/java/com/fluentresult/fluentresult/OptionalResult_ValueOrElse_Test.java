@@ -13,6 +13,12 @@ class OptionalResult_ValueOrElse_Test {
     }
 
     @Test
+    void valueOrElse_empty_shouldRespondWithSuccessValue() {
+        OptionalResult<String, Object> result = OptionalResult.empty();
+        assertThat(result.valueOrElse("Other")).isEqualTo("Other");
+    }
+
+    @Test
     void orElse_error_shouldRespondWithOtherValue() {
         OptionalResult<String, String> result = OptionalResult.error("Error");
         assertThat(result.valueOrElse("Other")).isEqualTo("Other");
