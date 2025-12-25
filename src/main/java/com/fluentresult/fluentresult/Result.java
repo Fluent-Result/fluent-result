@@ -415,6 +415,31 @@ public final class Result<T, E> extends BaseResult<T, E> {
 
     /**
      * If in success state, verifies the success value of this {@code Result} by
+     * testing it with the given predicate. If the predicate evaluates to false,
+     * a new {@code Result} is returned containing the error provided by
+     * mapping the value with the error function.
+     * If the predicate evaluates to true, or the
+     * {@code Result} already was in error state, the original {@code Result} is
+     * returned unaltered.
+     *
+     * @param predicate the predicate used to verify the success value, if
+     * success state
+     * @param errorFunction mapping the value to an error if predicate evaluates
+     * to false.
+     * @return the original {@code Result} unaltered, unless the predicate
+     * evaluates to false, then a new {@code Result} in error state is returned
+     * containing the result of mapping the value to an error
+     * @throws NullPointerException if the given predicate is {@code null} or
+     * returns {@code null}, or the given error supplier is {@code null} or
+     * returns {@code null}
+     */
+    public Result<T, E> verify(Predicate<? super T> predicate,
+                               Function<? super T, ? extends E> errorFunction) {
+        return Implementations.verify(predicate, errorFunction, Result::error, this);
+    }
+
+    /**
+     * If in success state, verifies the success value of this {@code Result} by
      * mapping it to a {@code VoidResult}. If the returned {@code VoidResult} is
      * in error state, a new {@code Result} is returned containing the error
      * value of the {@code VoidResult}. If the {@code VoidResult} is in success

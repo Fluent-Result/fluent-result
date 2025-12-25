@@ -574,6 +574,34 @@ public final class BooleanResult<E> extends BaseResult<Boolean, E> {
     }
 
     /**
+     * If in success state, verifies the boolean success value of this
+     * {@code BooleanResult} by testing it with the given predicate. If the
+     * predicate evaluates to false, a new {@code BooleanResult} is returned
+     * containing the error value provided by the given error function. If the
+     * predicate evaluates to true, or the {@code BooleanResult} already was in
+     * error state, the original {@code BooleanResult} is returned unaltered.
+     *
+     * @param predicate the predicate used to verify the boolean success value,
+     * if success state
+     * @param errorFunction mapping the value to error if predicate evaluates
+     * to false
+     * @return the original {@code BooleanResult} unaltered, unless the predicate
+     * evaluates to false, then a new {@code BooleanResult} in error state is returned
+     * containing the supplied error value
+     * @throws NullPointerException if the given predicate is {@code null} or
+     * returns {@code null}, or the given error supplier is {@code null} or
+     * returns {@code null}
+     */
+    public BooleanResult<E> verify(Predicate<Boolean> predicate,
+                                   Function<Boolean, ? extends E> errorFunction) {
+        return Implementations.verify(
+                predicate,
+                errorFunction,
+                BooleanResult::error,
+                this);
+    }
+
+    /**
      * If in success state, verifies the success value of this
      * {@code BooleanResult} by mapping it to a {@code VoidResult}. If the
      * returned {@code VoidResult} is in error state, a new
