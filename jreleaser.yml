@@ -1,0 +1,34 @@
+project:
+  name: fluent-result
+  description: A result library helping you get rid of your exceptions, handling errors in a more fluent way.
+  longDescription: A result library helping you get rid of your exceptions, handling errors in a more fluent way.
+  website: https://github.com/fluent-result/fluent-result
+  license: MIT
+  authors:
+    - Gøran Dalum
+    - Marvin Bredal Lillehaug
+  java:
+    groupId: com.fluent-result
+    version: '8'
+
+release:
+  github:
+    owner: fluent-result
+    name: fluent-result
+    overwrite: true
+    changelog:
+      formatted: ALWAYS
+
+signing:
+  active: ALWAYS
+  armored: true
+  mode: MEMORY
+
+deploy:
+  maven:
+    mavenCentral:
+      sonatype:
+        active: ALWAYS
+        url: https://central.sonatype.com/api/v1/publisher
+        stagingRepositories:
+          - target/staging-deploy
