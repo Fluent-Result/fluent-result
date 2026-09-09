@@ -132,6 +132,18 @@ final class Implementations {
                         instance : errorConstructor.apply(errorSupplier.get()));
     }
 
+    static <T, E, R extends BaseResult<T, E>> R verify(Predicate<? super T> predicate,
+                                                       Function<? super T, ? extends E> errorFunction,
+                                                       Function<E, R> errorConstructor,
+                                                       R instance) {
+        Objects.requireNonNull(predicate);
+        Objects.requireNonNull(errorFunction);
+        return instance.errorOpt()
+                .map(err -> instance)
+                .orElseGet(() -> predicate.test(instance.value()) ?
+                        instance : errorConstructor.apply(errorFunction.apply(instance.value())));
+    }
+
     static <T, E, R extends BaseResult<T, E>> R flatConsume(
             Function<? super T, ? extends BaseResult<Void, ? extends E>> function,
             Function<E, R> errorConstructor,

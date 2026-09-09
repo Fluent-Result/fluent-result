@@ -3,6 +3,8 @@ package com.fluentresult.fluentresult;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
@@ -25,11 +27,13 @@ class OptionalResult_ConsumeEither_3Args_Test {
     @Test
     void consumeEither_3Args_empty_shouldRunEmptyRunnableConsumer() {
         OptionalResult<String, String> result = OptionalResult.empty();
+        List<String> holder = new ArrayList<>();
         OptionalResult<String, String> finalResult = result.consumeEither(
                 val -> { throw new RuntimeException(); },
-                () -> {},
+                () -> holder.add("value"),
                 err -> { throw new RuntimeException(); });
         assertThat(finalResult).isNotNull();
+        assertThat(holder).isEqualTo(Collections.singletonList("value"));
     }
 
     @Test
