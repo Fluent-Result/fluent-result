@@ -687,14 +687,8 @@ public sealed interface OptionalResult<T, E> {
      * returns {@code null}, or the given error supplier is {@code null} or
      * returns {@code null}
      */
-    public OptionalResult<T, E> verify(Predicate<Optional<T>> predicate,
-                                       Function<Optional<T>, ? extends E> errorFunction) {
-        return Implementations.verify(
-                predicate,
-                errorFunction,
-                OptionalResult::error,
-                this);
-    }
+    OptionalResult<T, E> verify(Predicate<Optional<T>> predicate,
+                                       Function<Optional<T>, ? extends E> errorFunction);
 
     /**
      * If in success state, verifies the success value of this
@@ -760,15 +754,8 @@ public sealed interface OptionalResult<T, E> {
      * returns {@code null}, or the given error supplier is {@code null} or
      * returns {@code null}
      */
-    public OptionalResult<T, E> verifyValue(Predicate<? super T> predicate,
-                                            Function<? super T, ? extends E> errorFunction) {
-        Objects.requireNonNull(errorFunction);
-        return Implementations.verify(
-                maybeValue -> maybeValue.map(predicate::test).orElse(true),
-                maybeValue -> maybeValue.map(errorFunction).get(),
-                OptionalResult::error,
-                this);
-    }
+    OptionalResult<T, E> verifyValue(Predicate<? super T> predicate,
+                                            Function<? super T, ? extends E> errorFunction);
 
     /**
      * If in non-empty success state, verifies the success value of this
@@ -1219,6 +1206,17 @@ public sealed interface OptionalResult<T, E> {
         }
 
         @Override
+        public OptionalResult<S, ERR> verify(Predicate<Optional<S>> predicate, Function<Optional<S>, ? extends ERR> errorFunction) {
+            Objects.requireNonNull(errorFunction);
+            Optional<S> optional = Optional.of(value);
+            if(predicate.test(optional)) {
+                return safeCast();
+            } else {
+                return OptionalResult.error(errorFunction.apply(optional));
+            }
+        }
+
+        @Override
         public OptionalResult<S, ERR> verify(Function<Optional<S>, ? extends VoidResult<? extends ERR>> function) {
             VoidResult<? extends ERR> apply = function.apply(Optional.of(value));
             var instance = this;
@@ -1232,6 +1230,16 @@ public sealed interface OptionalResult<T, E> {
                 return safeCast();
             } else {
                 return OptionalResult.error(errorSupplier.get());
+            }
+        }
+
+        @Override
+        public OptionalResult<S, ERR> verifyValue(Predicate<? super S> predicate, Function<? super S, ? extends ERR> errorFunction) {
+            Objects.requireNonNull(errorFunction);
+            if(predicate.test(value)){
+                return safeCast();
+            } else {
+                return OptionalResult.error(errorFunction.apply(value));
             }
         }
 
@@ -1507,6 +1515,15 @@ public sealed interface OptionalResult<T, E> {
         }
 
         @Override
+        public OptionalResult<S, ERR> verify(Predicate<Optional<S>> predicate, Function<Optional<S>, ? extends ERR> errorFunction) {
+            if(predicate.test(Optional.empty())) {
+                return safeCast();
+            } else {
+                return OptionalResult.error(errorFunction.apply(Optional.empty()));
+            }
+        }
+
+        @Override
         public OptionalResult<S, ERR> verify(Function<Optional<S>, ? extends VoidResult<? extends ERR>> function) {
             VoidResult<? extends ERR> apply = function.apply(Optional.empty());
             var instance = this;
@@ -1515,11 +1532,21 @@ public sealed interface OptionalResult<T, E> {
 
         @Override
         public OptionalResult<S, ERR> verifyValue(Predicate<? super S> predicate, Supplier<? extends ERR> errorSupplier) {
+            Objects.requireNonNull(predicate);
+            Objects.requireNonNull(errorSupplier);
+            return safeCast();
+        }
+
+        @Override
+        public OptionalResult<S, ERR> verifyValue(Predicate<? super S> predicate, Function<? super S, ? extends ERR> errorFunction) {
+            Objects.requireNonNull(predicate);
+            Objects.requireNonNull(errorFunction);
             return safeCast();
         }
 
         @Override
         public OptionalResult<S, ERR> verifyValue(Function<? super S, ? extends VoidResult<? extends ERR>> function) {
+            Objects.requireNonNull(function);
             return safeCast();
         }
 
@@ -1788,6 +1815,11 @@ public sealed interface OptionalResult<T, E> {
         }
 
         @Override
+        public OptionalResult<S, ERR> verify(Predicate<Optional<S>> predicate, Function<Optional<S>, ? extends ERR> errorFunction) {
+            return safeCast();
+        }
+
+        @Override
         public OptionalResult<S, ERR> verify(Function<Optional<S>, ? extends VoidResult<? extends ERR>> function) {
             return safeCast();
         }
@@ -1796,6 +1828,11 @@ public sealed interface OptionalResult<T, E> {
         public OptionalResult<S, ERR> verifyValue(Predicate<? super S> predicate, Supplier<? extends ERR> errorSupplier) {
             Objects.requireNonNull(predicate);
             Objects.requireNonNull(errorSupplier);
+            return safeCast();
+        }
+
+        @Override
+        public OptionalResult<S, ERR> verifyValue(Predicate<? super S> predicate, Function<? super S, ? extends ERR> errorFunction) {
             return safeCast();
         }
 

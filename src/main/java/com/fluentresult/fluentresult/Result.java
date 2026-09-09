@@ -361,10 +361,8 @@ public sealed interface Result<T, E> {
      * returns {@code null}, or the given error supplier is {@code null} or
      * returns {@code null}
      */
-    public Result<T, E> verify(Predicate<? super T> predicate,
-                               Function<? super T, ? extends E> errorFunction) {
-        return Implementations.verify(predicate, errorFunction, Result::error, this);
-    }
+    Result<T, E> verify(Predicate<? super T> predicate,
+                               Function<? super T, ? extends E> errorFunction);
 
     /**
      * If in success state, verifies the success value of this {@code Result} by
@@ -640,6 +638,16 @@ public sealed interface Result<T, E> {
         }
 
         @Override
+        public Result<S, ERR> verify(Predicate<? super S> predicate, Function<? super S, ? extends ERR> errorFunction) {
+            Objects.requireNonNull(errorFunction);
+            if(predicate.test(value)) {
+                return safeCast();
+            } else {
+                return Result.error(errorFunction.apply(value));
+            }
+        }
+
+        @Override
         public Result<S, ERR> verify(Function<? super S, ? extends VoidResult<? extends ERR>> function) {
             VoidResult<? extends ERR> apply = function.apply(value);
             return apply.fold(() -> this, Result::error);
@@ -817,6 +825,12 @@ public sealed interface Result<T, E> {
         @Override
         public Result<S, ERR> verify(Predicate<? super S> predicate, Supplier<? extends ERR> errorSupplier) {
             Objects.requireNonNull(errorSupplier);
+            return safeCast();
+        }
+
+        @Override
+        public Result<S, ERR> verify(Predicate<? super S> predicate, Function<? super S, ? extends ERR> errorFunction) {
+            Objects.requireNonNull(errorFunction);
             return safeCast();
         }
 
