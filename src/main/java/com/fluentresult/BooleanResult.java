@@ -451,14 +451,8 @@ public sealed interface BooleanResult<E> {
      * returns {@code null}, or the given error supplier is {@code null} or
      * returns {@code null}
      */
-    public BooleanResult<E> verify(Predicate<Boolean> predicate,
-                                   Function<Boolean, ? extends E> errorFunction) {
-        return Implementations.verify(
-                predicate,
-                errorFunction,
-                BooleanResult::error,
-                this);
-    }
+    BooleanResult<E> verify(Predicate<Boolean> predicate,
+                                   Function<Boolean, ? extends E> errorFunction);
 
     /**
      * If in success state, verifies the success value of this
@@ -809,6 +803,15 @@ public sealed interface BooleanResult<E> {
         }
 
         @Override
+        public BooleanResult<ERR> verify(Predicate<Boolean> predicate, Function<Boolean, ? extends ERR> errorFunction) {
+            if(predicate.test(value)) {
+                return safeCast();
+            } else {
+                return BooleanResult.error(errorFunction.apply(value));
+            }
+        }
+
+        @Override
         public BooleanResult<ERR> verify(Function<Boolean, ? extends VoidResult<? extends ERR>> function) {
             VoidResult<? extends ERR> apply = function.apply(value);
             return apply.fold(() -> this, BooleanResult::error);
@@ -1002,6 +1005,11 @@ public sealed interface BooleanResult<E> {
 
         @Override
         public BooleanResult<ERR> verify(Predicate<Boolean> predicate, Supplier<? extends ERR> errorSupplier) {
+            return safeCast();
+        }
+
+        @Override
+        public BooleanResult<ERR> verify(Predicate<Boolean> predicate, Function<Boolean, ? extends ERR> errorFunction) {
             return safeCast();
         }
 
