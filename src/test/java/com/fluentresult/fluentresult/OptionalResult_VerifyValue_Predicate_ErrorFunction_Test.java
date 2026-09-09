@@ -2,6 +2,7 @@ package com.fluentresult.fluentresult;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -59,10 +60,37 @@ class OptionalResult_VerifyValue_Predicate_ErrorFunction_Test {
                 OptionalResult.empty()
                         .verifyValue(
                                 val -> {
-                                    throw new RuntimeException();
+                                    fail("Verify value predicate should not run on empty");
+                                    return false;
                                 },
                                 (v) -> "Error " + v);
         assertThat(result).isNotNull();
+    }
+
+    @Test
+    void verify_predicate_empty_shouldRunVerificatorWhenEmptyFalse() {
+        OptionalResult<Object, Object> result =
+                OptionalResult.empty()
+                        .verify(
+                                Optional::isPresent,
+                                (v) -> "Error empty");
+        result.consumeEither(
+                val -> fail("Should not have value"),
+                () -> fail("Should not be empty"),
+                err -> assertThat(err).isEqualTo("Error empty"));
+    }
+
+    @Test
+    void verify_predicate_empty_shouldRunVerificatorWhenEmptyTrue() {
+        OptionalResult<Object, Object> result =
+                OptionalResult.empty()
+                        .verify(
+                                Optional::isEmpty,
+                                (v) -> "Error empty");
+        result.consumeEither(
+                val -> fail("Should not have value"),
+                () -> {},
+                err -> fail("Should not be error"));
     }
 
     @Test
@@ -70,7 +98,8 @@ class OptionalResult_VerifyValue_Predicate_ErrorFunction_Test {
         OptionalResult<Object, String> result = OptionalResult.error("OriginalError")
                 .verifyValue(
                         val -> {
-                            throw new RuntimeException();
+                            fail("Verify predicate should not run on error");
+                            return false;
                         },
                         (v) -> "Error " + v);
         assertThat(result).isNotNull();
@@ -84,8 +113,22 @@ class OptionalResult_VerifyValue_Predicate_ErrorFunction_Test {
     }
 
     @Test
+    void verifyValue_predicate_empty_nullVerificatorGivesNPE() {
+        OptionalResult<String, String> result = OptionalResult.empty();
+        assertThatThrownBy(() -> result.verifyValue(null, () -> "ValidationError"))
+                .isInstanceOf(NullPointerException.class);
+    }
+
+    @Test
     void verify_success_nullErrorSupplierGivesNPE() {
         OptionalResult<String, String> result = OptionalResult.success("Success");
+        assertThatThrownBy(() -> result.verifyValue(val -> true, (Function<String, ? extends String>) null))
+                .isInstanceOf(NullPointerException.class);
+    }
+
+    @Test
+    void verify_empty_nullErrorSupplierGivesNPE() {
+        OptionalResult<String, String> result = OptionalResult.empty();
         assertThatThrownBy(() -> result.verifyValue(val -> true, (Function<String, ? extends String>) null))
                 .isInstanceOf(NullPointerException.class);
     }

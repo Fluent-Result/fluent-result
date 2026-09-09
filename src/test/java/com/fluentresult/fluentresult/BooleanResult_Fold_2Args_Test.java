@@ -14,4 +14,11 @@ class BooleanResult_Fold_2Args_Test {
                 err -> err);
         assertThat(folded).isEqualTo(7);
     }
+
+    @Test
+    void fold_error_shouldGiveErrorValueFunctionResult() {
+        BooleanResult<String> result = BooleanResult.error("Error");
+        String folded = result.fold(value -> (!value) + "", error -> error);
+        assertThat(folded).isEqualTo("Error");
+    }
 }

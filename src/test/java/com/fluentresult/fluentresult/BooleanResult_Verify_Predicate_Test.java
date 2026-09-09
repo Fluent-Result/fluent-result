@@ -31,6 +31,18 @@ class BooleanResult_Verify_Predicate_Test {
     }
 
     @Test
+    void verify_predicate_error_shouldSaySelf() {
+        BooleanResult<String> result = BooleanResult.error("Error")
+                .verify(
+                        val -> !val,
+                        (b) -> "ValidationError " + b);
+        result.consumeEither(
+                () -> fail("Should not be true"),
+                () -> fail("Should not be false"),
+                err -> {});
+    }
+
+    @Test
     void verify_predicate_success_shouldChangeToProvidedErrorWhenVerifiedFalse() {
         BooleanResult<String> result = BooleanResult.<String>success(true)
                 .verify(

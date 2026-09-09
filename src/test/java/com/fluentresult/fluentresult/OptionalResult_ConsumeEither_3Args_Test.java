@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -26,14 +27,15 @@ class OptionalResult_ConsumeEither_3Args_Test {
 
     @Test
     void consumeEither_3Args_empty_shouldRunEmptyRunnableConsumer() {
+        List<String> resultList = new ArrayList<>();
+
         OptionalResult<String, String> result = OptionalResult.empty();
-        List<String> holder = new ArrayList<>();
         OptionalResult<String, String> finalResult = result.consumeEither(
                 val -> { throw new RuntimeException(); },
-                () -> holder.add("value"),
+                () -> resultList.add("Empty"),
                 err -> { throw new RuntimeException(); });
         assertThat(finalResult).isNotNull();
-        assertThat(holder).isEqualTo(Collections.singletonList("value"));
+        assertThat(resultList).isEqualTo(List.of("Empty"));
     }
 
     @Test

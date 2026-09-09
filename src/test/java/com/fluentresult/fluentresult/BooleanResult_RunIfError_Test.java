@@ -19,4 +19,14 @@ class BooleanResult_RunIfError_Test {
         assertThat(resultList.get(0)).isEqualTo("Ran");
         assertThat(finalResult).isNotNull();
     }
+
+    @Test
+    void runIfError_success_consumerShouldNotRun() {
+        List<String> resultList = new ArrayList<>();
+        BooleanResult<String> result = BooleanResult.success(true);
+        BooleanResult<String> finalResult =
+                result.runIfError(() -> resultList.add("Ran"));
+        assertThat(resultList.size()).isZero();
+        assertThat(finalResult).isNotNull();
+    }
 }

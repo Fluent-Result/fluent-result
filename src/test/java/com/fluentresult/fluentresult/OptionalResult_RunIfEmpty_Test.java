@@ -14,7 +14,8 @@ class OptionalResult_RunIfEmpty_Test {
     void runIfEmpty_success_consumerShouldNotRun() {
         List<String> resultList = new ArrayList<>();
         OptionalResult<String, String> result = OptionalResult.success("Success");
-        result.runIfEmpty(() -> resultList.add("Ran"));
+        OptionalResult<String, String> ifEmpty = result.runIfEmpty(() -> resultList.add("Ran"));
+        assertThat(ifEmpty).isNotNull();
         assertThat(resultList).isEmpty();
     }
 
@@ -33,7 +34,8 @@ class OptionalResult_RunIfEmpty_Test {
     void runIfEmpty_error_consumerShouldNotRun() {
         List<String> resultList = new ArrayList<>();
         OptionalResult<String, String> result = OptionalResult.error("Error");
-        result.runIfEmpty(() -> resultList.add("Ran"));
+        OptionalResult<String, String> ifEmpty = result.runIfEmpty(() -> resultList.add("Ran"));
+        assertThat(ifEmpty).isNotNull();
         assertThat(resultList).isEmpty();
     }
 
