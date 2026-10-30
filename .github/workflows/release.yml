@@ -1,4 +1,4 @@
-name: Build Fluent Result
+name: Release Fluent Result
 on:
   workflow_dispatch:  # Allows manual triggering
 
