@@ -16,7 +16,7 @@ release:
     owner: fluent-result
     name: fluent-result
     overwrite: true
-    tagName: '{{projectName}}-{{projectVersion}}'
+    tagName: 'v{{projectVersion}}'
     skipTag: true          # the workflow creates and pushes the tag itself
     changelog:
       formatted: ALWAYS
