@@ -3,7 +3,7 @@
 
     <groupId>com.fluentresult</groupId>
     <artifactId>fluent-result</artifactId>
-    <version>1.7.0-SNAPSHOT</version>
+    <version>1.7.0</version>
     <name>Fluent Result</name>
     <description>A result library helping you get rid of your exceptions, handling errors in a more fluent way.</description>
     <url>https://github.com/fluent-result/fluent-result</url>
