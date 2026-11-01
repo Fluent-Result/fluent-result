@@ -1194,7 +1194,6 @@ public sealed interface OptionalResult<T, E> {
             return voidResult.fold(() -> this, OptionalResult::error);
         }
 
-        @SuppressWarnings("unchecked")
         @Override
         public OptionalResult<S, ERR> verify(Predicate<Optional<S>> predicate, Supplier<? extends ERR> errorSupplier) {
             Objects.requireNonNull(errorSupplier);
@@ -1330,21 +1329,25 @@ public sealed interface OptionalResult<T, E> {
             return safeCast();
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public <N> OptionalResult<N, ERR> mapValue(Function<? super S, ? extends N> function) {
             return (OptionalResult<N, ERR>) this;
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public <N> OptionalResult<N, ERR> mapValueToOptional(Function<? super S, Optional<N>> function) {
             return (OptionalResult<N, ERR>) this;
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public <N> Result<N, ERR> flatMap(Function<Optional<S>, Result<? extends N, ? extends ERR>> function) {
             return (Result<N, ERR>) function.apply(Optional.empty());
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public <N> OptionalResult<N, ERR> flatMapToOptionalResult(Function<Optional<S>, OptionalResult<? extends N, ? extends ERR>> function) {
             return (OptionalResult<N, ERR>) function.apply(Optional.empty());
@@ -1364,12 +1367,14 @@ public sealed interface OptionalResult<T, E> {
             return Objects.requireNonNull(supplier.get());
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public BooleanResult<ERR> flatMapToBooleanResult(Function<Optional<? extends S>, BooleanResult<? extends ERR>> function) {
             Objects.requireNonNull(function);
             return (BooleanResult<ERR>) function.apply(Optional.empty());
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public VoidResult<ERR> flatMapToVoidResult(Function<Optional<? extends S>, VoidResult<? extends ERR>> function) {
             Objects.requireNonNull(function);
@@ -1400,6 +1405,7 @@ public sealed interface OptionalResult<T, E> {
             return safeCast();
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public <N> OptionalResult<N, ERR> flatRecover(Function<ERR, OptionalResult<? extends N, ? extends ERR>> function) {
             Objects.requireNonNull(function);
@@ -1699,10 +1705,10 @@ public sealed interface OptionalResult<T, E> {
             return OptionalResult.success(function.apply(error));
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public <N> OptionalResult<N, ERR> flatRecover(Function<ERR, OptionalResult<? extends N, ? extends ERR>> function) {
             Objects.requireNonNull(function);
-
             return (OptionalResult<N, ERR>) function.apply(error);
         }
 

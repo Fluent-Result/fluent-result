@@ -396,21 +396,25 @@ public sealed interface VoidResult<E> {
             return BooleanResult.success(supplier.get());
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public <N> Result<N, ERR> flatReplace(Supplier<Result<? extends N, ? extends ERR>> supplier) {
             return (Result<N, ERR>) supplier.get();
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public <N> OptionalResult<N, ERR> flatReplaceToOptionalResult(Supplier<OptionalResult<? extends N, ? extends ERR>> supplier) {
             return (OptionalResult<N, ERR>) supplier.get();
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public BooleanResult<ERR> flatReplaceToBooleanResult(Supplier<BooleanResult<? extends ERR>> supplier) {
             return (BooleanResult<ERR>) supplier.get();
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public VoidResult<ERR> flatReplaceToVoidResult(Supplier<VoidResult<? extends ERR>> supplier) {
             return (VoidResult<ERR>) supplier.get();
@@ -460,6 +464,7 @@ public sealed interface VoidResult<E> {
             return safeCast();
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public VoidResult<ERR> flatRunIfSuccess(Supplier<? extends VoidResult<? extends ERR>> supplier) {
             return (VoidResult<ERR>) Objects.requireNonNull(supplier.get());
@@ -538,6 +543,7 @@ public sealed interface VoidResult<E> {
             return VoidResult.success();
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public VoidResult<ERR> flatRecover(Function<ERR, VoidResult<? extends ERR>> function) {
             return (VoidResult<ERR>) function.apply(error);
@@ -599,9 +605,8 @@ public sealed interface VoidResult<E> {
             return OptionalResult.error(error);
         }
 
-        @SuppressWarnings("unchecked")
         private Error<ERR> safeCast() {
-            return (Error<ERR>) this;
+            return this;
         }
 
     }

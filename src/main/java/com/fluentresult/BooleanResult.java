@@ -670,21 +670,25 @@ public sealed interface BooleanResult<E> {
             return safeCast();
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public <N> Result<N, ERR> flatMap(Function<Boolean, Result<? extends N, ? extends ERR>> function) {
             return (Result<N, ERR>) function.apply(value);
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public <N> OptionalResult<N, ERR> flatMapToOptionalResult(Function<Boolean, OptionalResult<? extends N, ? extends ERR>> function) {
             return (OptionalResult<N, ERR>) function.apply(value);
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public BooleanResult<ERR> flatMapToBooleanResult(Function<Boolean, BooleanResult<? extends ERR>> function) {
             return (BooleanResult<ERR>) function.apply(value);
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public VoidResult<ERR> flatMapToVoidResult(Function<Boolean, VoidResult<? extends ERR>> function) {
             return (VoidResult<ERR>) function.apply(value);
@@ -924,6 +928,7 @@ public sealed interface BooleanResult<E> {
             return BooleanResult.success(function.apply(error));
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public BooleanResult<ERR> flatRecover(Function<ERR, BooleanResult<? extends ERR>> function) {
             return (BooleanResult<ERR>) function.apply(error);
