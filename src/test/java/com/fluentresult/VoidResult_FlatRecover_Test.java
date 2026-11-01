@@ -28,4 +28,14 @@ class VoidResult_FlatRecover_Test {
                         err -> fail("Should not be error")
                 );
     }
+    @Test
+    void flatFlatRecover_error_change_error_type() {
+        VoidResult<String> result1 = VoidResult.error("Error");
+        VoidResult<Integer> result2 = result1
+                .flatRecover(error -> VoidResult.error(error.length()))
+                .consumeEither(
+                        () -> fail("Should not be error"),
+                        err -> {}
+                );
+    }
 }

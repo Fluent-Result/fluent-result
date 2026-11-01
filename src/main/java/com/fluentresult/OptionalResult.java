@@ -412,14 +412,14 @@ public sealed interface OptionalResult<T, E> {
      *
      * @param function the mapping function to apply to the error value to
      * convert to a new {@code OptionalResult}, if error state
-     * @param <N> the type of success value which may be present in the
+     * @param <F> the type of error value which may be present in the
      * {@code OptionalResult} returned by the mapping function
      * @return the {@code OptionalResult} returned from the mapping function, if
      * in error state, otherwise the unaltered {@code OptionalResult} in success
      * state
      */
-    <N> OptionalResult<N, E> flatRecover(
-            Function<E, OptionalResult<? extends N, ? extends E>> function);
+    <F> OptionalResult<T, F> flatRecover(
+            Function<? super E, ? extends OptionalResult<? extends T, ? extends F>> function);
 
     /**
      * If in success state, applies the optional success value to the given
@@ -1084,11 +1084,10 @@ public sealed interface OptionalResult<T, E> {
             return safeCast();
         }
 
-        @SuppressWarnings("unchecked")
         @Override
-        public <N> OptionalResult<N, ERR> flatRecover(Function<ERR, OptionalResult<? extends N, ? extends ERR>> function) {
+        public <F> OptionalResult<S, F> flatRecover(Function<? super ERR, ? extends OptionalResult<? extends S, ? extends F>> function) {
             Objects.requireNonNull(function);
-            return (OptionalResult<N, ERR>) this;
+            return safeCast();
         }
 
         @Override
@@ -1405,11 +1404,10 @@ public sealed interface OptionalResult<T, E> {
             return safeCast();
         }
 
-        @SuppressWarnings("unchecked")
         @Override
-        public <N> OptionalResult<N, ERR> flatRecover(Function<ERR, OptionalResult<? extends N, ? extends ERR>> function) {
+        public <F> OptionalResult<S, F> flatRecover(Function<? super ERR, ? extends OptionalResult<? extends S, ? extends F>> function) {
             Objects.requireNonNull(function);
-            return (OptionalResult<N, ERR>) this;
+            return safeCast();
         }
 
         @Override
@@ -1707,9 +1705,9 @@ public sealed interface OptionalResult<T, E> {
 
         @SuppressWarnings("unchecked")
         @Override
-        public <N> OptionalResult<N, ERR> flatRecover(Function<ERR, OptionalResult<? extends N, ? extends ERR>> function) {
+        public <F> OptionalResult<S, F> flatRecover(Function<? super ERR, ? extends OptionalResult<? extends S, ? extends F>> function) {
             Objects.requireNonNull(function);
-            return (OptionalResult<N, ERR>) function.apply(error);
+            return (OptionalResult<S, F>) function.apply(error);
         }
 
         @Override

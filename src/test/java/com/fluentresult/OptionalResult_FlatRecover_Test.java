@@ -32,7 +32,21 @@ class OptionalResult_FlatRecover_Test {
     @Test
     void flatRecover_empty_notNull() {
         OptionalResult<Integer, String> result = OptionalResult.empty();
-        OptionalResult<String, String> flatRecovered = result.flatRecover(s -> OptionalResult.success(s.toLowerCase()));
+        OptionalResult<Integer, String> flatRecovered = result.flatRecover(s -> OptionalResult.success(s.length()));
         assertThat(flatRecovered).isNotNull();
+    }
+
+    @Test
+    void flatRevover_success_change_error_type() {
+        OptionalResult<Integer, String> result = OptionalResult.success(1);
+        OptionalResult<Integer, Integer> result2 = result.flatRecover(e -> OptionalResult.success(e.length()));
+        assertThat(result2).isNotNull();
+    }
+
+    @Test
+    void flatRevover_error_change_error_type() {
+        OptionalResult<Integer, String> result = OptionalResult.error("1");
+        OptionalResult<Integer, Integer> result2 = result.flatRecover(e -> OptionalResult.success(e.length()));
+        assertThat(result2).isNotNull();
     }
 }

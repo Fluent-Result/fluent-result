@@ -194,8 +194,8 @@ public sealed interface VoidResult<E> {
      * @return the {@code VoidResult} returned from the mapping function, if in
      * error state, otherwise the unaltered {@code VoidResult} in success state
      */
-    VoidResult<E> flatRecover(
-            Function<E, VoidResult<? extends E>> function);
+    <F> VoidResult<F> flatRecover(
+            Function<? super E, ? extends VoidResult<? extends F>> function);
 
     /**
      * If in error state, applies the error value to the given consumer,
@@ -426,7 +426,8 @@ public sealed interface VoidResult<E> {
         }
 
         @Override
-        public VoidResult<ERR> flatRecover(Function<ERR, VoidResult<? extends ERR>> function) {
+        public <F> VoidResult<F> flatRecover(Function<? super ERR, ? extends VoidResult<? extends F>> function) {
+            Objects.requireNonNull(function);
             return safeCast();
         }
 
@@ -545,8 +546,9 @@ public sealed interface VoidResult<E> {
 
         @SuppressWarnings("unchecked")
         @Override
-        public VoidResult<ERR> flatRecover(Function<ERR, VoidResult<? extends ERR>> function) {
-            return (VoidResult<ERR>) function.apply(error);
+        public <F> VoidResult<F> flatRecover(Function<? super ERR, ? extends VoidResult<? extends F>> function) {
+            Objects.requireNonNull(function);
+            return (VoidResult<F>) function.apply(error);
         }
 
         @Override

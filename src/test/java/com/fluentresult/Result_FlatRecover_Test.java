@@ -26,4 +26,14 @@ class Result_FlatRecover_Test {
                         err -> fail("Should not be error")
                 );
     }
+
+    @Test
+    void flatRecover_change_error_type() {
+        Result<String, String> result = Result.error("Error");
+        Result<String, Integer> result2 = result.flatRecover(error -> Result.error(error.length()))
+                .consumeEither(
+                        value -> fail("should be error"),
+                        err -> { }
+                );
+    }
 }
