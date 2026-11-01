@@ -2,14 +2,16 @@ project:
   name: fluent-result
   description: A result library helping you get rid of your exceptions, handling errors in a more fluent way.
   longDescription: A result library helping you get rid of your exceptions, handling errors in a more fluent way.
-  website: https://github.com/fluent-result/fluent-result
+  links:
+    homepage: https://github.com/fluent-result/fluent-result
   license: MIT
   authors:
     - Gøran Dalum
     - Marvin Bredal Lillehaug
-  java:
-    groupId: com.fluent-result
-    version: '8'
+  languages:
+    java:
+      groupId: com.fluent-result
+      version: '8'
 
 release:
   github:
@@ -17,14 +19,15 @@ release:
     name: fluent-result
     overwrite: true
     tagName: 'v{{projectVersion}}'
-    skipTag: true          # the workflow creates and pushes the tag itself
+    skipTag: true
     changelog:
       formatted: ALWAYS
 
 signing:
   active: ALWAYS
-  armored: true
-  mode: MEMORY
+  pgp:
+    armored: true
+    mode: MEMORY
 
 deploy:
   maven:
