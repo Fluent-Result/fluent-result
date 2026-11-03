@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] - 2026-11-03
+### Changed
+- **Package name change** base package changed from `com.fluentresult.fluentresult` to `com.fluentresult`.
+
 ## [1.7.0] - 2026-10-31
 ### Changed
 - **Namespace Migration:** This project has been moved to a new GitHub repository and a new Maven Central group ID:
@@ -64,6 +68,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Renamed `flatten` to `toResult`
 
+[1.8.0]: https://github.com/fluent-result/fluent-result/compare/v1.7.0...v1.8.0
 [1.7.0]: https://github.com/fluent-result/fluent-result/compare/v1.6.0...v1.7.0
 [1.6.0]: https://github.com/gorandalum/fluent-result/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/gorandalum/fluent-result/compare/v1.4.0...v1.5.0
