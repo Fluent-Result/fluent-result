@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.1.0">
 
     <groupId>com.fluentresult</groupId>
     <artifactId>fluent-result</artifactId>
@@ -91,6 +90,27 @@
                 </configuration>
             </plugin>
         </plugins>
+     <!--   <sources>
+            <source>
+                <targetVersion>21</targetVersion>
+            </source>
+        </sources>-->
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>4.0.0-beta-3</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>4.0.0-beta-2</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>4.0.0-beta-5</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
 
     <profiles>
