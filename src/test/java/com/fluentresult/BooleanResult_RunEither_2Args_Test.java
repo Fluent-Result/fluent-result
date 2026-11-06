@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.fail;
 
 class BooleanResult_RunEither_2Args_Test {
 
@@ -19,5 +20,18 @@ class BooleanResult_RunEither_2Args_Test {
         assertThat(resultList).hasSize(1);
         assertThat(resultList.get(0)).isEqualTo("Run1");
         assertThat(finalResult).isNotNull();
+    }
+
+    @Test
+    void runEither_twoArgs_error_notNull() {
+        List<String> resultList = new ArrayList<>();
+
+        BooleanResult<String> result = BooleanResult.error("Error")
+                .runEither(
+                        () -> fail("Expected error"),
+                        () -> resultList.add("Run1")
+                );
+        assertThat(result).isNotNull();
+        assertThat(resultList).isEqualTo(List.of("Run1"));
     }
 }

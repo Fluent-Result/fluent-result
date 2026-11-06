@@ -21,4 +21,27 @@ class OptionalResult_RunEither_2Args_Test {
         assertThat(resultList.get(0)).isEqualTo("Run1");
         assertThat(finalResult).isNotNull();
     }
+
+    @Test
+    void runEither_twoArgs_empty_successRunnableShouldRun() {
+        List<String> resultList = new ArrayList<>();
+        OptionalResult<String, String> result = OptionalResult.empty();
+        OptionalResult<String, String> finalResult = result.runEither(
+                () -> resultList.add("Run1"),
+                () -> resultList.add("Run2"));
+        assertThat(resultList).hasSize(1);
+        assertThat(resultList.get(0)).isEqualTo("Run1");
+        assertThat(finalResult).isNotNull();
+    }
+
+    @Test
+    void runEither_twoArgs_error_successRunnableShouldRun() {
+        List<String> resultList = new ArrayList<>();
+        OptionalResult<String, String> result = OptionalResult.error("Error");
+        OptionalResult<String, String> finalResult = result.runEither(
+                () -> resultList.add("Run1"),
+                () -> resultList.add("Run2"));
+        assertThat(resultList).isEqualTo(List.of("Run2"));
+        assertThat(finalResult).isNotNull();
+    }
 }

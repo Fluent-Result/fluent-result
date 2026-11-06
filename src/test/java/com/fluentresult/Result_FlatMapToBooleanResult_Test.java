@@ -16,4 +16,11 @@ class Result_FlatMapToBooleanResult_Test {
                         err -> fail("Should not be error")
                 );
     }
+
+    @Test
+    void flatMapToBooleanResult_error_notNull() {
+        BooleanResult<String> result = Result.error("Error")
+                .flatMapToBooleanResult(o -> BooleanResult.error("Success"));
+        assertThat(result).isNotNull();
+    }
 }

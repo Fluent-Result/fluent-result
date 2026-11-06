@@ -18,4 +18,10 @@ class Result_FlatMapToOptionalResult_Test {
                 );
     }
 
+    @Test
+    void flatMapToOptionalResult_error_notNull() {
+        OptionalResult<String, String> result = Result.error("Error")
+                .flatMapToOptionalResult(o -> OptionalResult.success("Success"));
+        assertThat(result).isNotNull();
+    }
 }

@@ -11,6 +11,10 @@ class BooleanResult_OrElse_Test {
         BooleanResult<Object> result = BooleanResult.success(true);
         Boolean orElse = result.orElse(false);
         assertThat(orElse).isTrue();
+
+        result = BooleanResult.success(false);
+        orElse = result.orElse(true);
+        assertThat(orElse).isFalse();
     }
 
     @Test
@@ -18,5 +22,8 @@ class BooleanResult_OrElse_Test {
         BooleanResult<String> result = BooleanResult.error("Error");
         Boolean orElse = result.orElse(false);
         assertThat(orElse).isFalse();
+        orElse = result.orElse(true);
+        assertThat(orElse).isTrue();
     }
+
 }

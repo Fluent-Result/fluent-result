@@ -19,4 +19,23 @@ class BooleanResult_MapToOptional_Test {
                 () -> fail("Should not be empty"),
                 err -> fail("Should not be error"));
     }
+
+    @Test
+    void mapToOptional_error_noNull() {
+        OptionalResult<Integer, String> result =
+                BooleanResult.error("Error")
+                        .mapToOptional(val -> Optional.of(val ? 5 : 3));
+        assertThat(result).isNotNull();
+        switch (result) {
+            case OptionalResult.Empty<Integer, String> v -> {
+                fail("Should be error");
+            }
+            case OptionalResult.Error<Integer, String>(String e) -> {
+                assertThat(e).isEqualTo("Error");
+            }
+            case OptionalResult.Value<Integer, String> v -> {
+                fail("Should be error");
+            }
+        }
+    }
 }

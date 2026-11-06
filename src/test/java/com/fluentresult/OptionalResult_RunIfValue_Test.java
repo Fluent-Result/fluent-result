@@ -5,8 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 
 class OptionalResult_RunIfValue_Test {
 
@@ -25,7 +24,8 @@ class OptionalResult_RunIfValue_Test {
     void run_empty_consumerShouldNotRun() {
         List<String> resultList = new ArrayList<>();
         OptionalResult<String, String> result = OptionalResult.empty();
-        result.runIfValue(() -> resultList.add("Ran"));
+        OptionalResult<String, String> runIfValue = result.runIfValue(() -> resultList.add("Ran"));
+        assertThat(runIfValue).isNotNull();
         assertThat(resultList).isEmpty();
     }
 
@@ -42,5 +42,12 @@ class OptionalResult_RunIfValue_Test {
         OptionalResult<String, String> result = OptionalResult.success("Success");
         assertThatThrownBy(() -> result.runIfValue(null))
                 .isInstanceOf(NullPointerException.class);
+    }
+
+    @Test
+    void runIfValue_error_consumerShoulNotdRun() {
+        OptionalResult<String, String> result = OptionalResult.error("Error");
+        OptionalResult<String, String> consumedEither = result.runIfValue(() -> fail("Expected error"));
+        assertThat(consumedEither).isNotNull();
     }
 }

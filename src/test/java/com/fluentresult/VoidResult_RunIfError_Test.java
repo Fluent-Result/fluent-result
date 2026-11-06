@@ -19,4 +19,11 @@ class VoidResult_RunIfError_Test {
         assertThat(resultList.get(0)).isEqualTo("Ran");
         assertThat(finalResult).isNotNull();
     }
+
+    @Test
+    void runIfError_success_notNull() {
+        VoidResult<Object> result = VoidResult.success()
+                .runIfError(() -> fail("Expected success"));
+        assertThat(result).isNotNull();
+    }
 }

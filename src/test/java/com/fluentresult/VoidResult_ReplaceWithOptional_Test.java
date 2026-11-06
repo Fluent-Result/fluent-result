@@ -19,4 +19,11 @@ class VoidResult_ReplaceWithOptional_Test {
                 () -> fail("Should not be empty"),
                 err -> fail("Expected no error"));
     }
+
+    @Test
+    void replaceWithOptional_error_notNull() {
+        VoidResult<String> result = VoidResult.error("Error");
+        OptionalResult<String, String> replaced = result.replaceWithOptional(() -> Optional.of("Replaced"));
+        assertThat(replaced).isNotNull();
+    }
 }

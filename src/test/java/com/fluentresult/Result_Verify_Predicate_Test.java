@@ -38,6 +38,15 @@ class Result_Verify_Predicate_Test {
     }
 
     @Test
+    void verify_predicate_success_shouldChangeToProvidedFunctionErrorWhenVerifiedTrue() {
+        Result<String, String> result = Result.<String, String>success("Success")
+                .verify(val -> !val.isEmpty(), (s) -> "ValidationError " + s);
+        result.consumeEither(
+                val -> {},
+                err -> fail("Expected failure"));
+    }
+
+    @Test
     void verify_predicate_error_shouldKeepOriginalError() {
         Result<String, String> result = Result.<String, String>error("Error")
                 .verify(val -> val.length() == 5, () -> "ValidationError");

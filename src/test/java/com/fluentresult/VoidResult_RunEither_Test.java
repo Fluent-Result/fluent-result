@@ -22,4 +22,16 @@ class VoidResult_RunEither_Test {
         assertThat(resultList.get(0)).isEqualTo("Ran");
         assertThat(finalResult).isNotNull();
     }
+
+    @Test
+    void runEither_error_errorRunnableShouldRun() {
+        List<String> resultList = new ArrayList<>();
+
+        VoidResult<String> result = VoidResult.error("Error")
+                .runEither(
+                        () -> fail("Expected error"),
+                        () -> resultList.add("Ran"));
+        assertThat(result).isNotNull();
+        assertThat(resultList).isEqualTo(List.of("Ran"));
+    }
 }
