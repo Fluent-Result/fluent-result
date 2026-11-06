@@ -241,9 +241,8 @@ public sealed interface BooleanResult<E> {
      * in error state, otherwise the unaltered {@code BooleanResult} in success
      * state
      */
-    BooleanResult<E> flatRecover(
-            Function<E, BooleanResult<? extends E>> function);
-
+    <F> BooleanResult<F> flatRecover(
+            Function<? super E, ? extends BooleanResult<? extends F>> function);
     /**
      * If in success state, applies the boolean success value to the given
      * consumer, otherwise does nothing.
@@ -700,7 +699,8 @@ public sealed interface BooleanResult<E> {
         }
 
         @Override
-        public BooleanResult<ERR> flatRecover(Function<ERR, BooleanResult<? extends ERR>> function) {
+        public <F> BooleanResult<F> flatRecover(Function<? super ERR, ? extends BooleanResult<? extends F>> function) {
+            Objects.requireNonNull(function);
             return safeCast();
         }
 
@@ -930,8 +930,8 @@ public sealed interface BooleanResult<E> {
 
         @SuppressWarnings("unchecked")
         @Override
-        public BooleanResult<ERR> flatRecover(Function<ERR, BooleanResult<? extends ERR>> function) {
-            return (BooleanResult<ERR>) function.apply(error);
+        public <F> BooleanResult<F> flatRecover(Function<? super ERR, ? extends BooleanResult<? extends F>> function) {
+            return (BooleanResult<F>) function.apply(error);
         }
 
         @Override

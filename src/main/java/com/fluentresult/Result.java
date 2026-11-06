@@ -204,14 +204,13 @@ public sealed interface Result<T, E> {
      *
      * @param function the mapping function to apply to the error value to
      * convert to a new {@code Result}, if error state
-     * @param <N> the type of success value which may be present in the
+     * @param <F> the type of error value which may be present in the
      * {@code Result} returned by the mapping function
      * @return the {@code Result} returned from the mapping function, if in
      * error state, otherwise the unaltered {@code Result} in success state
      */
-    <N> Result<N, E> flatRecover(
-            Function<E, Result<? extends N, ? extends E>> function);
-
+    <F> Result<T, F> flatRecover(
+            Function<? super E, ? extends Result<? extends T, ? extends F>> function);
     /**
      * If in success state, applies the success value to the given consumer,
      * otherwise does nothing.
@@ -567,8 +566,9 @@ public sealed interface Result<T, E> {
 
         @SuppressWarnings("unchecked")
         @Override
-        public <N> Result<N, ERR> flatRecover(Function<ERR, Result<? extends N, ? extends ERR>> function) {
-            return (Result<N, ERR>) this;
+        public <F> Result<S, F> flatRecover(Function<? super ERR, ? extends Result<? extends S, ? extends F>> function) {
+            Objects.requireNonNull(function);
+            return (Result<S, F>) this;
         }
 
         @Override
@@ -764,8 +764,9 @@ public sealed interface Result<T, E> {
 
         @SuppressWarnings("unchecked")
         @Override
-        public <N> Result<N, ERR> flatRecover(Function<ERR, Result<? extends N, ? extends ERR>> function) {
-            return (Result<N, ERR>) function.apply(error);
+        public <F> Result<S, F> flatRecover(Function<? super ERR, ? extends Result<? extends S, ? extends F>> function) {
+            Objects.requireNonNull(function);
+            return (Result<S, F>) function.apply(error);
         }
 
         @Override
