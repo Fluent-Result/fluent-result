@@ -200,7 +200,7 @@ final class Implementations {
                 errorConstructor.apply(instance.error());
     }
 
-    static <T, E, N, NR extends BaseResult<? extends N, ? extends E>, R extends BaseResult<T, E>> NR flatRecover(
+    static <T, E, NR extends BaseResult<?, ?>, R extends BaseResult<T, E>> NR flatRecover(
             Function<? super E, ? extends NR> function,
             R instance) {
         Objects.requireNonNull(function);
@@ -210,7 +210,7 @@ final class Implementations {
             NR res = (NR) instance;
             return res;
         } else {
-            return function.apply(instance.error());
+            return Objects.requireNonNull(function.apply(instance.error()));
         }
     }
 

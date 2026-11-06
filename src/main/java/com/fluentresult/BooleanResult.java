@@ -298,10 +298,10 @@ public final class BooleanResult<E> extends BaseResult<Boolean, E> {
      * in error state, otherwise the unaltered {@code BooleanResult} in success
      * state
      */
-    public BooleanResult<E> flatRecover(
-            Function<E, BooleanResult<? extends E>> function) {
+    public <F> BooleanResult<F> flatRecover(
+            Function<? super E, ? extends BooleanResult<? extends F>> function) {
         @SuppressWarnings("unchecked")
-        BooleanResult<E> res = (BooleanResult<E>) Implementations.flatRecover(
+        BooleanResult<F> res = (BooleanResult<F>) Implementations.flatRecover(
                 val -> function.apply(error()),
                 this);
         return res;

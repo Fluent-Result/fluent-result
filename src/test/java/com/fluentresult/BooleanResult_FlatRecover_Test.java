@@ -10,8 +10,8 @@ class BooleanResult_FlatRecover_Test {
     @Test
     void flatRecover_success_shouldRemainExistingSuccess() {
         BooleanResult<String> result = BooleanResult.success(false);
-        BooleanResult<String> shouldNotBeError = result.flatRecover(error -> BooleanResult.success(true))
-                .consumeEither(
+        BooleanResult<String> shouldNotBeError = result.flatRecover(error -> BooleanResult.success(true));
+        shouldNotBeError.consumeEither(
                         value -> assertThat(value).isEqualTo(false),
                         err -> fail("Should not be error")
                 );

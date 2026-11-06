@@ -517,12 +517,10 @@ public final class OptionalResult<T, E> extends BaseResult<Optional<T>, E> {
      * in error state, otherwise the unaltered {@code OptionalResult} in success
      * state
      */
-    public <N> OptionalResult<N, E> flatRecover(
-            Function<E, OptionalResult<? extends N, ? extends E>> function) {
+    public <F> OptionalResult<T, F> flatRecover(
+            Function<? super E, ? extends OptionalResult<? extends T, ? extends F>> function) {
         @SuppressWarnings("unchecked")
-        OptionalResult<N, E> res = (OptionalResult<N, E>) Implementations.flatRecover(
-                val -> function.apply(error()),
-                this);
+        OptionalResult<T, F> res = (OptionalResult<T, F>) Implementations.flatRecover(function, this);
         return res;
     }
 
