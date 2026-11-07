@@ -243,7 +243,7 @@ public sealed interface OptionalResult<T, E> {
      * {@code null} or returns {@code null}
      */
     <N> Result<N, E> flatMap(
-            Function<Optional<T>, Result<? extends N, ? extends E>> function);
+            Function<Optional<? extends T>, Result<? extends N, ? extends E>> function);
 
     /**
      * If in success state, returns the {@code OptionalResult} from applying
@@ -261,7 +261,7 @@ public sealed interface OptionalResult<T, E> {
      * {@code null} or returns {@code null}
      */
     <N> OptionalResult<N, E> flatMapToOptionalResult(
-            Function<Optional<T>, OptionalResult<? extends N, ? extends E>> function);
+            Function<Optional<? extends T>, OptionalResult<? extends N, ? extends E>> function);
 
     /**
      * If in empty success state, returns the {@code OptionalResult} provided by
@@ -1043,7 +1043,7 @@ public sealed interface OptionalResult<T, E> {
         @SuppressWarnings("unchecked")
         @Override
         public <N> Result<N, ERR> flatMap(
-                Function<Optional<S>, Result<? extends N, ? extends ERR>> function) {
+                Function<Optional<? extends S>, Result<? extends N, ? extends ERR>> function) {
             Objects.requireNonNull(function);
             return (Result<N, ERR>) Objects.requireNonNull(function.apply(Optional.of(value)));
         }
@@ -1051,7 +1051,7 @@ public sealed interface OptionalResult<T, E> {
         @SuppressWarnings("unchecked")
         @Override
         public <N> OptionalResult<N, ERR> flatMapToOptionalResult(
-                Function<Optional<S>, OptionalResult<? extends N, ? extends ERR>> function) {
+                Function<Optional<? extends S>, OptionalResult<? extends N, ? extends ERR>> function) {
             Objects.requireNonNull(function);
             return (OptionalResult<N, ERR>) Objects.requireNonNull(
                     function.apply(Optional.of(value)));
@@ -1441,7 +1441,7 @@ public sealed interface OptionalResult<T, E> {
         @SuppressWarnings("unchecked")
         @Override
         public <N> Result<N, ERR> flatMap(
-                Function<Optional<S>, Result<? extends N, ? extends ERR>> function) {
+                Function<Optional<? extends S>, Result<? extends N, ? extends ERR>> function) {
             Objects.requireNonNull(function);
             return (Result<N, ERR>) Objects.requireNonNull(function.apply(Optional.empty()));
         }
@@ -1449,7 +1449,7 @@ public sealed interface OptionalResult<T, E> {
         @SuppressWarnings("unchecked")
         @Override
         public <N> OptionalResult<N, ERR> flatMapToOptionalResult(
-                Function<Optional<S>, OptionalResult<? extends N, ? extends ERR>> function) {
+                Function<Optional<? extends S>, OptionalResult<? extends N, ? extends ERR>> function) {
             Objects.requireNonNull(function);
             return (OptionalResult<N, ERR>) Objects.requireNonNull(
                     function.apply(Optional.empty()));
@@ -1824,14 +1824,14 @@ public sealed interface OptionalResult<T, E> {
 
         @Override
         public <N> Result<N, ERR> flatMap(
-                Function<Optional<S>, Result<? extends N, ? extends ERR>> function) {
+                Function<Optional<? extends S>, Result<? extends N, ? extends ERR>> function) {
             Objects.requireNonNull(function);
             return Result.error(error);
         }
 
         @Override
         public <N> OptionalResult<N, ERR> flatMapToOptionalResult(
-                Function<Optional<S>, OptionalResult<? extends N, ? extends ERR>> function) {
+                Function<Optional<? extends S>, OptionalResult<? extends N, ? extends ERR>> function) {
             Objects.requireNonNull(function);
             return OptionalResult.error(error);
         }
