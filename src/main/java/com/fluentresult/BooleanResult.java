@@ -112,7 +112,7 @@ public sealed interface BooleanResult<E> {
      * {@code null} or returns {@code null}
      */
     <N> OptionalResult<N, E> mapToOptional(
-            Function<Boolean, ? extends Optional<? extends N>> function);
+            Function<Boolean, Optional<? extends N>> function);
 
     /**
      * If in success state, returns a {@code BooleanResult} containing the
@@ -669,7 +669,7 @@ public sealed interface BooleanResult<E> {
 
         @Override
         public <N> OptionalResult<N, ERR> mapToOptional(
-                Function<Boolean, ? extends Optional<? extends N>> function) {
+                Function<Boolean, Optional<? extends N>> function) {
             Objects.requireNonNull(function);
             return OptionalResult.success(function.apply(value));
         }
@@ -957,7 +957,7 @@ public sealed interface BooleanResult<E> {
 
         @Override
         public <N> OptionalResult<N, ERR> mapToOptional(
-                Function<Boolean, ? extends Optional<? extends N>> function) {
+                Function<Boolean, Optional<? extends N>> function) {
             Objects.requireNonNull(function);
             return OptionalResult.error(error);
         }
