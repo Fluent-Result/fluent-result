@@ -96,7 +96,7 @@ public sealed interface VoidResult<E> {
      * returns {@code null}
      */
     <N> OptionalResult<N, E> replaceWithOptional(
-            Supplier<Optional<? extends N>> supplier);
+            Supplier<? extends Optional<? extends N>> supplier);
 
     /**
      * If in success state, returns a {@code BooleanResult} containing the
@@ -385,7 +385,7 @@ public sealed interface VoidResult<E> {
      * {@code null}
      */
     static <E> VoidResult<E> handle(CheckedRunnable runnable,
-                                    Function<Exception, E> exceptionMapper) {
+                                    Function<Exception, ? extends E> exceptionMapper) {
         Objects.requireNonNull(runnable);
         Objects.requireNonNull(exceptionMapper);
         return handle(runnable).mapError(exceptionMapper);
@@ -407,7 +407,7 @@ public sealed interface VoidResult<E> {
 
         @Override
         public <N> OptionalResult<N, ERR> replaceWithOptional(
-                Supplier<Optional<? extends N>> supplier) {
+                Supplier<? extends Optional<? extends N>> supplier) {
             Objects.requireNonNull(supplier);
             return OptionalResult.success(supplier.get());
         }
@@ -558,7 +558,7 @@ public sealed interface VoidResult<E> {
 
         @Override
         public <N> OptionalResult<N, ERR> replaceWithOptional(
-                Supplier<Optional<? extends N>> supplier) {
+                Supplier<? extends Optional<? extends N>> supplier) {
             Objects.requireNonNull(supplier);
             return OptionalResult.error(error);
         }
