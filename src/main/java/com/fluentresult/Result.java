@@ -88,7 +88,8 @@ public sealed interface Result<T, E> {
      * @throws NullPointerException if the given mapping function is
      * {@code null} or returns {@code null}
      */
-    <N> OptionalResult<N, E> mapToOptional(Function<? super T, Optional<? extends N>> function);
+    <N> OptionalResult<N, E> mapToOptional(
+            Function<? super T, ? extends Optional<? extends N>> function);
 
     /**
      * If in success state, returns a {@code BooleanResult} containing the
@@ -156,7 +157,7 @@ public sealed interface Result<T, E> {
      * {@code null} or returns {@code null}
      */
     <N> OptionalResult<N, E> flatMapToOptionalResult(
-            Function<? super T, OptionalResult<? extends N, ? extends E>> function);
+            Function<? super T, ? extends OptionalResult<? extends N, ? extends E>> function);
 
     /**
      * If in success state, returns the {@code BooleanResult} from applying
@@ -172,7 +173,7 @@ public sealed interface Result<T, E> {
      * {@code null} or returns {@code null}
      */
     BooleanResult<E> flatMapToBooleanResult(
-            Function<? super T, BooleanResult<? extends E>> function);
+            Function<? super T, ? extends BooleanResult<? extends E>> function);
 
     /**
      * If in success state, returns the {@code VoidResult} from applying the
@@ -188,7 +189,7 @@ public sealed interface Result<T, E> {
      * {@code null} or returns {@code null}
      */
     VoidResult<E> flatMapToVoidResult(
-            Function<? super T, VoidResult<? extends E>> function);
+            Function<? super T, ? extends VoidResult<? extends E>> function);
 
     /**
      * If in error state, returns a {@code Result} with the success value from
@@ -487,7 +488,7 @@ public sealed interface Result<T, E> {
      * @throws NullPointerException if the given callable is {@code null} or
      * returns {@code null}
      */
-    static <T> Result<T, Exception> handle(Callable<T> callable) {
+    static <T> Result<T, Exception> handle(Callable<? extends T> callable) {
         Objects.requireNonNull(callable);
         final T value;
         try {
@@ -517,11 +518,11 @@ public sealed interface Result<T, E> {
      * returns {@code null}, or if the given exception mapper function is
      * {@code null} or returns {@code null}
      */
-    static <T, E> Result<T, E> handle(Callable<T> callable,
-                                      Function<Exception, E> exceptionMapper) {
+    static <T, E> Result<T, E> handle(Callable<? extends T> callable,
+                                      Function<Exception, ? extends E> exceptionMapper) {
         Objects.requireNonNull(callable);
         Objects.requireNonNull(exceptionMapper);
-        return handle(callable).mapError(exceptionMapper);
+        return Result.<T>handle(callable).mapError(exceptionMapper);
     }
 
     record Success<S, ERR>(S value) implements Result<S, ERR> {
@@ -538,7 +539,7 @@ public sealed interface Result<T, E> {
 
         @Override
         public <N> OptionalResult<N, ERR> mapToOptional(
-                Function<? super S, Optional<? extends N>> function) {
+                Function<? super S, ? extends Optional<? extends N>> function) {
             Objects.requireNonNull(function);
             return OptionalResult.success(function.apply(value));
         }
@@ -566,7 +567,7 @@ public sealed interface Result<T, E> {
         @SuppressWarnings("unchecked")
         @Override
         public <N> OptionalResult<N, ERR> flatMapToOptionalResult(
-                Function<? super S, OptionalResult<? extends N, ? extends ERR>> function) {
+                Function<? super S, ? extends OptionalResult<? extends N, ? extends ERR>> function) {
             Objects.requireNonNull(function);
             return (OptionalResult<N, ERR>) Objects.requireNonNull(function.apply(value));
         }
@@ -574,7 +575,7 @@ public sealed interface Result<T, E> {
         @SuppressWarnings("unchecked")
         @Override
         public BooleanResult<ERR> flatMapToBooleanResult(
-                Function<? super S, BooleanResult<? extends ERR>> function) {
+                Function<? super S, ? extends BooleanResult<? extends ERR>> function) {
             Objects.requireNonNull(function);
             return (BooleanResult<ERR>) Objects.requireNonNull(function.apply(value));
         }
@@ -582,7 +583,7 @@ public sealed interface Result<T, E> {
         @SuppressWarnings("unchecked")
         @Override
         public VoidResult<ERR> flatMapToVoidResult(
-                Function<? super S, VoidResult<? extends ERR>> function) {
+                Function<? super S, ? extends VoidResult<? extends ERR>> function) {
             Objects.requireNonNull(function);
             return (VoidResult<ERR>) Objects.requireNonNull(function.apply(value));
         }
@@ -771,7 +772,7 @@ public sealed interface Result<T, E> {
 
         @Override
         public <N> OptionalResult<N, ERR> mapToOptional(
-                Function<? super S, Optional<? extends N>> function) {
+                Function<? super S, ? extends Optional<? extends N>> function) {
             Objects.requireNonNull(function);
             return OptionalResult.error(error);
         }
@@ -797,21 +798,21 @@ public sealed interface Result<T, E> {
 
         @Override
         public <N> OptionalResult<N, ERR> flatMapToOptionalResult(
-                Function<? super S, OptionalResult<? extends N, ? extends ERR>> function) {
+                Function<? super S, ? extends OptionalResult<? extends N, ? extends ERR>> function) {
             Objects.requireNonNull(function);
             return OptionalResult.error(error);
         }
 
         @Override
         public BooleanResult<ERR> flatMapToBooleanResult(
-                Function<? super S, BooleanResult<? extends ERR>> function) {
+                Function<? super S, ? extends BooleanResult<? extends ERR>> function) {
             Objects.requireNonNull(function);
             return BooleanResult.error(error);
         }
 
         @Override
         public VoidResult<ERR> flatMapToVoidResult(
-                Function<? super S, VoidResult<? extends ERR>> function) {
+                Function<? super S, ? extends VoidResult<? extends ERR>> function) {
             Objects.requireNonNull(function);
             return VoidResult.error(error);
         }
