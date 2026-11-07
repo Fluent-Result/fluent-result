@@ -131,7 +131,7 @@ public sealed interface VoidResult<E> {
      * returns {@code null}
      */
     <N> Result<N, E> flatReplace(
-            Supplier<Result<? extends N, ? extends E>> supplier);
+            Supplier<? extends Result<? extends N, ? extends E>> supplier);
 
     /**
      * If in success state, returns the {@code OptionalResult} provided by the
@@ -149,7 +149,7 @@ public sealed interface VoidResult<E> {
      * returns {@code null}
      */
     <N> OptionalResult<N, E> flatReplaceToOptionalResult(
-            Supplier<OptionalResult<? extends N, ? extends E>> supplier);
+            Supplier<? extends OptionalResult<? extends N, ? extends E>> supplier);
 
     /**
      * If in success state, returns the {@code BooleanResult} provided by the
@@ -165,7 +165,7 @@ public sealed interface VoidResult<E> {
      * returns {@code null}
      */
     BooleanResult<E> flatReplaceToBooleanResult(
-            Supplier<BooleanResult<? extends E>> supplier);
+            Supplier<? extends BooleanResult<? extends E>> supplier);
 
     /**
      * If in success state, returns the {@code VoidResult} provided by the given
@@ -180,7 +180,7 @@ public sealed interface VoidResult<E> {
      * returns {@code null}
      */
     VoidResult<E> flatReplaceToVoidResult(
-            Supplier<VoidResult<? extends E>> supplier);
+            Supplier<? extends VoidResult<? extends E>> supplier);
 
     /**
      * If in error state, returns a new {@code VoidResult} in success state,
@@ -421,7 +421,7 @@ public sealed interface VoidResult<E> {
         @SuppressWarnings("unchecked")
         @Override
         public <N> Result<N, ERR> flatReplace(
-                Supplier<Result<? extends N, ? extends ERR>> supplier) {
+                Supplier<? extends Result<? extends N, ? extends ERR>> supplier) {
             Objects.requireNonNull(supplier);
             return (Result<N, ERR>) Objects.requireNonNull(supplier.get());
         }
@@ -429,7 +429,7 @@ public sealed interface VoidResult<E> {
         @SuppressWarnings("unchecked")
         @Override
         public <N> OptionalResult<N, ERR> flatReplaceToOptionalResult(
-                Supplier<OptionalResult<? extends N, ? extends ERR>> supplier) {
+                Supplier<? extends OptionalResult<? extends N, ? extends ERR>> supplier) {
             Objects.requireNonNull(supplier);
             return (OptionalResult<N, ERR>) Objects.requireNonNull(supplier.get());
         }
@@ -437,7 +437,7 @@ public sealed interface VoidResult<E> {
         @SuppressWarnings("unchecked")
         @Override
         public BooleanResult<ERR> flatReplaceToBooleanResult(
-                Supplier<BooleanResult<? extends ERR>> supplier) {
+                Supplier<? extends BooleanResult<? extends ERR>> supplier) {
             Objects.requireNonNull(supplier);
             return (BooleanResult<ERR>) Objects.requireNonNull(supplier.get());
         }
@@ -445,7 +445,7 @@ public sealed interface VoidResult<E> {
         @SuppressWarnings("unchecked")
         @Override
         public VoidResult<ERR> flatReplaceToVoidResult(
-                Supplier<VoidResult<? extends ERR>> supplier) {
+                Supplier<? extends VoidResult<? extends ERR>> supplier) {
             Objects.requireNonNull(supplier);
             return (VoidResult<ERR>) Objects.requireNonNull(supplier.get());
         }
@@ -571,28 +571,28 @@ public sealed interface VoidResult<E> {
 
         @Override
         public <N> Result<N, ERR> flatReplace(
-                Supplier<Result<? extends N, ? extends ERR>> supplier) {
+                Supplier<? extends Result<? extends N, ? extends ERR>> supplier) {
             Objects.requireNonNull(supplier);
             return Result.error(error);
         }
 
         @Override
         public <N> OptionalResult<N, ERR> flatReplaceToOptionalResult(
-                Supplier<OptionalResult<? extends N, ? extends ERR>> supplier) {
+                Supplier<? extends OptionalResult<? extends N, ? extends ERR>> supplier) {
             Objects.requireNonNull(supplier);
             return OptionalResult.error(error);
         }
 
         @Override
         public BooleanResult<ERR> flatReplaceToBooleanResult(
-                Supplier<BooleanResult<? extends ERR>> supplier) {
+                Supplier<? extends BooleanResult<? extends ERR>> supplier) {
             Objects.requireNonNull(supplier);
             return BooleanResult.error(error);
         }
 
         @Override
         public VoidResult<ERR> flatReplaceToVoidResult(
-                Supplier<VoidResult<? extends ERR>> supplier) {
+                Supplier<? extends VoidResult<? extends ERR>> supplier) {
             Objects.requireNonNull(supplier);
             return safeCast();
         }
