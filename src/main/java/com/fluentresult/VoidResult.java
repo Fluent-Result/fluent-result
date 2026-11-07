@@ -359,6 +359,9 @@ public sealed interface VoidResult<E> {
             runnable.run();
             return VoidResult.success();
         } catch (Exception e) {
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
             return VoidResult.error(e);
         }
     }

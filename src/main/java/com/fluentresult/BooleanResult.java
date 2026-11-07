@@ -628,6 +628,9 @@ public sealed interface BooleanResult<E> {
         try {
             value = callable.call();
         } catch (Exception e) {
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
             return BooleanResult.error(e);
         }
         return BooleanResult.success(Objects.requireNonNull(value));

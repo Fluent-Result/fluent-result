@@ -961,6 +961,9 @@ public sealed interface OptionalResult<T, E> {
         try {
             value = callable.call();
         } catch (Exception e) {
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
             return OptionalResult.error(e);
         }
         return OptionalResult.success(Objects.requireNonNull(value));
