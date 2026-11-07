@@ -42,4 +42,25 @@ class OptionalResult_Handle_Test {
         assertThatThrownBy(() -> OptionalResult.handle(() -> null))
                 .isInstanceOf(NullPointerException.class);
     }
+
+    @Test
+    void handle_interruptedException_shouldContainExceptionAndRestoreInterruptStatus() {
+        OptionalResult<String, Exception> result = OptionalResult.handle(() -> {
+            throw new InterruptedException("Interrupted");
+        });
+        boolean interrupted = Thread.interrupted(); // reads and clears the flag
+        assertThat(interrupted).isTrue();
+        result.consumeEither(
+                val -> fail("Should not be success"),
+                err -> assertThat(err).isInstanceOf(InterruptedException.class)
+        );
+    }
+
+    @Test
+    void handle_otherException_shouldNotInterruptThread() {
+        OptionalResult.handle(() -> {
+            throw new IOException("Error");
+        });
+        assertThat(Thread.currentThread().isInterrupted()).isFalse();
+    }
 }
