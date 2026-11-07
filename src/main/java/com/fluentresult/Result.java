@@ -494,6 +494,9 @@ public sealed interface Result<T, E> {
         try {
             value = callable.call();
         } catch (Exception e) {
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
             return Result.error(e);
         }
         return Result.success(Objects.requireNonNull(value));
