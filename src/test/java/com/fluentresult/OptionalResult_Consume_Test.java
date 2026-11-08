@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -35,5 +36,17 @@ class OptionalResult_Consume_Test {
         OptionalResult<String, String> consumed = result.consume(resultList::add);
         assertThat(consumed).isNotNull();
         assertThat(resultList).isEqualTo(List.of(Optional.empty()));
+    }
+
+    @Test
+    void consume_consumerAcceptingSupertypeOfOptional_canBeUsed() {
+        // A Consumer<Object> is not a Consumer<Optional<String>>, but is a
+        // Consumer<? super Optional<String>>.
+        List<Object> resultList = new ArrayList<>();
+        Consumer<Object> consumer = resultList::add;
+
+        OptionalResult.<String, String>success("Success").consume(consumer);
+
+        assertThat(resultList).containsExactly(Optional.of("Success"));
     }
 }
