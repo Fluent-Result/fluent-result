@@ -824,6 +824,7 @@ public sealed interface Result<T, E> {
         public <F> Result<S, F> flatRecover(
                 Function<? super ERR, ? extends Result<? extends S, ? extends F>> function) {
             Objects.requireNonNull(function);
+            Objects.requireNonNull(function);
             return (Result<S, F>) Objects.requireNonNull(function.apply(error));
         }
 
