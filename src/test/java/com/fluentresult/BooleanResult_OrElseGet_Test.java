@@ -3,6 +3,7 @@ package com.fluentresult;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class BooleanResult_OrElseGet_Test {
 
@@ -27,5 +28,12 @@ class BooleanResult_OrElseGet_Test {
         assertThat(b).isFalse();
         b = result.orElseGet(s -> true);
         assertThat(b).isTrue();
+    }
+
+    @Test
+    void orElseGet_error_functionReturningNull_shouldThrowNullPointerException() {
+        BooleanResult<String> result = BooleanResult.error("Error");
+        assertThatThrownBy(() -> result.orElseGet(s -> null))
+                .isInstanceOf(NullPointerException.class);
     }
 }
