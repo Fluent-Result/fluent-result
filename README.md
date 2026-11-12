@@ -14,6 +14,7 @@ A Java result library helping you get rid of exceptions, enabling a more fluent 
   - [Additional Result Classes](#additional-result-classes)
   - [Verifying the Value](#verifying-the-value)
   - [Extracting the Value](#extracting-the-value)
+  - [Pattern Matching](#pattern-matching)
 - [API](#api)
   - [Result](#result)
     - [Static Factory Methods](#static-factory-methods)
@@ -24,7 +25,7 @@ A Java result library helping you get rid of exceptions, enabling a more fluent 
   - [BooleanResult](#booleanresult)
     - [Static Factory Methods](#static-factory-methods-2)
     - [Instance Methods](#instance-methods-2)
-  - [OptionalResult](#voidresult)
+  - [VoidResult](#voidresult)
     - [Static Factory Methods](#static-factory-methods-3)
     - [Instance Methods](#instance-methods-3)
 
@@ -297,6 +298,70 @@ public Status getCustomerStatus() {
                       error -> Status.CUSTOMER_FETCH_ERROR);
 }
 ```
+
+### Pattern Matching
+
+All the Result classes are sealed interfaces implemented by records, so a Result-object can be deconstructed with record patterns in a `switch`. Because the interfaces are sealed, the compiler checks that every state is handled and no `default` branch is needed. If a state is left out, the code does not compile.
+
+This is an alternative to `fold` and `consumeEither` when a branch needs more than a single expression, when you want to guard on the value, or when you only care about one of the states.
+
+The states and their record patterns are:
+
+| Class | Success states | Error state |
+|-------|----------------|-------------|
+| _Result_ | `Result.Success(T value)` | `Result.Error(E error)` |
+| _OptionalResult_ | `OptionalResult.Value(T value)`<br/>`OptionalResult.Empty()` | `OptionalResult.Error(E error)` |
+| _BooleanResult_ | `BooleanResult.Success(boolean value)` | `BooleanResult.Error(E error)` |
+| _VoidResult_ | `VoidResult.Success()` | `VoidResult.Error(E error)` |
+
+Example with _Result_:
+```java
+public Status getCustomerStatus() {
+    return switch (getCustomer(id)) { // Returns Result<Customer, String>
+        case Result.Success(Customer customer) -> Status.CUSTOMER_EXISTS;
+        case Result.Error(String errorMsg) -> Status.CUSTOMER_FETCH_ERROR;
+    };
+}
+```
+
+Example with _OptionalResult_, which has three states:
+```java
+public Status getCustomerStatus() {
+    return switch (findCustomer(id)) { // Returns OptionalResult<Customer, String>
+        case OptionalResult.Value(Customer customer) -> Status.CUSTOMER_EXISTS;
+        case OptionalResult.Empty() -> Status.CUSTOMER_NOT_FOUND;
+        case OptionalResult.Error(String errorMsg) -> Status.CUSTOMER_FETCH_ERROR;
+    };
+}
+```
+
+Guards with `when` can be used to branch on the value itself. The compiler still requires an unguarded case for the state:
+```java
+public Status getCustomerStatus() {
+    return switch (getCustomer(id)) { // Returns Result<Customer, String>
+        case Result.Success(Customer customer) when customer.getAge() >= 18 -> Status.CUSTOMER_APPROVED;
+        case Result.Success(Customer customer) -> Status.CUSTOMER_UNDERAGE;
+        case Result.Error(String errorMsg) -> Status.CUSTOMER_FETCH_ERROR;
+    };
+}
+```
+
+A `switch` statement works the same way for _VoidResult_, where the success state carries no value:
+```java
+switch (deleteCustomer(id)) { // Returns VoidResult<String>
+    case VoidResult.Success() -> System.out.println("Customer deleted");
+    case VoidResult.Error(String errorMsg) -> logAnError(errorMsg);
+}
+```
+
+If only one state is of interest, `instanceof` with a record pattern can be used:
+```java
+if (getCustomer(id) instanceof Result.Error(String errorMsg)) {
+    logAnError(errorMsg);
+}
+```
+
+The component types may be replaced with `var`, for example `case Result.Success(var customer)`. The record classes are public so that they can be used in patterns, but prefer the static factory methods like `Result.success` and `OptionalResult.successNullable` over calling the record constructors directly.
 
 
 ## API
