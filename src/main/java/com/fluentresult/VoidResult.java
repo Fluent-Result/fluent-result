@@ -385,92 +385,92 @@ public sealed interface VoidResult<E> {
      * {@code null}
      */
     static <E> VoidResult<E> handle(CheckedRunnable runnable,
-                                    Function<Exception, ? extends E> exceptionMapper) {
+                                    Function<? super Exception, ? extends E> exceptionMapper) {
         Objects.requireNonNull(runnable);
         Objects.requireNonNull(exceptionMapper);
         return handle(runnable).mapError(exceptionMapper);
     }
 
-    record Success<ERR>() implements VoidResult<ERR> {
+    record Success<E>() implements VoidResult<E> {
 
         @Override
-        public <N> VoidResult<N> mapError(Function<? super ERR, ? extends N> function) {
+        public <N> VoidResult<N> mapError(Function<? super E, ? extends N> function) {
             Objects.requireNonNull(function);
             return safeCast();
         }
 
         @Override
-        public <N> Result<N, ERR> replace(Supplier<? extends N> supplier) {
+        public <N> Result<N, E> replace(Supplier<? extends N> supplier) {
             Objects.requireNonNull(supplier);
             return Result.success(supplier.get());
         }
 
         @Override
-        public <N> OptionalResult<N, ERR> replaceWithOptional(
+        public <N> OptionalResult<N, E> replaceWithOptional(
                 Supplier<? extends Optional<? extends N>> supplier) {
             Objects.requireNonNull(supplier);
             return OptionalResult.success(supplier.get());
         }
 
         @Override
-        public BooleanResult<ERR> replaceWithBoolean(Supplier<Boolean> supplier) {
+        public BooleanResult<E> replaceWithBoolean(Supplier<Boolean> supplier) {
             Objects.requireNonNull(supplier);
             return BooleanResult.success(Objects.requireNonNull(supplier.get()));
         }
 
         @SuppressWarnings("unchecked")
         @Override
-        public <N> Result<N, ERR> flatReplace(
-                Supplier<? extends Result<? extends N, ? extends ERR>> supplier) {
+        public <N> Result<N, E> flatReplace(
+                Supplier<? extends Result<? extends N, ? extends E>> supplier) {
             Objects.requireNonNull(supplier);
-            return (Result<N, ERR>) Objects.requireNonNull(supplier.get());
+            return (Result<N, E>) Objects.requireNonNull(supplier.get());
         }
 
         @SuppressWarnings("unchecked")
         @Override
-        public <N> OptionalResult<N, ERR> flatReplaceToOptionalResult(
-                Supplier<? extends OptionalResult<? extends N, ? extends ERR>> supplier) {
+        public <N> OptionalResult<N, E> flatReplaceToOptionalResult(
+                Supplier<? extends OptionalResult<? extends N, ? extends E>> supplier) {
             Objects.requireNonNull(supplier);
-            return (OptionalResult<N, ERR>) Objects.requireNonNull(supplier.get());
+            return (OptionalResult<N, E>) Objects.requireNonNull(supplier.get());
         }
 
         @SuppressWarnings("unchecked")
         @Override
-        public BooleanResult<ERR> flatReplaceToBooleanResult(
-                Supplier<? extends BooleanResult<? extends ERR>> supplier) {
+        public BooleanResult<E> flatReplaceToBooleanResult(
+                Supplier<? extends BooleanResult<? extends E>> supplier) {
             Objects.requireNonNull(supplier);
-            return (BooleanResult<ERR>) Objects.requireNonNull(supplier.get());
+            return (BooleanResult<E>) Objects.requireNonNull(supplier.get());
         }
 
         @SuppressWarnings("unchecked")
         @Override
-        public VoidResult<ERR> flatReplaceToVoidResult(
-                Supplier<? extends VoidResult<? extends ERR>> supplier) {
+        public VoidResult<E> flatReplaceToVoidResult(
+                Supplier<? extends VoidResult<? extends E>> supplier) {
             Objects.requireNonNull(supplier);
-            return (VoidResult<ERR>) Objects.requireNonNull(supplier.get());
+            return (VoidResult<E>) Objects.requireNonNull(supplier.get());
         }
 
         @Override
-        public VoidResult<ERR> recover() {
+        public VoidResult<E> recover() {
             return safeCast();
         }
 
         @Override
         public <F> VoidResult<F> flatRecover(
-                Function<? super ERR, ? extends VoidResult<? extends F>> function) {
+                Function<? super E, ? extends VoidResult<? extends F>> function) {
             Objects.requireNonNull(function);
             return safeCast();
         }
 
         @Override
-        public VoidResult<ERR> consumeError(Consumer<? super ERR> errorConsumer) {
+        public VoidResult<E> consumeError(Consumer<? super E> errorConsumer) {
             Objects.requireNonNull(errorConsumer);
             return safeCast();
         }
 
         @Override
-        public VoidResult<ERR> consumeEither(Runnable successRunnable,
-                                             Consumer<? super ERR> errorConsumer) {
+        public VoidResult<E> consumeEither(Runnable successRunnable,
+                                             Consumer<? super E> errorConsumer) {
             Objects.requireNonNull(successRunnable);
             Objects.requireNonNull(errorConsumer);
             successRunnable.run();
@@ -478,20 +478,20 @@ public sealed interface VoidResult<E> {
         }
 
         @Override
-        public VoidResult<ERR> runIfSuccess(Runnable runnable) {
+        public VoidResult<E> runIfSuccess(Runnable runnable) {
             Objects.requireNonNull(runnable);
             runnable.run();
             return safeCast();
         }
 
         @Override
-        public VoidResult<ERR> runIfError(Runnable runnable) {
+        public VoidResult<E> runIfError(Runnable runnable) {
             Objects.requireNonNull(runnable);
             return safeCast();
         }
 
         @Override
-        public VoidResult<ERR> runEither(Runnable successRunnable, Runnable errorRunnable) {
+        public VoidResult<E> runEither(Runnable successRunnable, Runnable errorRunnable) {
             Objects.requireNonNull(successRunnable);
             Objects.requireNonNull(errorRunnable);
             successRunnable.run();
@@ -499,23 +499,23 @@ public sealed interface VoidResult<E> {
         }
 
         @Override
-        public VoidResult<ERR> runAlways(Runnable runnable) {
+        public VoidResult<E> runAlways(Runnable runnable) {
             Objects.requireNonNull(runnable);
             runnable.run();
             return safeCast();
         }
 
         @Override
-        public VoidResult<ERR> flatRunIfSuccess(
-                Supplier<? extends VoidResult<? extends ERR>> supplier) {
+        public VoidResult<E> flatRunIfSuccess(
+                Supplier<? extends VoidResult<? extends E>> supplier) {
             Objects.requireNonNull(supplier);
-            VoidResult<? extends ERR> result = Objects.requireNonNull(supplier.get());
+            VoidResult<? extends E> result = Objects.requireNonNull(supplier.get());
             return result.fold(() -> this, VoidResult::error);
         }
 
         @Override
         public <N> N fold(Supplier<? extends N> valueSupplier,
-                          Function<? super ERR, ? extends N> errorFunction) {
+                          Function<? super E, ? extends N> errorFunction) {
             Objects.requireNonNull(valueSupplier);
             Objects.requireNonNull(errorFunction);
             return valueSupplier.get();
@@ -523,12 +523,12 @@ public sealed interface VoidResult<E> {
 
         @Override
         public <X extends Throwable> void orElseThrow(
-                Function<? super ERR, ? extends X> function) throws X {
+                Function<? super E, ? extends X> function) throws X {
             Objects.requireNonNull(function);
         }
 
         @Override
-        public <N> OptionalResult<N, ERR> toOptionalResult() {
+        public <N> OptionalResult<N, E> toOptionalResult() {
             return OptionalResult.empty();
         }
 
@@ -538,88 +538,88 @@ public sealed interface VoidResult<E> {
         }
     }
 
-    record Error<ERR>(ERR error) implements VoidResult<ERR> {
+    record Error<E>(E error) implements VoidResult<E> {
 
-        public Error(ERR error) {
+        public Error(E error) {
             this.error = Objects.requireNonNull(error);
         }
 
         @Override
-        public <N> VoidResult<N> mapError(Function<? super ERR, ? extends N> function) {
+        public <N> VoidResult<N> mapError(Function<? super E, ? extends N> function) {
             Objects.requireNonNull(function);
             return VoidResult.error(function.apply(error));
         }
 
         @Override
-        public <N> Result<N, ERR> replace(Supplier<? extends N> supplier) {
+        public <N> Result<N, E> replace(Supplier<? extends N> supplier) {
             Objects.requireNonNull(supplier);
             return Result.error(error);
         }
 
         @Override
-        public <N> OptionalResult<N, ERR> replaceWithOptional(
+        public <N> OptionalResult<N, E> replaceWithOptional(
                 Supplier<? extends Optional<? extends N>> supplier) {
             Objects.requireNonNull(supplier);
             return OptionalResult.error(error);
         }
 
         @Override
-        public BooleanResult<ERR> replaceWithBoolean(Supplier<Boolean> supplier) {
+        public BooleanResult<E> replaceWithBoolean(Supplier<Boolean> supplier) {
             Objects.requireNonNull(supplier);
             return BooleanResult.error(error);
         }
 
         @Override
-        public <N> Result<N, ERR> flatReplace(
-                Supplier<? extends Result<? extends N, ? extends ERR>> supplier) {
+        public <N> Result<N, E> flatReplace(
+                Supplier<? extends Result<? extends N, ? extends E>> supplier) {
             Objects.requireNonNull(supplier);
             return Result.error(error);
         }
 
         @Override
-        public <N> OptionalResult<N, ERR> flatReplaceToOptionalResult(
-                Supplier<? extends OptionalResult<? extends N, ? extends ERR>> supplier) {
+        public <N> OptionalResult<N, E> flatReplaceToOptionalResult(
+                Supplier<? extends OptionalResult<? extends N, ? extends E>> supplier) {
             Objects.requireNonNull(supplier);
             return OptionalResult.error(error);
         }
 
         @Override
-        public BooleanResult<ERR> flatReplaceToBooleanResult(
-                Supplier<? extends BooleanResult<? extends ERR>> supplier) {
+        public BooleanResult<E> flatReplaceToBooleanResult(
+                Supplier<? extends BooleanResult<? extends E>> supplier) {
             Objects.requireNonNull(supplier);
             return BooleanResult.error(error);
         }
 
         @Override
-        public VoidResult<ERR> flatReplaceToVoidResult(
-                Supplier<? extends VoidResult<? extends ERR>> supplier) {
+        public VoidResult<E> flatReplaceToVoidResult(
+                Supplier<? extends VoidResult<? extends E>> supplier) {
             Objects.requireNonNull(supplier);
             return safeCast();
         }
 
         @Override
-        public VoidResult<ERR> recover() {
+        public VoidResult<E> recover() {
             return VoidResult.success();
         }
 
         @SuppressWarnings("unchecked")
         @Override
         public <F> VoidResult<F> flatRecover(
-                Function<? super ERR, ? extends VoidResult<? extends F>> function) {
+                Function<? super E, ? extends VoidResult<? extends F>> function) {
             Objects.requireNonNull(function);
             return (VoidResult<F>) Objects.requireNonNull(function.apply(error));
         }
 
         @Override
-        public VoidResult<ERR> consumeError(Consumer<? super ERR> errorConsumer) {
+        public VoidResult<E> consumeError(Consumer<? super E> errorConsumer) {
             Objects.requireNonNull(errorConsumer);
             errorConsumer.accept(error);
             return safeCast();
         }
 
         @Override
-        public VoidResult<ERR> consumeEither(Runnable successRunnable,
-                                             Consumer<? super ERR> errorConsumer) {
+        public VoidResult<E> consumeEither(Runnable successRunnable,
+                                             Consumer<? super E> errorConsumer) {
             Objects.requireNonNull(successRunnable);
             Objects.requireNonNull(errorConsumer);
             errorConsumer.accept(error);
@@ -627,20 +627,20 @@ public sealed interface VoidResult<E> {
         }
 
         @Override
-        public VoidResult<ERR> runIfSuccess(Runnable runnable) {
+        public VoidResult<E> runIfSuccess(Runnable runnable) {
             Objects.requireNonNull(runnable);
             return safeCast();
         }
 
         @Override
-        public VoidResult<ERR> runIfError(Runnable runnable) {
+        public VoidResult<E> runIfError(Runnable runnable) {
             Objects.requireNonNull(runnable);
             runnable.run();
             return safeCast();
         }
 
         @Override
-        public VoidResult<ERR> runEither(Runnable successRunnable, Runnable errorRunnable) {
+        public VoidResult<E> runEither(Runnable successRunnable, Runnable errorRunnable) {
             Objects.requireNonNull(successRunnable);
             Objects.requireNonNull(errorRunnable);
             errorRunnable.run();
@@ -648,22 +648,22 @@ public sealed interface VoidResult<E> {
         }
 
         @Override
-        public VoidResult<ERR> runAlways(Runnable runnable) {
+        public VoidResult<E> runAlways(Runnable runnable) {
             Objects.requireNonNull(runnable);
             runnable.run();
             return safeCast();
         }
 
         @Override
-        public VoidResult<ERR> flatRunIfSuccess(
-                Supplier<? extends VoidResult<? extends ERR>> supplier) {
+        public VoidResult<E> flatRunIfSuccess(
+                Supplier<? extends VoidResult<? extends E>> supplier) {
             Objects.requireNonNull(supplier);
             return safeCast();
         }
 
         @Override
         public <N> N fold(Supplier<? extends N> valueSupplier,
-                          Function<? super ERR, ? extends N> errorFunction) {
+                          Function<? super E, ? extends N> errorFunction) {
             Objects.requireNonNull(valueSupplier);
             Objects.requireNonNull(errorFunction);
             return errorFunction.apply(error);
@@ -671,17 +671,17 @@ public sealed interface VoidResult<E> {
 
         @Override
         public <X extends Throwable> void orElseThrow(
-                Function<? super ERR, ? extends X> function) throws X {
+                Function<? super E, ? extends X> function) throws X {
             Objects.requireNonNull(function);
             throw Objects.requireNonNull(function.apply(error));
         }
 
         @Override
-        public <N> OptionalResult<N, ERR> toOptionalResult() {
+        public <N> OptionalResult<N, E> toOptionalResult() {
             return OptionalResult.error(error);
         }
 
-        private Error<ERR> safeCast() {
+        private Error<E> safeCast() {
             return this;
         }
     }
