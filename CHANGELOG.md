@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Changed
+- **Breaking:** `BooleanResult.orElse`, `orElseGet` and `orElseThrow` now take and return primitive `boolean` instead of `Boolean`. `orElseGet` throws `NullPointerException` if the given function returns `null`.
+- Widened functional parameters consistently across `Result`, `OptionalResult`, `BooleanResult` and `VoidResult` to accept `? super` input types and `? extends` return types. This includes the exception mapper of `handle`, all success-side parameters of `BooleanResult`, the `flatMapValueWith*` methods of `OptionalResult`, and `OptionalResult.orElse`/`orElseGet` which now accept `Optional<? extends T>`.
+
 ## [1.8.0] - 2026-11-03
 ### Changed
 - **Package name change** base package changed from `com.fluentresult.fluentresult` to `com.fluentresult`.
