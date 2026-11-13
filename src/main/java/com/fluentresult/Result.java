@@ -14,7 +14,12 @@ import java.util.function.Supplier;
  * non-{@code null} error value.
  * <p>
  * A variable whose type is {@code Result} should never itself be {@code null},
- * it should always point to an {@code Result} instance.
+ * it should always point to a {@code Result} instance.
+ * <p>
+ * All methods taking functional arguments (functions, suppliers, consumers,
+ * predicates and runnables) check them for {@code null} eagerly. A
+ * {@code null} argument results in a {@link NullPointerException} regardless
+ * of the state of the result, even if the argument would not have been used.
  *
  * @param <T> the type of the success value
  * @param <E> the type of the error value
@@ -67,18 +72,18 @@ public sealed interface Result<T, E> {
     <N> Result<N, E> map(Function<? super T, ? extends N> function);
 
     /**
-     * If in success state, returns a {@code OptionalResult} containing the
+     * If in success state, returns an {@code OptionalResult} containing the
      * result of applying the given mapping function to the success value,
-     * otherwise returns a {@code OptionalResult} containing the error value of
-     * this {@code Result}.
+     * otherwise returns an {@code OptionalResult} containing the error value
+     * of this {@code Result}.
      *
      * @param function the mapping function to apply to the success value, if
      * success state
      * @param <N> the type of the success value which may be present in the
      * {@code Optional} returned from the mapping function
-     * @return a {@code OptionalResult} containing the result of applying the
+     * @return an {@code OptionalResult} containing the result of applying the
      * mapping function to the success value of this {@code Result}, if in
-     * success state, otherwise a {@code OptionalResult} containing the error
+     * success state, otherwise an {@code OptionalResult} containing the error
      * value of this {@code Result}
      * @throws NullPointerException if the given mapping function is
      * {@code null} or returns {@code null}
@@ -137,7 +142,7 @@ public sealed interface Result<T, E> {
 
     /**
      * If in success state, returns the {@code OptionalResult} from applying
-     * the given mapping function to the success value, otherwise returns a
+     * the given mapping function to the success value, otherwise returns an
      * {@code OptionalResult} containing the error value of this {@code Result}.
      *
      * @param <N> the type of success value which may be present in the
@@ -145,8 +150,8 @@ public sealed interface Result<T, E> {
      * @param function the mapping function to apply to the success value, if
      * success state
      * @return the {@code OptionalResult} returned from the mapping function, if
-     * in success state, otherwise a {@code OptionalResult} containing the error
-     * value of this {@code Result}
+     * in success state, otherwise an {@code OptionalResult} containing the
+     * error value of this {@code Result}
      * @throws NullPointerException if the given mapping function is
      * {@code null} or returns {@code null}
      */
@@ -192,8 +197,10 @@ public sealed interface Result<T, E> {
      *
      * @param function the mapping function to apply to the error value to
      * convert to a new success value, if error state
-     * @return A {@code Result} containing the value from the mapping function,
+     * @return a {@code Result} containing the value from the mapping function,
      * if in error state, otherwise the unaltered {@code Result} in success state
+     * @throws NullPointerException if the given mapping function is
+     * {@code null} or returns {@code null}
      */
     Result<T, E> recover(Function<E, T> function);
 
@@ -208,9 +215,12 @@ public sealed interface Result<T, E> {
      * {@code Result} returned by the mapping function
      * @return the {@code Result} returned from the mapping function, if in
      * error state, otherwise the unaltered {@code Result} in success state
+     * @throws NullPointerException if the given mapping function is
+     * {@code null} or returns {@code null}
      */
     <F> Result<T, F> flatRecover(
             Function<? super E, ? extends Result<? extends T, ? extends F>> function);
+
     /**
      * If in success state, applies the success value to the given consumer,
      * otherwise does nothing.
@@ -243,7 +253,7 @@ public sealed interface Result<T, E> {
      * {@code null}
      */
     Result<T, E> consumeEither(Consumer<? super T> valueConsumer,
-                                      Consumer<? super E> errorConsumer);
+                               Consumer<? super E> errorConsumer);
 
     /**
      * If in success state, applies the success value to the given function. If
@@ -261,7 +271,8 @@ public sealed interface Result<T, E> {
      * @throws NullPointerException if the given function is {@code null} or
      * returns {@code null}
      */
-    Result<T, E> flatConsume(Function<? super T, ? extends VoidResult<? extends E>> function);
+    Result<T, E> flatConsume(
+            Function<? super T, ? extends VoidResult<? extends E>> function);
 
     /**
      * If in success state, runs the given runnable, otherwise does nothing.
@@ -316,7 +327,8 @@ public sealed interface Result<T, E> {
      * @throws NullPointerException if the given supplier is {@code null} or
      * returns {@code null}
      */
-    Result<T, E> flatRunIfSuccess(Supplier<? extends VoidResult<? extends E>> supplier);
+    Result<T, E> flatRunIfSuccess(
+            Supplier<? extends VoidResult<? extends E>> supplier);
 
     /**
      * If in success state, verifies the success value of this {@code Result} by
@@ -333,35 +345,32 @@ public sealed interface Result<T, E> {
      * @return the original {@code Result} unaltered, unless the predicate
      * evaluates to false, then a new {@code Result} in error state is returned
      * containing the supplied error value
-     * @throws NullPointerException if the given predicate is {@code null} or
-     * returns {@code null}, or the given error supplier is {@code null} or
-     * returns {@code null}
+     * @throws NullPointerException if the given predicate is {@code null}, or
+     * the given error supplier is {@code null} or returns {@code null}
      */
     Result<T, E> verify(Predicate<? super T> predicate,
-                               Supplier<? extends E> errorSupplier);
+                        Supplier<? extends E> errorSupplier);
 
     /**
      * If in success state, verifies the success value of this {@code Result} by
      * testing it with the given predicate. If the predicate evaluates to false,
      * a new {@code Result} is returned containing the error provided by
-     * mapping the value with the error function.
-     * If the predicate evaluates to true, or the
-     * {@code Result} already was in error state, the original {@code Result} is
-     * returned unaltered.
+     * mapping the value with the given error function. If the predicate
+     * evaluates to true, or the {@code Result} already was in error state, the
+     * original {@code Result} is returned unaltered.
      *
      * @param predicate the predicate used to verify the success value, if
      * success state
-     * @param errorFunction mapping the value to an error if predicate evaluates
-     * to false.
+     * @param errorFunction the function mapping the value to an error, if the
+     * predicate evaluates to false
      * @return the original {@code Result} unaltered, unless the predicate
      * evaluates to false, then a new {@code Result} in error state is returned
      * containing the result of mapping the value to an error
-     * @throws NullPointerException if the given predicate is {@code null} or
-     * returns {@code null}, or the given error supplier is {@code null} or
-     * returns {@code null}
+     * @throws NullPointerException if the given predicate is {@code null}, or
+     * the given error function is {@code null} or returns {@code null}
      */
     Result<T, E> verify(Predicate<? super T> predicate,
-                               Function<? super T, ? extends E> errorFunction);
+                        Function<? super T, ? extends E> errorFunction);
 
     /**
      * If in success state, verifies the success value of this {@code Result} by
@@ -380,7 +389,8 @@ public sealed interface Result<T, E> {
      * @throws NullPointerException if the given function is {@code null} or
      * returns {@code null}
      */
-    Result<T, E> verify(Function<? super T, ? extends VoidResult<? extends E>> function);
+    Result<T, E> verify(
+            Function<? super T, ? extends VoidResult<? extends E>> function);
 
     /**
      * Retrieve a value from this {@code Result} by folding the states. If in
@@ -399,7 +409,7 @@ public sealed interface Result<T, E> {
      * {@code null}
      */
     <N> N fold(Function<? super T, ? extends N> valueFunction,
-                      Function<? super E, ? extends N> errorFunction);
+               Function<? super E, ? extends N> errorFunction);
 
     /**
      * If in success state, returns the success value, otherwise returns
@@ -410,13 +420,12 @@ public sealed interface Result<T, E> {
      * @return the success value, if success state, otherwise {@code other}
      */
     T orElse(T other);
-
     /**
      * If in success state, returns the success value, otherwise returns the
      * value returned from the given function.
      *
      * @param function the mapping function to apply to the error value, if not
-     * in success state, it may return {@code null}
+     * in success state, may return {@code null}
      * @return the success value, if success state, otherwise the result
      * returned from the given function
      * @throws NullPointerException if the given function is {@code null}
@@ -486,7 +495,7 @@ public sealed interface Result<T, E> {
         } catch (Exception e) {
             return Result.error(e);
         }
-        return Result.success(value);
+        return Result.success(Objects.requireNonNull(value));
     }
 
     /**
@@ -497,6 +506,8 @@ public sealed interface Result<T, E> {
      * the exception with the given exception mapper function.
      *
      * @param callable the {@code Callable} to handle
+     * @param exceptionMapper the function mapping a thrown exception to an
+     * error value
      * @param <T> type of the return value of the {@code Callable}
      * @param <E> type of the error value after mapping a thrown exception
      * @return a {@code Result} either in success state containing the value
@@ -507,29 +518,35 @@ public sealed interface Result<T, E> {
      * {@code null} or returns {@code null}
      */
     static <T, E> Result<T, E> handle(Callable<T> callable,
-                                             Function<Exception, E> exceptionMapper) {
+                                      Function<Exception, E> exceptionMapper) {
+        Objects.requireNonNull(callable);
         Objects.requireNonNull(exceptionMapper);
         return handle(callable).mapError(exceptionMapper);
     }
 
-    record Success<S, ERR>(S value) implements Result<S,ERR> {
+    record Success<S, ERR>(S value) implements Result<S, ERR> {
+
         public Success(S value) {
             this.value = Objects.requireNonNull(value);
         }
 
         @Override
         public <N> Result<N, ERR> map(Function<? super S, ? extends N> function) {
-            return new Success<>(function.apply(value));
+            Objects.requireNonNull(function);
+            return Result.success(function.apply(value));
         }
 
         @Override
-        public <N> OptionalResult<N, ERR> mapToOptional(Function<? super S, Optional<N>> function) {
+        public <N> OptionalResult<N, ERR> mapToOptional(
+                Function<? super S, Optional<N>> function) {
+            Objects.requireNonNull(function);
             return OptionalResult.success(function.apply(value));
         }
 
         @Override
         public BooleanResult<ERR> mapToBoolean(Function<? super S, Boolean> function) {
-            return BooleanResult.success(function.apply(value));
+            Objects.requireNonNull(function);
+            return BooleanResult.success(Objects.requireNonNull(function.apply(value)));
         }
 
         @Override
@@ -540,35 +557,44 @@ public sealed interface Result<T, E> {
 
         @SuppressWarnings("unchecked")
         @Override
-        public <N> Result<N, ERR> flatMap(Function<? super S, ? extends Result<? extends N, ? extends ERR>> function) {
+        public <N> Result<N, ERR> flatMap(
+                Function<? super S, ? extends Result<? extends N, ? extends ERR>> function) {
+            Objects.requireNonNull(function);
             return (Result<N, ERR>) Objects.requireNonNull(function.apply(value));
         }
 
         @Override
-        public <N> OptionalResult<N, ERR> flatMapToOptionalResult(Function<? super S, OptionalResult<N, ERR>> function) {
-            return function.apply(value);
+        public <N> OptionalResult<N, ERR> flatMapToOptionalResult(
+                Function<? super S, OptionalResult<N, ERR>> function) {
+            Objects.requireNonNull(function);
+            return Objects.requireNonNull(function.apply(value));
         }
 
         @Override
-        public BooleanResult<ERR> flatMapToBooleanResult(Function<? super S, BooleanResult<ERR>> function) {
-            return function.apply(value);
+        public BooleanResult<ERR> flatMapToBooleanResult(
+                Function<? super S, BooleanResult<ERR>> function) {
+            Objects.requireNonNull(function);
+            return Objects.requireNonNull(function.apply(value));
         }
 
         @Override
-        public VoidResult<ERR> flatMapToVoidResult(Function<? super S, VoidResult<ERR>> function) {
-            return function.apply(value);
+        public VoidResult<ERR> flatMapToVoidResult(
+                Function<? super S, VoidResult<ERR>> function) {
+            Objects.requireNonNull(function);
+            return Objects.requireNonNull(function.apply(value));
         }
 
         @Override
         public Result<S, ERR> recover(Function<ERR, S> function) {
+            Objects.requireNonNull(function);
             return safeCast();
         }
 
-        @SuppressWarnings("unchecked")
         @Override
-        public <F> Result<S, F> flatRecover(Function<? super ERR, ? extends Result<? extends S, ? extends F>> function) {
+        public <F> Result<S, F> flatRecover(
+                Function<? super ERR, ? extends Result<? extends S, ? extends F>> function) {
             Objects.requireNonNull(function);
-            return (Result<S, F>) this;
+            return safeCast();
         }
 
         @Override
@@ -585,20 +611,25 @@ public sealed interface Result<T, E> {
         }
 
         @Override
-        public Result<S, ERR> consumeEither(Consumer<? super S> valueConsumer, Consumer<? super ERR> errorConsumer) {
+        public Result<S, ERR> consumeEither(Consumer<? super S> valueConsumer,
+                                            Consumer<? super ERR> errorConsumer) {
+            Objects.requireNonNull(valueConsumer);
             Objects.requireNonNull(errorConsumer);
             valueConsumer.accept(value);
             return safeCast();
         }
 
         @Override
-        public Result<S, ERR> flatConsume(Function<? super S, ? extends VoidResult<? extends ERR>> function) {
-            VoidResult<? extends ERR> apply = function.apply(value);
-            return apply.fold(() -> this, Result::error);
+        public Result<S, ERR> flatConsume(
+                Function<? super S, ? extends VoidResult<? extends ERR>> function) {
+            Objects.requireNonNull(function);
+            VoidResult<? extends ERR> result = Objects.requireNonNull(function.apply(value));
+            return result.fold(() -> this, Result::error);
         }
 
         @Override
         public Result<S, ERR> runIfSuccess(Runnable runnable) {
+            Objects.requireNonNull(runnable);
             runnable.run();
             return safeCast();
         }
@@ -611,26 +642,33 @@ public sealed interface Result<T, E> {
 
         @Override
         public Result<S, ERR> runEither(Runnable successRunnable, Runnable errorRunnable) {
+            Objects.requireNonNull(successRunnable);
+            Objects.requireNonNull(errorRunnable);
             successRunnable.run();
             return safeCast();
         }
 
         @Override
         public Result<S, ERR> runAlways(Runnable runnable) {
+            Objects.requireNonNull(runnable);
             runnable.run();
             return safeCast();
         }
 
         @Override
-        public Result<S, ERR> flatRunIfSuccess(Supplier<? extends VoidResult<? extends ERR>> supplier) {
-            VoidResult<? extends ERR> voidResult = supplier.get();
-            return voidResult.fold(() -> this, Result::error);
+        public Result<S, ERR> flatRunIfSuccess(
+                Supplier<? extends VoidResult<? extends ERR>> supplier) {
+            Objects.requireNonNull(supplier);
+            VoidResult<? extends ERR> result = Objects.requireNonNull(supplier.get());
+            return result.fold(() -> this, Result::error);
         }
 
         @Override
-        public Result<S, ERR> verify(Predicate<? super S> predicate, Supplier<? extends ERR> errorSupplier) {
+        public Result<S, ERR> verify(Predicate<? super S> predicate,
+                                     Supplier<? extends ERR> errorSupplier) {
+            Objects.requireNonNull(predicate);
             Objects.requireNonNull(errorSupplier);
-            if(predicate.test(value)) {
+            if (predicate.test(value)) {
                 return safeCast();
             } else {
                 return Result.error(errorSupplier.get());
@@ -638,9 +676,11 @@ public sealed interface Result<T, E> {
         }
 
         @Override
-        public Result<S, ERR> verify(Predicate<? super S> predicate, Function<? super S, ? extends ERR> errorFunction) {
+        public Result<S, ERR> verify(Predicate<? super S> predicate,
+                                     Function<? super S, ? extends ERR> errorFunction) {
+            Objects.requireNonNull(predicate);
             Objects.requireNonNull(errorFunction);
-            if(predicate.test(value)) {
+            if (predicate.test(value)) {
                 return safeCast();
             } else {
                 return Result.error(errorFunction.apply(value));
@@ -648,20 +688,23 @@ public sealed interface Result<T, E> {
         }
 
         @Override
-        public Result<S, ERR> verify(Function<? super S, ? extends VoidResult<? extends ERR>> function) {
-            VoidResult<? extends ERR> apply = function.apply(value);
-            return apply.fold(() -> this, Result::error);
+        public Result<S, ERR> verify(
+                Function<? super S, ? extends VoidResult<? extends ERR>> function) {
+            Objects.requireNonNull(function);
+            VoidResult<? extends ERR> result = Objects.requireNonNull(function.apply(value));
+            return result.fold(() -> this, Result::error);
         }
 
         @Override
-        public <N> N fold(Function<? super S, ? extends N> valueFunction, Function<? super ERR, ? extends N> errorFunction) {
+        public <N> N fold(Function<? super S, ? extends N> valueFunction,
+                          Function<? super ERR, ? extends N> errorFunction) {
+            Objects.requireNonNull(valueFunction);
             Objects.requireNonNull(errorFunction);
             return valueFunction.apply(value);
         }
 
         @Override
         public S orElse(S other) {
-            Objects.requireNonNull(other);
             return value;
         }
 
@@ -672,7 +715,8 @@ public sealed interface Result<T, E> {
         }
 
         @Override
-        public <X extends Throwable> S orElseThrow(Function<? super ERR, ? extends X> function) throws X {
+        public <X extends Throwable> S orElseThrow(
+                Function<? super ERR, ? extends X> function) throws X {
             Objects.requireNonNull(function);
             return value;
         }
@@ -710,7 +754,8 @@ public sealed interface Result<T, E> {
         }
     }
 
-    record Error<S, ERR>(ERR error) implements Result<S,ERR> {
+    record Error<S, ERR>(ERR error) implements Result<S, ERR> {
+
         public Error(ERR error) {
             this.error = Objects.requireNonNull(error);
         }
@@ -722,51 +767,64 @@ public sealed interface Result<T, E> {
         }
 
         @Override
-        public <N> OptionalResult<N, ERR> mapToOptional(Function<? super S, Optional<N>> function) {
+        public <N> OptionalResult<N, ERR> mapToOptional(
+                Function<? super S, Optional<N>> function) {
+            Objects.requireNonNull(function);
             return OptionalResult.error(error);
         }
 
         @Override
         public BooleanResult<ERR> mapToBoolean(Function<? super S, Boolean> function) {
+            Objects.requireNonNull(function);
             return BooleanResult.error(error);
         }
 
         @Override
         public <N> Result<S, N> mapError(Function<? super ERR, ? extends N> function) {
-            return new Error<>(function.apply(error));
+            Objects.requireNonNull(function);
+            return Result.error(function.apply(error));
         }
 
         @Override
-        public <N> Result<N, ERR> flatMap(Function<? super S, ? extends Result<? extends N, ? extends ERR>> function) {
+        public <N> Result<N, ERR> flatMap(
+                Function<? super S, ? extends Result<? extends N, ? extends ERR>> function) {
             Objects.requireNonNull(function);
             return safeCast();
         }
 
         @Override
-        public <N> OptionalResult<N, ERR> flatMapToOptionalResult(Function<? super S, OptionalResult<N, ERR>> function) {
+        public <N> OptionalResult<N, ERR> flatMapToOptionalResult(
+                Function<? super S, OptionalResult<N, ERR>> function) {
+            Objects.requireNonNull(function);
             return OptionalResult.error(error);
         }
 
         @Override
-        public BooleanResult<ERR> flatMapToBooleanResult(Function<? super S, BooleanResult<ERR>> function) {
+        public BooleanResult<ERR> flatMapToBooleanResult(
+                Function<? super S, BooleanResult<ERR>> function) {
+            Objects.requireNonNull(function);
             return BooleanResult.error(error);
         }
 
         @Override
-        public VoidResult<ERR> flatMapToVoidResult(Function<? super S, VoidResult<ERR>> function) {
+        public VoidResult<ERR> flatMapToVoidResult(
+                Function<? super S, VoidResult<ERR>> function) {
+            Objects.requireNonNull(function);
             return VoidResult.error(error);
         }
 
         @Override
         public Result<S, ERR> recover(Function<ERR, S> function) {
-            return new Success<>(function.apply(error));
+            Objects.requireNonNull(function);
+            return Result.success(function.apply(error));
         }
 
         @SuppressWarnings("unchecked")
         @Override
-        public <F> Result<S, F> flatRecover(Function<? super ERR, ? extends Result<? extends S, ? extends F>> function) {
+        public <F> Result<S, F> flatRecover(
+                Function<? super ERR, ? extends Result<? extends S, ? extends F>> function) {
             Objects.requireNonNull(function);
-            return (Result<S, F>) function.apply(error);
+            return (Result<S, F>) Objects.requireNonNull(function.apply(error));
         }
 
         @Override
@@ -777,19 +835,24 @@ public sealed interface Result<T, E> {
 
         @Override
         public Result<S, ERR> consumeError(Consumer<? super ERR> errorConsumer) {
+            Objects.requireNonNull(errorConsumer);
             errorConsumer.accept(error);
             return safeCast();
         }
 
         @Override
-        public Result<S, ERR> consumeEither(Consumer<? super S> valueConsumer, Consumer<? super ERR> errorConsumer) {
+        public Result<S, ERR> consumeEither(Consumer<? super S> valueConsumer,
+                                            Consumer<? super ERR> errorConsumer) {
             Objects.requireNonNull(valueConsumer);
+            Objects.requireNonNull(errorConsumer);
             errorConsumer.accept(error);
             return safeCast();
         }
 
         @Override
-        public Result<S, ERR> flatConsume(Function<? super S, ? extends VoidResult<? extends ERR>> function) {
+        public Result<S, ERR> flatConsume(
+                Function<? super S, ? extends VoidResult<? extends ERR>> function) {
+            Objects.requireNonNull(function);
             return safeCast();
         }
 
@@ -801,6 +864,7 @@ public sealed interface Result<T, E> {
 
         @Override
         public Result<S, ERR> runIfError(Runnable runnable) {
+            Objects.requireNonNull(runnable);
             runnable.run();
             return safeCast();
         }
@@ -808,41 +872,53 @@ public sealed interface Result<T, E> {
         @Override
         public Result<S, ERR> runEither(Runnable successRunnable, Runnable errorRunnable) {
             Objects.requireNonNull(successRunnable);
+            Objects.requireNonNull(errorRunnable);
             errorRunnable.run();
             return safeCast();
         }
 
         @Override
         public Result<S, ERR> runAlways(Runnable runnable) {
+            Objects.requireNonNull(runnable);
             runnable.run();
             return safeCast();
         }
 
         @Override
-        public Result<S, ERR> flatRunIfSuccess(Supplier<? extends VoidResult<? extends ERR>> supplier) {
+        public Result<S, ERR> flatRunIfSuccess(
+                Supplier<? extends VoidResult<? extends ERR>> supplier) {
+            Objects.requireNonNull(supplier);
             return safeCast();
         }
 
         @Override
-        public Result<S, ERR> verify(Predicate<? super S> predicate, Supplier<? extends ERR> errorSupplier) {
+        public Result<S, ERR> verify(Predicate<? super S> predicate,
+                                     Supplier<? extends ERR> errorSupplier) {
+            Objects.requireNonNull(predicate);
             Objects.requireNonNull(errorSupplier);
             return safeCast();
         }
 
         @Override
-        public Result<S, ERR> verify(Predicate<? super S> predicate, Function<? super S, ? extends ERR> errorFunction) {
+        public Result<S, ERR> verify(Predicate<? super S> predicate,
+                                     Function<? super S, ? extends ERR> errorFunction) {
+            Objects.requireNonNull(predicate);
             Objects.requireNonNull(errorFunction);
             return safeCast();
         }
 
         @Override
-        public Result<S, ERR> verify(Function<? super S, ? extends VoidResult<? extends ERR>> function) {
+        public Result<S, ERR> verify(
+                Function<? super S, ? extends VoidResult<? extends ERR>> function) {
             Objects.requireNonNull(function);
             return safeCast();
         }
 
         @Override
-        public <N> N fold(Function<? super S, ? extends N> valueFunction, Function<? super ERR, ? extends N> errorFunction) {
+        public <N> N fold(Function<? super S, ? extends N> valueFunction,
+                          Function<? super ERR, ? extends N> errorFunction) {
+            Objects.requireNonNull(valueFunction);
+            Objects.requireNonNull(errorFunction);
             return errorFunction.apply(error);
         }
 
@@ -853,12 +929,15 @@ public sealed interface Result<T, E> {
 
         @Override
         public S orElseGet(Function<? super ERR, ? extends S> function) {
+            Objects.requireNonNull(function);
             return function.apply(error);
         }
 
         @Override
-        public <X extends Throwable> S orElseThrow(Function<? super ERR, ? extends X> function) throws X {
-            throw function.apply(error);
+        public <X extends Throwable> S orElseThrow(
+                Function<? super ERR, ? extends X> function) throws X {
+            Objects.requireNonNull(function);
+            throw Objects.requireNonNull(function.apply(error));
         }
 
         @Override
@@ -894,4 +973,3 @@ public sealed interface Result<T, E> {
         }
     }
 }
-

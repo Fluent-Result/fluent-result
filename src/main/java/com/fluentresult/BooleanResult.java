@@ -9,26 +9,29 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
- * A result object which either is in success state containing a
- * non-{@code null} boolean value, or in error state containing a
- * non-{@code null} error value.
+ * A result object which either is in success state containing a boolean
+ * value, or in error state containing a non-{@code null} error value.
  * <p>
  * A variable whose type is {@code BooleanResult} should never itself be
- * {@code null}, it should always point to an {@code BooleanResult} instance.
+ * {@code null}, it should always point to a {@code BooleanResult} instance.
+ * <p>
+ * All methods taking functional arguments (functions, suppliers, consumers,
+ * predicates and runnables) check them for {@code null} eagerly. A
+ * {@code null} argument results in a {@link NullPointerException} regardless
+ * of the state of the result, even if the argument would not have been used.
  *
  * @param <E> the type of the error value
  */
 public sealed interface BooleanResult<E> {
-    
+
     /**
      * Returns a {@code BooleanResult} in success state containing the given
-     * non-{@code null} boolean value as success value.
+     * boolean value as success value.
      *
-     * @param value the boolean success value, which must be non-{@code null}
+     * @param value the boolean success value
      * @param <E> the type of the error value
      * @return a {@code BooleanResult} in success state containing the given
      * boolean success value
-     * @throws NullPointerException if given success value is {@code null}
      */
     static <E> BooleanResult<E> success(boolean value) {
         return new Success<>(value);
@@ -40,7 +43,7 @@ public sealed interface BooleanResult<E> {
      *
      * @param <E> the type of the error value
      * @return a {@code BooleanResult} in success state containing {@code true}
-     * as the boolean success value.
+     * as the boolean success value
      */
     static <E> BooleanResult<E> successTrue() {
         return BooleanResult.success(true);
@@ -52,7 +55,7 @@ public sealed interface BooleanResult<E> {
      *
      * @param <E> the type of the error value
      * @return a {@code BooleanResult} in success state containing {@code false}
-     * as the boolean success value.
+     * as the boolean success value
      */
     static <E> BooleanResult<E> successFalse() {
         return BooleanResult.success(false);
@@ -91,18 +94,18 @@ public sealed interface BooleanResult<E> {
     <N> Result<N, E> map(Function<Boolean, ? extends N> function);
 
     /**
-     * If in success state, returns a {@code OptionalResult} containing the
+     * If in success state, returns an {@code OptionalResult} containing the
      * result of applying the given mapping function to the boolean success
-     * value, otherwise returns a {@code OptionalResult} containing the error
+     * value, otherwise returns an {@code OptionalResult} containing the error
      * value of this {@code BooleanResult}.
      *
      * @param function the mapping function to apply to the boolean success
      * value, if success state
      * @param <N> the type of the success value which may be present in the
      * {@code Optional} returned from the mapping function
-     * @return a {@code OptionalResult} containing the result of applying the
+     * @return an {@code OptionalResult} containing the result of applying the
      * mapping function to the boolean success value of this
-     * {@code BooleanResult}, if in success state, otherwise a
+     * {@code BooleanResult}, if in success state, otherwise an
      * {@code OptionalResult} containing the error value of this
      * {@code BooleanResult}
      * @throws NullPointerException if the given mapping function is
@@ -113,8 +116,9 @@ public sealed interface BooleanResult<E> {
 
     /**
      * If in success state, returns a {@code BooleanResult} containing the
-     * result of applying the given mapping function to the success value,
-     * otherwise returns the unaltered {@code BooleanResult} in error state.
+     * result of applying the given mapping function to the boolean success
+     * value, otherwise returns the unaltered {@code BooleanResult} in error
+     * state.
      *
      * @param function the mapping function to apply to the boolean success
      * value, if success state
@@ -125,8 +129,7 @@ public sealed interface BooleanResult<E> {
      * @throws NullPointerException if the given mapping function is
      * {@code null} or returns {@code null}
      */
-    BooleanResult<E> mapToBoolean(
-            Function<Boolean, Boolean> function);
+    BooleanResult<E> mapToBoolean(Function<Boolean, Boolean> function);
 
     /**
      * If in error state, returns a {@code BooleanResult} containing the result
@@ -155,8 +158,8 @@ public sealed interface BooleanResult<E> {
      * @param function the mapping function to apply to the boolean success
      * value, if success state
      * @return the {@code Result} returned from the mapping function, if in
-     * success state, otherwise a {@code Result} containing the error
-     * value of this {@code BooleanResult}
+     * success state, otherwise a {@code Result} containing the error value of
+     * this {@code BooleanResult}
      * @throws NullPointerException if the given mapping function is
      * {@code null} or returns {@code null}
      */
@@ -166,7 +169,7 @@ public sealed interface BooleanResult<E> {
     /**
      * If in success state, returns the {@code OptionalResult} from applying
      * the given mapping function to the boolean success value, otherwise
-     * returns a {@code OptionalResult} containing the error value of this
+     * returns an {@code OptionalResult} containing the error value of this
      * {@code BooleanResult}.
      *
      * @param <N> the type of success value which may be present in the
@@ -174,8 +177,8 @@ public sealed interface BooleanResult<E> {
      * @param function the mapping function to apply to the boolean success
      * value, if success state
      * @return the {@code OptionalResult} returned from the mapping function, if
-     * in success state, otherwise a {@code OptionalResult} containing the error
-     * value of this {@code BooleanResult}
+     * in success state, otherwise an {@code OptionalResult} containing the
+     * error value of this {@code BooleanResult}
      * @throws NullPointerException if the given mapping function is
      * {@code null} or returns {@code null}
      */
@@ -222,12 +225,13 @@ public sealed interface BooleanResult<E> {
      *
      * @param function the mapping function to apply to the error value to
      * convert to a new success value, if error state
-     * @return A {@code BooleanResult} containing the value from the mapping
+     * @return a {@code BooleanResult} containing the value from the mapping
      * function, if in error state, otherwise the unaltered
      * {@code BooleanResult} in success state
+     * @throws NullPointerException if the given mapping function is
+     * {@code null} or returns {@code null}
      */
-    BooleanResult<E> recover(
-            Function<E, Boolean> function);
+    BooleanResult<E> recover(Function<E, Boolean> function);
 
     /**
      * If in error state, returns the {@code BooleanResult} from applying the
@@ -236,13 +240,17 @@ public sealed interface BooleanResult<E> {
      *
      * @param function the mapping function to apply to the error value to
      * convert to a new {@code BooleanResult}, if error state
+     * @param <F> the type of error value which may be present in the
      * {@code BooleanResult} returned by the mapping function
      * @return the {@code BooleanResult} returned from the mapping function, if
      * in error state, otherwise the unaltered {@code BooleanResult} in success
      * state
+     * @throws NullPointerException if the given mapping function is
+     * {@code null} or returns {@code null}
      */
     <F> BooleanResult<F> flatRecover(
             Function<? super E, ? extends BooleanResult<? extends F>> function);
+
     /**
      * If in success state, applies the boolean success value to the given
      * consumer, otherwise does nothing.
@@ -289,8 +297,8 @@ public sealed interface BooleanResult<E> {
      * {@code false}
      * @param errorConsumer the consumer which accepts the error value
      * @return the original {@code BooleanResult} unaltered
-     * @throws NullPointerException if one of the given runnables or consumer is
-     * {@code null}
+     * @throws NullPointerException if one of the given runnables or the
+     * consumer is {@code null}
      */
     BooleanResult<E> consumeEither(
             Runnable trueRunnable,
@@ -313,7 +321,8 @@ public sealed interface BooleanResult<E> {
      * @throws NullPointerException if the given function is {@code null} or
      * returns {@code null}
      */
-    BooleanResult<E> flatConsume(Function<Boolean, ? extends VoidResult<? extends E>> function);
+    BooleanResult<E> flatConsume(
+            Function<Boolean, ? extends VoidResult<? extends E>> function);
 
     /**
      * If in success state, runs the given runnable, otherwise does nothing.
@@ -379,8 +388,8 @@ public sealed interface BooleanResult<E> {
      * @throws NullPointerException if one of the given runnables is {@code null}
      */
     BooleanResult<E> runEither(Runnable trueRunnable,
-                                      Runnable falseRunnable,
-                                      Runnable errorRunnable);
+                               Runnable falseRunnable,
+                               Runnable errorRunnable);
 
     /**
      * Runs the given runnable, no matter the state.
@@ -407,7 +416,8 @@ public sealed interface BooleanResult<E> {
      * @throws NullPointerException if the given supplier is {@code null} or
      * returns {@code null}
      */
-    BooleanResult<E> flatRunIfSuccess(Supplier<? extends VoidResult<? extends E>> supplier);
+    BooleanResult<E> flatRunIfSuccess(
+            Supplier<? extends VoidResult<? extends E>> supplier);
 
     /**
      * If in success state, verifies the boolean success value of this
@@ -421,40 +431,39 @@ public sealed interface BooleanResult<E> {
      * if success state
      * @param errorSupplier supplier providing the error if predicate evaluates
      * to false
-     * @return the original {@code BooleanResult} unaltered, unless the predicate
-     * evaluates to false, then a new {@code BooleanResult} in error state is returned
-     * containing the supplied error value
-     * @throws NullPointerException if the given predicate is {@code null} or
-     * returns {@code null}, or the given error supplier is {@code null} or
-     * returns {@code null}
+     * @return the original {@code BooleanResult} unaltered, unless the
+     * predicate evaluates to false, then a new {@code BooleanResult} in error
+     * state is returned containing the supplied error value
+     * @throws NullPointerException if the given predicate is {@code null}, or
+     * the given error supplier is {@code null} or returns {@code null}
      */
     BooleanResult<E> verify(Predicate<Boolean> predicate,
-                                   Supplier<? extends E> errorSupplier);
+                            Supplier<? extends E> errorSupplier);
 
     /**
      * If in success state, verifies the boolean success value of this
      * {@code BooleanResult} by testing it with the given predicate. If the
      * predicate evaluates to false, a new {@code BooleanResult} is returned
-     * containing the error value provided by the given error function. If the
-     * predicate evaluates to true, or the {@code BooleanResult} already was in
-     * error state, the original {@code BooleanResult} is returned unaltered.
+     * containing the error value provided by mapping the value with the given
+     * error function. If the predicate evaluates to true, or the
+     * {@code BooleanResult} already was in error state, the original
+     * {@code BooleanResult} is returned unaltered.
      *
      * @param predicate the predicate used to verify the boolean success value,
      * if success state
-     * @param errorFunction mapping the value to error if predicate evaluates
-     * to false
-     * @return the original {@code BooleanResult} unaltered, unless the predicate
-     * evaluates to false, then a new {@code BooleanResult} in error state is returned
-     * containing the supplied error value
-     * @throws NullPointerException if the given predicate is {@code null} or
-     * returns {@code null}, or the given error supplier is {@code null} or
-     * returns {@code null}
+     * @param errorFunction the function mapping the value to an error, if the
+     * predicate evaluates to false
+     * @return the original {@code BooleanResult} unaltered, unless the
+     * predicate evaluates to false, then a new {@code BooleanResult} in error
+     * state is returned containing the result of mapping the value to an error
+     * @throws NullPointerException if the given predicate is {@code null}, or
+     * the given error function is {@code null} or returns {@code null}
      */
     BooleanResult<E> verify(Predicate<Boolean> predicate,
-                                   Function<Boolean, ? extends E> errorFunction);
+                            Function<Boolean, ? extends E> errorFunction);
 
     /**
-     * If in success state, verifies the success value of this
+     * If in success state, verifies the boolean success value of this
      * {@code BooleanResult} by mapping it to a {@code VoidResult}. If the
      * returned {@code VoidResult} is in error state, a new
      * {@code BooleanResult} is returned containing the error value of the
@@ -462,8 +471,8 @@ public sealed interface BooleanResult<E> {
      * {@code BooleanResult} already was in error state, the original
      * {@code BooleanResult} is returned unaltered.
      *
-     * @param function the function applied to the success value, if success
-     * state
+     * @param function the function applied to the boolean success value, if
+     * success state
      * @return the original {@code BooleanResult} unaltered, unless the
      * {@code VoidResult} returned by the mapping function is in error state,
      * then a new {@code BooleanResult} in error state is returned containing
@@ -471,7 +480,8 @@ public sealed interface BooleanResult<E> {
      * @throws NullPointerException if the given function is {@code null} or
      * returns {@code null}
      */
-    BooleanResult<E> verify(Function<Boolean, ? extends VoidResult<? extends E>> function) ;
+    BooleanResult<E> verify(
+            Function<Boolean, ? extends VoidResult<? extends E>> function);
 
     /**
      * Retrieve a value from this {@code BooleanResult} by folding the states.
@@ -490,7 +500,7 @@ public sealed interface BooleanResult<E> {
      * {@code null}
      */
     <N> N fold(Function<Boolean, ? extends N> valueFunction,
-                      Function<? super E, ? extends N> errorFunction);
+               Function<? super E, ? extends N> errorFunction);
 
     /**
      * Retrieve a value from this {@code BooleanResult} by folding the states.
@@ -507,14 +517,14 @@ public sealed interface BooleanResult<E> {
      * of {@code false}, may return {@code null}
      * @param errorFunction the mapping function to apply to the error value, if
      * error state, may return {@code null}
-     * @return the folded value mapped from either the success value or error
-     * value, may be {@code null}
-     * @throws NullPointerException if one of the given functions or the
-     * supplier is {@code null}
+     * @return the folded value provided by one of the suppliers or mapped from
+     * the error value, may be {@code null}
+     * @throws NullPointerException if one of the given suppliers or the
+     * function is {@code null}
      */
     <N> N fold(Supplier<? extends N> trueSupplier,
-                      Supplier<? extends N> falseSupplier,
-                      Function<? super E, ? extends N> errorFunction);
+               Supplier<? extends N> falseSupplier,
+               Function<? super E, ? extends N> errorFunction);
 
     /**
      * If in success state, returns the boolean success value, otherwise returns
@@ -550,7 +560,7 @@ public sealed interface BooleanResult<E> {
      * the value returned from the given function.
      *
      * @param function the mapping function to apply to the error value, if not
-     * in success state, it may return {@code null}
+     * in success state, may return {@code null}
      * @return the boolean success value, if success state, otherwise the result
      * returned from the given function
      * @throws NullPointerException if the given function is {@code null}
@@ -620,7 +630,7 @@ public sealed interface BooleanResult<E> {
         } catch (Exception e) {
             return BooleanResult.error(e);
         }
-        return BooleanResult.success(value);
+        return BooleanResult.success(Objects.requireNonNull(value));
     }
 
     /**
@@ -632,6 +642,8 @@ public sealed interface BooleanResult<E> {
      * function.
      *
      * @param callable the {@code Callable} to handle
+     * @param exceptionMapper the function mapping a thrown exception to an
+     * error value
      * @param <E> type of the error value after mapping a thrown exception
      * @return a {@code BooleanResult} either in success state containing the
      * value from the {@code Callable}, or in error state containing the result
@@ -641,7 +653,8 @@ public sealed interface BooleanResult<E> {
      * {@code null} or returns {@code null}
      */
     static <E> BooleanResult<E> handle(Callable<Boolean> callable,
-                                              Function<Exception, E> exceptionMapper) {
+                                       Function<Exception, E> exceptionMapper) {
+        Objects.requireNonNull(callable);
         Objects.requireNonNull(exceptionMapper);
         return handle(callable).mapError(exceptionMapper);
     }
@@ -650,17 +663,21 @@ public sealed interface BooleanResult<E> {
 
         @Override
         public <N> Result<N, ERR> map(Function<Boolean, ? extends N> function) {
+            Objects.requireNonNull(function);
             return Result.success(function.apply(value));
         }
 
         @Override
-        public <N> OptionalResult<N, ERR> mapToOptional(Function<Boolean, ? extends Optional<? extends N>> function) {
+        public <N> OptionalResult<N, ERR> mapToOptional(
+                Function<Boolean, ? extends Optional<? extends N>> function) {
+            Objects.requireNonNull(function);
             return OptionalResult.success(function.apply(value));
         }
 
         @Override
         public BooleanResult<ERR> mapToBoolean(Function<Boolean, Boolean> function) {
-            return BooleanResult.success(function.apply(value));
+            Objects.requireNonNull(function);
+            return BooleanResult.success(Objects.requireNonNull(function.apply(value)));
         }
 
         @Override
@@ -671,62 +688,78 @@ public sealed interface BooleanResult<E> {
 
         @SuppressWarnings("unchecked")
         @Override
-        public <N> Result<N, ERR> flatMap(Function<Boolean, Result<? extends N, ? extends ERR>> function) {
-            return (Result<N, ERR>) function.apply(value);
+        public <N> Result<N, ERR> flatMap(
+                Function<Boolean, Result<? extends N, ? extends ERR>> function) {
+            Objects.requireNonNull(function);
+            return (Result<N, ERR>) Objects.requireNonNull(function.apply(value));
         }
 
         @SuppressWarnings("unchecked")
         @Override
-        public <N> OptionalResult<N, ERR> flatMapToOptionalResult(Function<Boolean, OptionalResult<? extends N, ? extends ERR>> function) {
-            return (OptionalResult<N, ERR>) function.apply(value);
+        public <N> OptionalResult<N, ERR> flatMapToOptionalResult(
+                Function<Boolean, OptionalResult<? extends N, ? extends ERR>> function) {
+            Objects.requireNonNull(function);
+            return (OptionalResult<N, ERR>) Objects.requireNonNull(function.apply(value));
         }
 
         @SuppressWarnings("unchecked")
         @Override
-        public BooleanResult<ERR> flatMapToBooleanResult(Function<Boolean, BooleanResult<? extends ERR>> function) {
-            return (BooleanResult<ERR>) function.apply(value);
+        public BooleanResult<ERR> flatMapToBooleanResult(
+                Function<Boolean, BooleanResult<? extends ERR>> function) {
+            Objects.requireNonNull(function);
+            return (BooleanResult<ERR>) Objects.requireNonNull(function.apply(value));
         }
 
         @SuppressWarnings("unchecked")
         @Override
-        public VoidResult<ERR> flatMapToVoidResult(Function<Boolean, VoidResult<? extends ERR>> function) {
-            return (VoidResult<ERR>) function.apply(value);
+        public VoidResult<ERR> flatMapToVoidResult(
+                Function<Boolean, VoidResult<? extends ERR>> function) {
+            Objects.requireNonNull(function);
+            return (VoidResult<ERR>) Objects.requireNonNull(function.apply(value));
         }
 
         @Override
         public BooleanResult<ERR> recover(Function<ERR, Boolean> function) {
+            Objects.requireNonNull(function);
             return safeCast();
         }
 
         @Override
-        public <F> BooleanResult<F> flatRecover(Function<? super ERR, ? extends BooleanResult<? extends F>> function) {
+        public <F> BooleanResult<F> flatRecover(
+                Function<? super ERR, ? extends BooleanResult<? extends F>> function) {
             Objects.requireNonNull(function);
             return safeCast();
         }
 
         @Override
         public BooleanResult<ERR> consume(Consumer<Boolean> consumer) {
+            Objects.requireNonNull(consumer);
             consumer.accept(value);
             return safeCast();
         }
 
         @Override
         public BooleanResult<ERR> consumeError(Consumer<? super ERR> errorConsumer) {
+            Objects.requireNonNull(errorConsumer);
             return safeCast();
         }
 
         @Override
-        public BooleanResult<ERR> consumeEither(Consumer<Boolean> valueConsumer, Consumer<? super ERR> errorConsumer) {
+        public BooleanResult<ERR> consumeEither(Consumer<Boolean> valueConsumer,
+                                                Consumer<? super ERR> errorConsumer) {
+            Objects.requireNonNull(valueConsumer);
+            Objects.requireNonNull(errorConsumer);
             valueConsumer.accept(value);
             return safeCast();
         }
 
         @Override
-        public BooleanResult<ERR> consumeEither(Runnable trueRunnable, Runnable falseRunnable, Consumer<? super ERR> errorConsumer) {
+        public BooleanResult<ERR> consumeEither(Runnable trueRunnable,
+                                                Runnable falseRunnable,
+                                                Consumer<? super ERR> errorConsumer) {
             Objects.requireNonNull(trueRunnable);
             Objects.requireNonNull(falseRunnable);
             Objects.requireNonNull(errorConsumer);
-
             if (value) {
                 trueRunnable.run();
             } else {
@@ -736,21 +769,24 @@ public sealed interface BooleanResult<E> {
         }
 
         @Override
-        public BooleanResult<ERR> flatConsume(Function<Boolean, ? extends VoidResult<? extends ERR>> function) {
+        public BooleanResult<ERR> flatConsume(
+                Function<Boolean, ? extends VoidResult<? extends ERR>> function) {
             Objects.requireNonNull(function);
-            VoidResult<? extends ERR> apply = function.apply(value);
-            return apply.fold(() -> this, BooleanResult::error);
+            VoidResult<? extends ERR> result = Objects.requireNonNull(function.apply(value));
+            return result.fold(() -> this, BooleanResult::error);
         }
 
         @Override
         public BooleanResult<ERR> runIfSuccess(Runnable runnable) {
+            Objects.requireNonNull(runnable);
             runnable.run();
             return safeCast();
         }
 
         @Override
         public BooleanResult<ERR> runIfTrue(Runnable runnable) {
-            if(value) {
+            Objects.requireNonNull(runnable);
+            if (value) {
                 runnable.run();
             }
             return safeCast();
@@ -758,7 +794,8 @@ public sealed interface BooleanResult<E> {
 
         @Override
         public BooleanResult<ERR> runIfFalse(Runnable runnable) {
-            if(!value) {
+            Objects.requireNonNull(runnable);
+            if (!value) {
                 runnable.run();
             }
             return safeCast();
@@ -766,18 +803,26 @@ public sealed interface BooleanResult<E> {
 
         @Override
         public BooleanResult<ERR> runIfError(Runnable runnable) {
+            Objects.requireNonNull(runnable);
             return safeCast();
         }
 
         @Override
         public BooleanResult<ERR> runEither(Runnable successRunnable, Runnable errorRunnable) {
+            Objects.requireNonNull(successRunnable);
+            Objects.requireNonNull(errorRunnable);
             successRunnable.run();
             return safeCast();
         }
 
         @Override
-        public BooleanResult<ERR> runEither(Runnable trueRunnable, Runnable falseRunnable, Runnable errorRunnable) {
-            if(value) {
+        public BooleanResult<ERR> runEither(Runnable trueRunnable,
+                                            Runnable falseRunnable,
+                                            Runnable errorRunnable) {
+            Objects.requireNonNull(trueRunnable);
+            Objects.requireNonNull(falseRunnable);
+            Objects.requireNonNull(errorRunnable);
+            if (value) {
                 trueRunnable.run();
             } else {
                 falseRunnable.run();
@@ -787,19 +832,25 @@ public sealed interface BooleanResult<E> {
 
         @Override
         public BooleanResult<ERR> runAlways(Runnable runnable) {
+            Objects.requireNonNull(runnable);
             runnable.run();
             return safeCast();
         }
 
         @Override
-        public BooleanResult<ERR> flatRunIfSuccess(Supplier<? extends VoidResult<? extends ERR>> supplier) {
-            VoidResult<? extends ERR> result = supplier.get();
+        public BooleanResult<ERR> flatRunIfSuccess(
+                Supplier<? extends VoidResult<? extends ERR>> supplier) {
+            Objects.requireNonNull(supplier);
+            VoidResult<? extends ERR> result = Objects.requireNonNull(supplier.get());
             return result.fold(() -> this, BooleanResult::error);
         }
 
         @Override
-        public BooleanResult<ERR> verify(Predicate<Boolean> predicate, Supplier<? extends ERR> errorSupplier) {
-            if(predicate.test(value)) {
+        public BooleanResult<ERR> verify(Predicate<Boolean> predicate,
+                                         Supplier<? extends ERR> errorSupplier) {
+            Objects.requireNonNull(predicate);
+            Objects.requireNonNull(errorSupplier);
+            if (predicate.test(value)) {
                 return safeCast();
             } else {
                 return BooleanResult.error(errorSupplier.get());
@@ -807,8 +858,11 @@ public sealed interface BooleanResult<E> {
         }
 
         @Override
-        public BooleanResult<ERR> verify(Predicate<Boolean> predicate, Function<Boolean, ? extends ERR> errorFunction) {
-            if(predicate.test(value)) {
+        public BooleanResult<ERR> verify(Predicate<Boolean> predicate,
+                                         Function<Boolean, ? extends ERR> errorFunction) {
+            Objects.requireNonNull(predicate);
+            Objects.requireNonNull(errorFunction);
+            if (predicate.test(value)) {
                 return safeCast();
             } else {
                 return BooleanResult.error(errorFunction.apply(value));
@@ -816,22 +870,29 @@ public sealed interface BooleanResult<E> {
         }
 
         @Override
-        public BooleanResult<ERR> verify(Function<Boolean, ? extends VoidResult<? extends ERR>> function) {
-            VoidResult<? extends ERR> apply = function.apply(value);
-            return apply.fold(() -> this, BooleanResult::error);
+        public BooleanResult<ERR> verify(
+                Function<Boolean, ? extends VoidResult<? extends ERR>> function) {
+            Objects.requireNonNull(function);
+            VoidResult<? extends ERR> result = Objects.requireNonNull(function.apply(value));
+            return result.fold(() -> this, BooleanResult::error);
         }
 
         @Override
-        public <N> N fold(Function<Boolean, ? extends N> valueFunction, Function<? super ERR, ? extends N> errorFunction) {
+        public <N> N fold(Function<Boolean, ? extends N> valueFunction,
+                          Function<? super ERR, ? extends N> errorFunction) {
+            Objects.requireNonNull(valueFunction);
+            Objects.requireNonNull(errorFunction);
             return valueFunction.apply(value);
         }
 
         @Override
-        public <N> N fold(Supplier<? extends N> trueSupplier, Supplier<? extends N> falseSupplier, Function<? super ERR, ? extends N> errorFunction) {
-            Objects.requireNonNull(falseSupplier);
+        public <N> N fold(Supplier<? extends N> trueSupplier,
+                          Supplier<? extends N> falseSupplier,
+                          Function<? super ERR, ? extends N> errorFunction) {
             Objects.requireNonNull(trueSupplier);
+            Objects.requireNonNull(falseSupplier);
             Objects.requireNonNull(errorFunction);
-            if(value) {
+            if (value) {
                 return trueSupplier.get();
             } else {
                 return falseSupplier.get();
@@ -855,11 +916,14 @@ public sealed interface BooleanResult<E> {
 
         @Override
         public Boolean orElseGet(Function<? super ERR, Boolean> function) {
+            Objects.requireNonNull(function);
             return value;
         }
 
         @Override
-        public <X extends Throwable> Boolean orElseThrow(Function<? super ERR, ? extends X> function) throws X {
+        public <X extends Throwable> Boolean orElseThrow(
+                Function<? super ERR, ? extends X> function) throws X {
+            Objects.requireNonNull(function);
             return value;
         }
 
@@ -873,7 +937,6 @@ public sealed interface BooleanResult<E> {
             return VoidResult.success();
         }
 
-
         @SuppressWarnings("unchecked")
         private <E1> Success<E1> safeCast() {
             return (Success<E1>) this;
@@ -882,18 +945,26 @@ public sealed interface BooleanResult<E> {
 
     record Error<ERR>(ERR error) implements BooleanResult<ERR> {
 
+        public Error(ERR error) {
+            this.error = Objects.requireNonNull(error);
+        }
+
         @Override
         public <N> Result<N, ERR> map(Function<Boolean, ? extends N> function) {
+            Objects.requireNonNull(function);
             return Result.error(error);
         }
 
         @Override
-        public <N> OptionalResult<N, ERR> mapToOptional(Function<Boolean, ? extends Optional<? extends N>> function) {
+        public <N> OptionalResult<N, ERR> mapToOptional(
+                Function<Boolean, ? extends Optional<? extends N>> function) {
+            Objects.requireNonNull(function);
             return OptionalResult.error(error);
         }
 
         @Override
         public BooleanResult<ERR> mapToBoolean(Function<Boolean, Boolean> function) {
+            Objects.requireNonNull(function);
             return safeCast();
         }
 
@@ -904,134 +975,183 @@ public sealed interface BooleanResult<E> {
         }
 
         @Override
-        public <N> Result<N, ERR> flatMap(Function<Boolean, Result<? extends N, ? extends ERR>> function) {
+        public <N> Result<N, ERR> flatMap(
+                Function<Boolean, Result<? extends N, ? extends ERR>> function) {
+            Objects.requireNonNull(function);
             return Result.error(error);
         }
 
         @Override
-        public <N> OptionalResult<N, ERR> flatMapToOptionalResult(Function<Boolean, OptionalResult<? extends N, ? extends ERR>> function) {
+        public <N> OptionalResult<N, ERR> flatMapToOptionalResult(
+                Function<Boolean, OptionalResult<? extends N, ? extends ERR>> function) {
+            Objects.requireNonNull(function);
             return OptionalResult.error(error);
         }
 
         @Override
-        public BooleanResult<ERR> flatMapToBooleanResult(Function<Boolean, BooleanResult<? extends ERR>> function) {
-            return BooleanResult.error(error);
+        public BooleanResult<ERR> flatMapToBooleanResult(
+                Function<Boolean, BooleanResult<? extends ERR>> function) {
+            Objects.requireNonNull(function);
+            return safeCast();
         }
 
         @Override
-        public VoidResult<ERR> flatMapToVoidResult(Function<Boolean, VoidResult<? extends ERR>> function) {
+        public VoidResult<ERR> flatMapToVoidResult(
+                Function<Boolean, VoidResult<? extends ERR>> function) {
+            Objects.requireNonNull(function);
             return VoidResult.error(error);
         }
 
         @Override
         public BooleanResult<ERR> recover(Function<ERR, Boolean> function) {
-            return BooleanResult.success(function.apply(error));
+            Objects.requireNonNull(function);
+            return BooleanResult.success(Objects.requireNonNull(function.apply(error)));
         }
 
         @SuppressWarnings("unchecked")
         @Override
-        public <F> BooleanResult<F> flatRecover(Function<? super ERR, ? extends BooleanResult<? extends F>> function) {
-            return (BooleanResult<F>) function.apply(error);
+        public <F> BooleanResult<F> flatRecover(
+                Function<? super ERR, ? extends BooleanResult<? extends F>> function) {
+            Objects.requireNonNull(function);
+            return (BooleanResult<F>) Objects.requireNonNull(function.apply(error));
         }
 
         @Override
         public BooleanResult<ERR> consume(Consumer<Boolean> consumer) {
+            Objects.requireNonNull(consumer);
             return safeCast();
         }
 
         @Override
         public BooleanResult<ERR> consumeError(Consumer<? super ERR> errorConsumer) {
+            Objects.requireNonNull(errorConsumer);
             errorConsumer.accept(error);
             return safeCast();
         }
 
         @Override
-        public BooleanResult<ERR> consumeEither(Consumer<Boolean> valueConsumer, Consumer<? super ERR> errorConsumer) {
+        public BooleanResult<ERR> consumeEither(Consumer<Boolean> valueConsumer,
+                                                Consumer<? super ERR> errorConsumer) {
+            Objects.requireNonNull(valueConsumer);
+            Objects.requireNonNull(errorConsumer);
             errorConsumer.accept(error);
             return safeCast();
         }
 
         @Override
-        public BooleanResult<ERR> consumeEither(Runnable trueRunnable, Runnable falseRunnable, Consumer<? super ERR> errorConsumer) {
+        public BooleanResult<ERR> consumeEither(Runnable trueRunnable,
+                                                Runnable falseRunnable,
+                                                Consumer<? super ERR> errorConsumer) {
+            Objects.requireNonNull(trueRunnable);
+            Objects.requireNonNull(falseRunnable);
+            Objects.requireNonNull(errorConsumer);
             errorConsumer.accept(error);
             return safeCast();
         }
 
         @Override
-        public BooleanResult<ERR> flatConsume(Function<Boolean, ? extends VoidResult<? extends ERR>> function) {
+        public BooleanResult<ERR> flatConsume(
+                Function<Boolean, ? extends VoidResult<? extends ERR>> function) {
+            Objects.requireNonNull(function);
             return safeCast();
         }
 
         @Override
         public BooleanResult<ERR> runIfSuccess(Runnable runnable) {
+            Objects.requireNonNull(runnable);
             return safeCast();
         }
 
         @Override
         public BooleanResult<ERR> runIfTrue(Runnable runnable) {
+            Objects.requireNonNull(runnable);
             return safeCast();
         }
 
         @Override
         public BooleanResult<ERR> runIfFalse(Runnable runnable) {
+            Objects.requireNonNull(runnable);
             return safeCast();
         }
 
         @Override
         public BooleanResult<ERR> runIfError(Runnable runnable) {
+            Objects.requireNonNull(runnable);
             runnable.run();
             return safeCast();
         }
 
         @Override
         public BooleanResult<ERR> runEither(Runnable successRunnable, Runnable errorRunnable) {
+            Objects.requireNonNull(successRunnable);
+            Objects.requireNonNull(errorRunnable);
             errorRunnable.run();
             return safeCast();
         }
 
         @Override
-        public BooleanResult<ERR> runEither(Runnable trueRunnable, Runnable falseRunnable, Runnable errorRunnable) {
+        public BooleanResult<ERR> runEither(Runnable trueRunnable,
+                                            Runnable falseRunnable,
+                                            Runnable errorRunnable) {
             Objects.requireNonNull(trueRunnable);
             Objects.requireNonNull(falseRunnable);
+            Objects.requireNonNull(errorRunnable);
             errorRunnable.run();
             return safeCast();
         }
 
         @Override
         public BooleanResult<ERR> runAlways(Runnable runnable) {
+            Objects.requireNonNull(runnable);
             runnable.run();
             return safeCast();
         }
 
         @Override
-        public BooleanResult<ERR> flatRunIfSuccess(Supplier<? extends VoidResult<? extends ERR>> supplier) {
+        public BooleanResult<ERR> flatRunIfSuccess(
+                Supplier<? extends VoidResult<? extends ERR>> supplier) {
+            Objects.requireNonNull(supplier);
             return safeCast();
         }
 
         @Override
-        public BooleanResult<ERR> verify(Predicate<Boolean> predicate, Supplier<? extends ERR> errorSupplier) {
+        public BooleanResult<ERR> verify(Predicate<Boolean> predicate,
+                                         Supplier<? extends ERR> errorSupplier) {
+            Objects.requireNonNull(predicate);
+            Objects.requireNonNull(errorSupplier);
             return safeCast();
         }
 
         @Override
-        public BooleanResult<ERR> verify(Predicate<Boolean> predicate, Function<Boolean, ? extends ERR> errorFunction) {
+        public BooleanResult<ERR> verify(Predicate<Boolean> predicate,
+                                         Function<Boolean, ? extends ERR> errorFunction) {
+            Objects.requireNonNull(predicate);
+            Objects.requireNonNull(errorFunction);
             return safeCast();
         }
 
         @Override
-        public BooleanResult<ERR> verify(Function<Boolean, ? extends VoidResult<? extends ERR>> function) {
+        public BooleanResult<ERR> verify(
+                Function<Boolean, ? extends VoidResult<? extends ERR>> function) {
+            Objects.requireNonNull(function);
             return safeCast();
         }
 
         @Override
-        public <N> N fold(Function<Boolean, ? extends N> valueFunction, Function<? super ERR, ? extends N> errorFunction) {
+        public <N> N fold(Function<Boolean, ? extends N> valueFunction,
+                          Function<? super ERR, ? extends N> errorFunction) {
+            Objects.requireNonNull(valueFunction);
+            Objects.requireNonNull(errorFunction);
             return errorFunction.apply(error);
         }
 
         @Override
-        public <N> N fold(Supplier<? extends N> trueSupplier, Supplier<? extends N> falseSupplier, Function<? super ERR, ? extends N> errorFunction) {
+        public <N> N fold(Supplier<? extends N> trueSupplier,
+                          Supplier<? extends N> falseSupplier,
+                          Function<? super ERR, ? extends N> errorFunction) {
             Objects.requireNonNull(trueSupplier);
             Objects.requireNonNull(falseSupplier);
+            Objects.requireNonNull(errorFunction);
             return errorFunction.apply(error);
         }
 
@@ -1052,12 +1172,15 @@ public sealed interface BooleanResult<E> {
 
         @Override
         public Boolean orElseGet(Function<? super ERR, Boolean> function) {
+            Objects.requireNonNull(function);
             return function.apply(error);
         }
 
         @Override
-        public <X extends Throwable> Boolean orElseThrow(Function<? super ERR, ? extends X> function) throws X {
-            throw function.apply(error);
+        public <X extends Throwable> Boolean orElseThrow(
+                Function<? super ERR, ? extends X> function) throws X {
+            Objects.requireNonNull(function);
+            throw Objects.requireNonNull(function.apply(error));
         }
 
         @Override
@@ -1075,6 +1198,4 @@ public sealed interface BooleanResult<E> {
             return (Error<E1>) this;
         }
     }
-
 }
-

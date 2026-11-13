@@ -11,7 +11,12 @@ import java.util.function.Supplier;
  * state containing a non-{@code null} error value.
  * <p>
  * A variable whose type is {@code VoidResult} should never itself be
- * {@code null}, it should always point to an {@code VoidResult} instance.
+ * {@code null}, it should always point to a {@code VoidResult} instance.
+ * <p>
+ * All methods taking functional arguments (functions, suppliers, consumers
+ * and runnables) check them for {@code null} eagerly. A {@code null} argument
+ * results in a {@link NullPointerException} regardless of the state of the
+ * result, even if the argument would not have been used.
  *
  * @param <E> the type of the error value
  */
@@ -62,8 +67,8 @@ public sealed interface VoidResult<E> {
      * provided by the given supplier, otherwise returns a {@code Result}
      * containing the error value of this {@code VoidResult}.
      *
-     * @param supplier the supplier to provide the value if success state, may
-     * not be {@code null}
+     * @param supplier the supplier to provide the value if success state, must
+     * not return {@code null}
      * @param <N> the type of the value provided by the supplier
      * @return a {@code Result} containing the value provided by the given
      * supplier, if in success state, otherwise a {@code Result} containing the
@@ -74,17 +79,17 @@ public sealed interface VoidResult<E> {
     <N> Result<N, E> replace(Supplier<? extends N> supplier);
 
     /**
-     * If in success state, returns a {@code OptionalResult} containing the
-     * optional value provided by given supplier, otherwise returns a
+     * If in success state, returns an {@code OptionalResult} containing the
+     * optional value provided by the given supplier, otherwise returns an
      * {@code OptionalResult} containing the error value of this
      * {@code VoidResult}.
      *
      * @param supplier the supplier to provide the optional value if success
-     * state, may not be {@code null}
+     * state, must not return {@code null}
      * @param <N> the type of the value which may be present in the
      * {@code Optional} provided by the supplier
-     * @return a {@code OptionalResult} containing the optional value provided
-     * by the given supplier, if in success state, otherwise a
+     * @return an {@code OptionalResult} containing the optional value provided
+     * by the given supplier, if in success state, otherwise an
      * {@code OptionalResult} containing the error value of this
      * {@code VoidResult}
      * @throws NullPointerException if the given supplier is {@code null} or
@@ -100,7 +105,7 @@ public sealed interface VoidResult<E> {
      * {@code VoidResult}.
      *
      * @param supplier the supplier to provide the boolean value if success
-     * state, may not be {@code null}
+     * state, must not return {@code null}
      * @return a {@code BooleanResult} containing the boolean value provided by
      * the given supplier, if in success state, otherwise a
      * {@code BooleanResult} containing the error value of this
@@ -171,14 +176,18 @@ public sealed interface VoidResult<E> {
      * success state
      * @return the {@code VoidResult} provided by the supplier, if in success
      * state, otherwise the unaltered {@code VoidResult} in error state
-     * @throws NullPointerException if the given mapping function is
-     * {@code null} or returns {@code null}
+     * @throws NullPointerException if the given supplier is {@code null} or
+     * returns {@code null}
      */
-    VoidResult<E> flatReplaceToVoidResult(Supplier<VoidResult<? extends E>> supplier);
+    VoidResult<E> flatReplaceToVoidResult(
+            Supplier<VoidResult<? extends E>> supplier);
 
     /**
      * If in error state, returns a new {@code VoidResult} in success state,
-     * otherwise returns the unaltered {@code VoidResult} in success state.
+     * discarding the error value, otherwise returns the unaltered
+     * {@code VoidResult} in success state.
+     * <p>
+     * This method never throws.
      *
      * @return a {@code VoidResult} in success state
      */
@@ -191,8 +200,12 @@ public sealed interface VoidResult<E> {
      *
      * @param function the mapping function to apply to the error value to
      * convert to a new {@code VoidResult}, if error state
+     * @param <F> the type of error value which may be present in the
+     * {@code VoidResult} returned by the mapping function
      * @return the {@code VoidResult} returned from the mapping function, if in
      * error state, otherwise the unaltered {@code VoidResult} in success state
+     * @throws NullPointerException if the given mapping function is
+     * {@code null} or returns {@code null}
      */
     <F> VoidResult<F> flatRecover(
             Function<? super E, ? extends VoidResult<? extends F>> function);
@@ -208,14 +221,14 @@ public sealed interface VoidResult<E> {
     VoidResult<E> consumeError(Consumer<? super E> errorConsumer);
 
     /**
-     * If in success state, runs the success-runnable. If in error state,
-     * applies the error value to the given error-consumer.
+     * If in success state, runs the given success runnable. If in error state,
+     * applies the error value to the given error consumer.
      *
      * @param successRunnable the runnable to run if success state
      * @param errorConsumer the consumer which accepts the error value
      * @return the original {@code VoidResult} unaltered
-     * @throws NullPointerException if either the given runnable or consumer is
-     * {@code null}
+     * @throws NullPointerException if either the given runnable or the
+     * consumer is {@code null}
      */
     VoidResult<E> consumeEither(
             Runnable successRunnable,
@@ -274,30 +287,31 @@ public sealed interface VoidResult<E> {
      * @throws NullPointerException if the given supplier is {@code null} or
      * returns {@code null}
      */
-    VoidResult<E> flatRunIfSuccess(Supplier<? extends VoidResult<? extends E>> supplier);
+    VoidResult<E> flatRunIfSuccess(
+            Supplier<? extends VoidResult<? extends E>> supplier);
 
     /**
      * Retrieve a value from this {@code VoidResult} by folding the states. If
-     * in success state, return the value provided by the value-supplier. If in
-     * error state, return the value of applying the error-function to the error
-     * value.
+     * in success state, return the value provided by the value supplier. If in
+     * error state, return the value of applying the error function to the
+     * error value.
      *
-     * @param <N> the type of retrieved value
-     * @param valueSupplier supplier to provide the value, if success state, may
-     * return {@code null}
+     * @param <N> the type of the retrieved value
+     * @param valueSupplier the supplier to provide the value, if success
+     * state, may return {@code null}
      * @param errorFunction the mapping function to apply to the error value, if
      * error state, may return {@code null}
-     * @return the folded value mapped from either the success value or error
-     * value, may be {@code null}
-     * @throws NullPointerException if either the given supplier or function is
-     * {@code null}
+     * @return the folded value provided by the value supplier or mapped from
+     * the error value, may be {@code null}
+     * @throws NullPointerException if either the given supplier or the
+     * function is {@code null}
      */
     <N> N fold(Supplier<? extends N> valueSupplier,
-                      Function<? super E, ? extends N> errorFunction);
+               Function<? super E, ? extends N> errorFunction);
 
     /**
-     * If in success state, does nothing, otherwise throws the exception returned
-     * by the given function.
+     * If in success state, does nothing, otherwise throws the exception
+     * returned by the given function.
      *
      * @param <X> type of the exception to be thrown
      * @param function the mapping function producing an exception by applying
@@ -318,7 +332,7 @@ public sealed interface VoidResult<E> {
      * The returned {@code OptionalResult} will never have a value.
      *
      * @param <N> the type of the success value in the returned
-     * {@code OptionalResult}, inferred from the variable
+     * {@code OptionalResult}, inferred from the context
      * @return an {@code OptionalResult} in empty success state or in error
      * state containing the error value from this {@code VoidResult}
      */
@@ -328,8 +342,9 @@ public sealed interface VoidResult<E> {
      * Handle the given {@code CheckedRunnable}. If the {@code CheckedRunnable}
      * executes successfully, the {@code VoidResult} will be in success state.
      * If the {@code CheckedRunnable} throws an exception, the
-     * {@code VoidResult} will be in error state containing the thrown exception.
-     *
+     * {@code VoidResult} will be in error state containing the thrown
+     * exception.
+     * <p>
      * Note! A custom {@code CheckedRunnable} is used here instead of
      * {@code Runnable} to allow handling of checked exceptions.
      *
@@ -354,25 +369,28 @@ public sealed interface VoidResult<E> {
      * If the {@code CheckedRunnable} throws an exception, the
      * {@code VoidResult} will be in error state containing the result after
      * mapping the exception with the given exception mapper function.
-     *
+     * <p>
      * Note! A custom {@code CheckedRunnable} is used here instead of
      * {@code Runnable} to allow handling of checked exceptions.
      *
      * @param runnable the {@code CheckedRunnable} to handle
+     * @param exceptionMapper the function mapping a thrown exception to an
+     * error value
      * @param <E> type of the error value after mapping a thrown exception
      * @return a {@code VoidResult} either in success state, or in error state
      * containing the result after mapping the exception thrown by the
      * {@code CheckedRunnable}
-     * @throws NullPointerException if the given runnable is {@code null} or
-     * the given exception mapper function is {@code null} or returns
+     * @throws NullPointerException if the given runnable is {@code null}, or
+     * if the given exception mapper function is {@code null} or returns
      * {@code null}
      */
     static <E> VoidResult<E> handle(CheckedRunnable runnable,
-                                           Function<Exception, E> exceptionMapper) {
+                                    Function<Exception, E> exceptionMapper) {
+        Objects.requireNonNull(runnable);
         Objects.requireNonNull(exceptionMapper);
         return handle(runnable).mapError(exceptionMapper);
     }
-    
+
     record Success<ERR>() implements VoidResult<ERR> {
 
         @Override
@@ -383,107 +401,135 @@ public sealed interface VoidResult<E> {
 
         @Override
         public <N> Result<N, ERR> replace(Supplier<? extends N> supplier) {
+            Objects.requireNonNull(supplier);
             return Result.success(supplier.get());
         }
 
         @Override
-        public <N> OptionalResult<N, ERR> replaceWithOptional(Supplier<Optional<? extends N>> supplier) {
+        public <N> OptionalResult<N, ERR> replaceWithOptional(
+                Supplier<Optional<? extends N>> supplier) {
+            Objects.requireNonNull(supplier);
             return OptionalResult.success(supplier.get());
         }
 
         @Override
         public BooleanResult<ERR> replaceWithBoolean(Supplier<Boolean> supplier) {
-            return BooleanResult.success(supplier.get());
+            Objects.requireNonNull(supplier);
+            return BooleanResult.success(Objects.requireNonNull(supplier.get()));
         }
 
         @SuppressWarnings("unchecked")
         @Override
-        public <N> Result<N, ERR> flatReplace(Supplier<Result<? extends N, ? extends ERR>> supplier) {
-            return (Result<N, ERR>) supplier.get();
+        public <N> Result<N, ERR> flatReplace(
+                Supplier<Result<? extends N, ? extends ERR>> supplier) {
+            Objects.requireNonNull(supplier);
+            return (Result<N, ERR>) Objects.requireNonNull(supplier.get());
         }
 
         @SuppressWarnings("unchecked")
         @Override
-        public <N> OptionalResult<N, ERR> flatReplaceToOptionalResult(Supplier<OptionalResult<? extends N, ? extends ERR>> supplier) {
-            return (OptionalResult<N, ERR>) supplier.get();
+        public <N> OptionalResult<N, ERR> flatReplaceToOptionalResult(
+                Supplier<OptionalResult<? extends N, ? extends ERR>> supplier) {
+            Objects.requireNonNull(supplier);
+            return (OptionalResult<N, ERR>) Objects.requireNonNull(supplier.get());
         }
 
         @SuppressWarnings("unchecked")
         @Override
-        public BooleanResult<ERR> flatReplaceToBooleanResult(Supplier<BooleanResult<? extends ERR>> supplier) {
-            return (BooleanResult<ERR>) supplier.get();
+        public BooleanResult<ERR> flatReplaceToBooleanResult(
+                Supplier<BooleanResult<? extends ERR>> supplier) {
+            Objects.requireNonNull(supplier);
+            return (BooleanResult<ERR>) Objects.requireNonNull(supplier.get());
         }
 
         @SuppressWarnings("unchecked")
         @Override
-        public VoidResult<ERR> flatReplaceToVoidResult(Supplier<VoidResult<? extends ERR>> supplier) {
-            return (VoidResult<ERR>) supplier.get();
+        public VoidResult<ERR> flatReplaceToVoidResult(
+                Supplier<VoidResult<? extends ERR>> supplier) {
+            Objects.requireNonNull(supplier);
+            return (VoidResult<ERR>) Objects.requireNonNull(supplier.get());
         }
 
         @Override
         public VoidResult<ERR> recover() {
-            return VoidResult.success();
+            return safeCast();
         }
 
         @Override
-        public <F> VoidResult<F> flatRecover(Function<? super ERR, ? extends VoidResult<? extends F>> function) {
+        public <F> VoidResult<F> flatRecover(
+                Function<? super ERR, ? extends VoidResult<? extends F>> function) {
             Objects.requireNonNull(function);
             return safeCast();
         }
 
         @Override
         public VoidResult<ERR> consumeError(Consumer<? super ERR> errorConsumer) {
+            Objects.requireNonNull(errorConsumer);
             return safeCast();
         }
 
         @Override
-        public VoidResult<ERR> consumeEither(Runnable successRunnable, Consumer<? super ERR> errorConsumer) {
+        public VoidResult<ERR> consumeEither(Runnable successRunnable,
+                                             Consumer<? super ERR> errorConsumer) {
+            Objects.requireNonNull(successRunnable);
+            Objects.requireNonNull(errorConsumer);
             successRunnable.run();
             return safeCast();
         }
 
         @Override
         public VoidResult<ERR> runIfSuccess(Runnable runnable) {
+            Objects.requireNonNull(runnable);
             runnable.run();
             return safeCast();
         }
 
         @Override
         public VoidResult<ERR> runIfError(Runnable runnable) {
+            Objects.requireNonNull(runnable);
             return safeCast();
         }
 
         @Override
         public VoidResult<ERR> runEither(Runnable successRunnable, Runnable errorRunnable) {
+            Objects.requireNonNull(successRunnable);
+            Objects.requireNonNull(errorRunnable);
             successRunnable.run();
             return safeCast();
         }
 
         @Override
         public VoidResult<ERR> runAlways(Runnable runnable) {
+            Objects.requireNonNull(runnable);
             runnable.run();
             return safeCast();
         }
 
-        @SuppressWarnings("unchecked")
         @Override
-        public VoidResult<ERR> flatRunIfSuccess(Supplier<? extends VoidResult<? extends ERR>> supplier) {
-            return (VoidResult<ERR>) Objects.requireNonNull(supplier.get());
+        public VoidResult<ERR> flatRunIfSuccess(
+                Supplier<? extends VoidResult<? extends ERR>> supplier) {
+            Objects.requireNonNull(supplier);
+            VoidResult<? extends ERR> result = Objects.requireNonNull(supplier.get());
+            return result.fold(() -> this, VoidResult::error);
         }
 
         @Override
-        public <N> N fold(Supplier<? extends N> valueSupplier, Function<? super ERR, ? extends N> errorFunction) {
+        public <N> N fold(Supplier<? extends N> valueSupplier,
+                          Function<? super ERR, ? extends N> errorFunction) {
+            Objects.requireNonNull(valueSupplier);
+            Objects.requireNonNull(errorFunction);
             return valueSupplier.get();
         }
 
         @Override
-        public <X extends Throwable> void orElseThrow(Function<? super ERR, ? extends X> function) throws X {
-
+        public <X extends Throwable> void orElseThrow(
+                Function<? super ERR, ? extends X> function) throws X {
+            Objects.requireNonNull(function);
         }
 
         @Override
         public <N> OptionalResult<N, ERR> toOptionalResult() {
-            return OptionalResult.success(Optional.empty());
+            return OptionalResult.empty();
         }
 
         @SuppressWarnings("unchecked")
@@ -491,7 +537,7 @@ public sealed interface VoidResult<E> {
             return (Success<E1>) this;
         }
     }
-    
+
     record Error<ERR>(ERR error) implements VoidResult<ERR> {
 
         public Error(ERR error) {
@@ -506,37 +552,49 @@ public sealed interface VoidResult<E> {
 
         @Override
         public <N> Result<N, ERR> replace(Supplier<? extends N> supplier) {
+            Objects.requireNonNull(supplier);
             return Result.error(error);
         }
 
         @Override
-        public <N> OptionalResult<N, ERR> replaceWithOptional(Supplier<Optional<? extends N>> supplier) {
+        public <N> OptionalResult<N, ERR> replaceWithOptional(
+                Supplier<Optional<? extends N>> supplier) {
+            Objects.requireNonNull(supplier);
             return OptionalResult.error(error);
         }
 
         @Override
         public BooleanResult<ERR> replaceWithBoolean(Supplier<Boolean> supplier) {
+            Objects.requireNonNull(supplier);
             return BooleanResult.error(error);
         }
 
         @Override
-        public <N> Result<N, ERR> flatReplace(Supplier<Result<? extends N, ? extends ERR>> supplier) {
+        public <N> Result<N, ERR> flatReplace(
+                Supplier<Result<? extends N, ? extends ERR>> supplier) {
+            Objects.requireNonNull(supplier);
             return Result.error(error);
         }
 
         @Override
-        public <N> OptionalResult<N, ERR> flatReplaceToOptionalResult(Supplier<OptionalResult<? extends N, ? extends ERR>> supplier) {
+        public <N> OptionalResult<N, ERR> flatReplaceToOptionalResult(
+                Supplier<OptionalResult<? extends N, ? extends ERR>> supplier) {
+            Objects.requireNonNull(supplier);
             return OptionalResult.error(error);
         }
 
         @Override
-        public BooleanResult<ERR> flatReplaceToBooleanResult(Supplier<BooleanResult<? extends ERR>> supplier) {
+        public BooleanResult<ERR> flatReplaceToBooleanResult(
+                Supplier<BooleanResult<? extends ERR>> supplier) {
+            Objects.requireNonNull(supplier);
             return BooleanResult.error(error);
         }
 
         @Override
-        public VoidResult<ERR> flatReplaceToVoidResult(Supplier<VoidResult<? extends ERR>> supplier) {
-            return VoidResult.error(error);
+        public VoidResult<ERR> flatReplaceToVoidResult(
+                Supplier<VoidResult<? extends ERR>> supplier) {
+            Objects.requireNonNull(supplier);
+            return safeCast();
         }
 
         @Override
@@ -546,60 +604,76 @@ public sealed interface VoidResult<E> {
 
         @SuppressWarnings("unchecked")
         @Override
-        public <F> VoidResult<F> flatRecover(Function<? super ERR, ? extends VoidResult<? extends F>> function) {
+        public <F> VoidResult<F> flatRecover(
+                Function<? super ERR, ? extends VoidResult<? extends F>> function) {
             Objects.requireNonNull(function);
-            return (VoidResult<F>) function.apply(error);
+            return (VoidResult<F>) Objects.requireNonNull(function.apply(error));
         }
 
         @Override
         public VoidResult<ERR> consumeError(Consumer<? super ERR> errorConsumer) {
+            Objects.requireNonNull(errorConsumer);
             errorConsumer.accept(error);
             return safeCast();
         }
 
         @Override
-        public VoidResult<ERR> consumeEither(Runnable successRunnable, Consumer<? super ERR> errorConsumer) {
+        public VoidResult<ERR> consumeEither(Runnable successRunnable,
+                                             Consumer<? super ERR> errorConsumer) {
+            Objects.requireNonNull(successRunnable);
+            Objects.requireNonNull(errorConsumer);
             errorConsumer.accept(error);
             return safeCast();
         }
 
         @Override
         public VoidResult<ERR> runIfSuccess(Runnable runnable) {
+            Objects.requireNonNull(runnable);
             return safeCast();
         }
 
         @Override
         public VoidResult<ERR> runIfError(Runnable runnable) {
+            Objects.requireNonNull(runnable);
             runnable.run();
             return safeCast();
         }
 
         @Override
         public VoidResult<ERR> runEither(Runnable successRunnable, Runnable errorRunnable) {
+            Objects.requireNonNull(successRunnable);
+            Objects.requireNonNull(errorRunnable);
             errorRunnable.run();
             return safeCast();
         }
 
         @Override
         public VoidResult<ERR> runAlways(Runnable runnable) {
+            Objects.requireNonNull(runnable);
             runnable.run();
             return safeCast();
         }
 
         @Override
-        public VoidResult<ERR> flatRunIfSuccess(Supplier<? extends VoidResult<? extends ERR>> supplier) {
+        public VoidResult<ERR> flatRunIfSuccess(
+                Supplier<? extends VoidResult<? extends ERR>> supplier) {
             Objects.requireNonNull(supplier);
             return safeCast();
         }
 
         @Override
-        public <N> N fold(Supplier<? extends N> valueSupplier, Function<? super ERR, ? extends N> errorFunction) {
+        public <N> N fold(Supplier<? extends N> valueSupplier,
+                          Function<? super ERR, ? extends N> errorFunction) {
+            Objects.requireNonNull(valueSupplier);
+            Objects.requireNonNull(errorFunction);
             return errorFunction.apply(error);
         }
 
         @Override
-        public <X extends Throwable> void orElseThrow(Function<? super ERR, ? extends X> function) throws X {
-            throw function.apply(error);
+        public <X extends Throwable> void orElseThrow(
+                Function<? super ERR, ? extends X> function) throws X {
+            Objects.requireNonNull(function);
+            throw Objects.requireNonNull(function.apply(error));
         }
 
         @Override
@@ -610,7 +684,5 @@ public sealed interface VoidResult<E> {
         private Error<ERR> safeCast() {
             return this;
         }
-
     }
 }
-
