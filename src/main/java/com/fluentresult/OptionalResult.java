@@ -267,42 +267,35 @@ public sealed interface OptionalResult<T, E> {
      * If in empty success state, returns the {@code OptionalResult} provided by
      * the given supplier, otherwise returns the unaltered
      * {@code OptionalResult} in success state with a value or in error state.
-     * <p>
-     * Note: when this {@code OptionalResult} contains a success value, it is
-     * returned as is, so {@code N} should be the same type as {@code T}.
      *
-     * @param <N> the type of success value which may be present in the
-     * {@code OptionalResult} provided by the supplier
-     * @param supplier the supplier to call if in empty success state
+     * @param supplier the supplier providing the replacement
+     * {@code OptionalResult}, if in empty success state
      * @return the {@code OptionalResult} provided by the supplier, if in empty
      * success state, otherwise the unaltered {@code OptionalResult} in success
      * state with a value or in error state
      * @throws NullPointerException if the given supplier is {@code null} or
      * returns {@code null}
      */
-    <N> OptionalResult<N, E> flatReplaceEmpty(
-            Supplier<OptionalResult<N, E>> supplier);
+    OptionalResult<T, E> flatReplaceEmpty(
+            Supplier<? extends OptionalResult<? extends T, ? extends E>> supplier);
 
     /**
      * If in empty success state, returns the {@code Result} provided by the
-     * given supplier, otherwise returns a {@code Result} with the existing
-     * success value or error value.
-     * <p>
-     * Note: when this {@code OptionalResult} contains a success value, that
-     * value is placed in the returned {@code Result}, so {@code N} should be
-     * the same type as {@code T}.
+     * given supplier. If in success state with a value, returns a
+     * {@code Result} in success state containing that value. If in error
+     * state, returns a {@code Result} containing the error value of this
+     * {@code OptionalResult}.
      *
-     * @param <N> the type of success value which may be present in the
-     * {@code Result} provided by the supplier
-     * @param supplier the supplier to call if in empty success state
+     * @param supplier the supplier providing the {@code Result}, if in empty
+     * success state
      * @return the {@code Result} provided by the supplier, if in empty success
-     * state, otherwise a {@code Result} with the existing success value or
-     * error value
+     * state, otherwise a {@code Result} containing the existing success value
+     * or error value
      * @throws NullPointerException if the given supplier is {@code null} or
      * returns {@code null}
      */
-    <N> Result<N, E> flatReplaceEmptyWithResult(Supplier<Result<N, E>> supplier);
-
+    Result<T, E> flatReplaceEmptyWithResult(
+            Supplier<? extends Result<? extends T, ? extends E>> supplier);
     /**
      * If in success state, returns the {@code BooleanResult} from applying
      * the given mapping function to the optional success value, otherwise
@@ -1064,19 +1057,18 @@ public sealed interface OptionalResult<T, E> {
                     function.apply(Optional.of(value)));
         }
 
-        @SuppressWarnings("unchecked")
         @Override
-        public <N> OptionalResult<N, ERR> flatReplaceEmpty(
-                Supplier<OptionalResult<N, ERR>> supplier) {
+        public OptionalResult<S, ERR> flatReplaceEmpty(
+                Supplier<? extends OptionalResult<? extends S, ? extends ERR>> supplier) {
             Objects.requireNonNull(supplier);
-            return (OptionalResult<N, ERR>) this;
+            return this;
         }
 
-        @SuppressWarnings("unchecked")
         @Override
-        public <N> Result<N, ERR> flatReplaceEmptyWithResult(Supplier<Result<N, ERR>> supplier) {
+        public Result<S, ERR> flatReplaceEmptyWithResult(
+                Supplier<? extends Result<? extends S, ? extends ERR>> supplier) {
             Objects.requireNonNull(supplier);
-            return (Result<N, ERR>) Result.success(value);
+            return Result.success(value);
         }
 
         @SuppressWarnings("unchecked")
@@ -1463,17 +1455,20 @@ public sealed interface OptionalResult<T, E> {
                     function.apply(Optional.empty()));
         }
 
+        @SuppressWarnings("unchecked")
         @Override
-        public <N> OptionalResult<N, ERR> flatReplaceEmpty(
-                Supplier<OptionalResult<N, ERR>> supplier) {
+        public OptionalResult<S, ERR> flatReplaceEmpty(
+                Supplier<? extends OptionalResult<? extends S, ? extends ERR>> supplier) {
             Objects.requireNonNull(supplier);
-            return Objects.requireNonNull(supplier.get());
+            return (OptionalResult<S, ERR>) Objects.requireNonNull(supplier.get());
         }
 
+        @SuppressWarnings("unchecked")
         @Override
-        public <N> Result<N, ERR> flatReplaceEmptyWithResult(Supplier<Result<N, ERR>> supplier) {
+        public Result<S, ERR> flatReplaceEmptyWithResult(
+                Supplier<? extends Result<? extends S, ? extends ERR>> supplier) {
             Objects.requireNonNull(supplier);
-            return Objects.requireNonNull(supplier.get());
+            return (Result<S, ERR>) Objects.requireNonNull(supplier.get());
         }
 
         @SuppressWarnings("unchecked")
@@ -1842,14 +1837,15 @@ public sealed interface OptionalResult<T, E> {
         }
 
         @Override
-        public <N> OptionalResult<N, ERR> flatReplaceEmpty(
-                Supplier<OptionalResult<N, ERR>> supplier) {
+        public OptionalResult<S, ERR> flatReplaceEmpty(
+                Supplier<? extends OptionalResult<? extends S, ? extends ERR>> supplier) {
             Objects.requireNonNull(supplier);
-            return OptionalResult.error(error);
+            return this;
         }
 
         @Override
-        public <N> Result<N, ERR> flatReplaceEmptyWithResult(Supplier<Result<N, ERR>> supplier) {
+        public Result<S, ERR> flatReplaceEmptyWithResult(
+                Supplier<? extends Result<? extends S, ? extends ERR>> supplier) {
             Objects.requireNonNull(supplier);
             return Result.error(error);
         }
