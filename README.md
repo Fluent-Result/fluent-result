@@ -476,7 +476,7 @@ public Status getCustomerStatus() {
 
 [`fold(`<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`Function<Boolean, N> successFunction,`<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`Function<E, N> errorFunction)`](https://fluent-result.github.io/fluent-result/com/fluentresult/fluentresult/BooleanResult.html#fold(java.util.function.Function,java.util.function.Function))<br/>
 [`fold(`<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`Supplier<N> trueSupplier,`<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`Supplier<N> falseSupplier,`<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`Function<E, N> errorFunction)`](https://fluent-result.github.io/fluent-result/com/fluentresult/fluentresult/BooleanResult.html#fold(java.util.function.Supplier,java.util.function.Supplier,java.util.function.Function))<br/>
-[`orElse(Boolean other)`](https://fluent-result.github.io/fluent-result/com/fluentresult/fluentresult/BooleanResult.html#orElse(java.lang.Boolean))<br/>
+[`orElse(boolean other)`](https://fluent-result.github.io/fluent-result/com/fluentresult/fluentresult/BooleanResult.html#orElse(boolean))<br/>
 [`orElseTrue()`](https://fluent-result.github.io/fluent-result/com/fluentresult/fluentresult/BooleanResult.html#orElseTrue())<br/>
 [`orElseFalse()`](https://fluent-result.github.io/fluent-result/com/fluentresult/fluentresult/BooleanResult.html#orElseFalse())<br/>
 [`orElseGet(Function<E, Boolean> function)`](https://fluent-result.github.io/fluent-result/com/fluentresult/fluentresult/BooleanResult.html#orElseGet(java.util.function.Function))<br/>

@@ -2,6 +2,9 @@ package com.fluentresult;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+import java.util.function.Function;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
@@ -44,5 +47,21 @@ class OptionalResult_Map_Test {
                 fail("Expected error");
             }
         }
+    }
+
+    @Test
+    void map_functionAcceptingSupertypeOfOptional_canBeUsed() {
+        // Reusable function declared for any optional of a Number subtype. It is
+        // a Function<Optional<? extends Number>, String>, which is not a
+        // Function<Optional<Integer>, String>, but is a
+        // Function<? super Optional<Integer>, String>.
+        Function<Optional<? extends Number>, String> describe =
+                o -> o.map(n -> "number " + n).orElse("no number");
+
+        Result<String, String> present = OptionalResult.<Integer, String>success(1).map(describe);
+        Result<String, String> empty = OptionalResult.<Integer, String>empty().map(describe);
+
+        assertThat(present).isEqualTo(Result.success("number 1"));
+        assertThat(empty).isEqualTo(Result.success("no number"));
     }
 }
