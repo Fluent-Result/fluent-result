@@ -1,7 +1,10 @@
 package com.fluentresult.assertj;
 
 import com.fluentresult.OptionalResult;
+import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.Test;
+
+import java.util.function.Consumer;
 
 import static com.fluentresult.assertj.FluentResultAssertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -171,7 +174,45 @@ class OptionalResultAssert_Test {
 
     @Test
     void hasValueSatisfying_nullRequirements_shouldThrow() {
-        assertThatThrownBy(() -> assertThat(error).hasValueSatisfying(null))
+        assertThatThrownBy(() -> assertThat(error).hasValueSatisfying((Consumer<Object>) null))
+                .isInstanceOf(NullPointerException.class);
+    }
+
+    @Test
+    void hasValueSatisfyingCondition_satisfied_shouldPass() {
+        assertThat(success)
+                .hasValueSatisfying(new Condition<>(value -> value.startsWith("Succ"), "starts with Succ"))
+                .isSuccess();
+    }
+
+    @Test
+    void hasValueSatisfyingCondition_notSatisfied_shouldFail() {
+        assertThatThrownBy(() -> assertThat(success)
+                .hasValueSatisfying(new Condition<>(value -> value.startsWith("Other"), "starts with Other")))
+                .isInstanceOf(AssertionError.class)
+                .hasMessageContaining("Expecting OptionalResult value:")
+                .hasMessageContaining("Success")
+                .hasMessageContaining("to satisfy:")
+                .hasMessageContaining("starts with Other");
+    }
+
+    @Test
+    void hasValueSatisfyingCondition_empty_shouldFail() {
+        assertThatThrownBy(() -> assertThat(empty).hasValueSatisfying(new Condition<>(value -> true, "anything")))
+                .isInstanceOf(AssertionError.class)
+                .hasMessageContaining("Expecting OptionalResult to be Value but was:");
+    }
+
+    @Test
+    void hasValueSatisfyingCondition_error_shouldFail() {
+        assertThatThrownBy(() -> assertThat(error).hasValueSatisfying(new Condition<>(value -> true, "anything")))
+                .isInstanceOf(AssertionError.class)
+                .hasMessageContaining("Expecting OptionalResult to be Value but was:");
+    }
+
+    @Test
+    void hasValueSatisfyingCondition_nullCondition_shouldThrow() {
+        assertThatThrownBy(() -> assertThat(error).hasValueSatisfying((Condition<Object>) null))
                 .isInstanceOf(NullPointerException.class);
     }
 

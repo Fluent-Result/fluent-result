@@ -20,6 +20,11 @@ public final class FluentResultAssertions {
     /**
      * Creates a new assertion for the given {@code Result}.
      *
+     * {@snippet lang="java" :
+     * Result<Integer, String> result = Result.success(42);
+     * assertThat(result).hasValue(42);
+     * }
+     *
      * @param actual the {@code Result} to make assertions on
      * @param <T> the type of the success value
      * @param <E> the type of the error value
@@ -31,6 +36,11 @@ public final class FluentResultAssertions {
 
     /**
      * Creates a new assertion for the given {@code OptionalResult}.
+     *
+     * {@snippet lang="java" :
+     * OptionalResult<Integer, String> result = OptionalResult.empty();
+     * assertThat(result).isEmpty();
+     * }
      *
      * @param actual the {@code OptionalResult} to make assertions on
      * @param <T> the type of the success value
@@ -44,6 +54,11 @@ public final class FluentResultAssertions {
     /**
      * Creates a new assertion for the given {@code BooleanResult}.
      *
+     * {@snippet lang="java" :
+     * BooleanResult<String> result = BooleanResult.successTrue();
+     * assertThat(result).isTrue();
+     * }
+     *
      * @param actual the {@code BooleanResult} to make assertions on
      * @param <E> the type of the error value
      * @return the created assertion object
@@ -54,6 +69,11 @@ public final class FluentResultAssertions {
 
     /**
      * Creates a new assertion for the given {@code VoidResult}.
+     *
+     * {@snippet lang="java" :
+     * VoidResult<String> result = VoidResult.success();
+     * assertThat(result).isSuccess();
+     * }
      *
      * @param actual the {@code VoidResult} to make assertions on
      * @param <E> the type of the error value

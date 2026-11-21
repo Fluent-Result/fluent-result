@@ -2,6 +2,7 @@ package com.fluentresult.assertj;
 
 import com.fluentresult.Result;
 import org.assertj.core.api.AbstractAssert;
+import org.assertj.core.api.Condition;
 import org.assertj.core.api.InstanceOfAssertFactory;
 import org.assertj.core.api.ObjectAssert;
 
@@ -25,6 +26,11 @@ public final class ResultAssert<T, E> extends AbstractAssert<ResultAssert<T, E>,
     /**
      * Verifies that the actual {@code Result} is in success state.
      *
+     * {@snippet lang="java" :
+     * Result<Integer, String> result = Result.success(42);
+     * assertThat(result).isSuccess();
+     * }
+     *
      * @return this assertion object
      * @throws AssertionError if the actual {@code Result} is {@code null} or
      * in error state
@@ -36,6 +42,11 @@ public final class ResultAssert<T, E> extends AbstractAssert<ResultAssert<T, E>,
 
     /**
      * Verifies that the actual {@code Result} is in error state.
+     *
+     * {@snippet lang="java" :
+     * Result<Integer, String> result = Result.error("failed");
+     * assertThat(result).isError();
+     * }
      *
      * @return this assertion object
      * @throws AssertionError if the actual {@code Result} is {@code null} or
@@ -49,6 +60,11 @@ public final class ResultAssert<T, E> extends AbstractAssert<ResultAssert<T, E>,
     /**
      * Verifies that the actual {@code Result} is in success state with a
      * value equal to the given one.
+     *
+     * {@snippet lang="java" :
+     * Result<Integer, String> result = Result.success(42);
+     * assertThat(result).hasValue(42);
+     * }
      *
      * @param expected the expected success value
      * @return this assertion object
@@ -67,6 +83,18 @@ public final class ResultAssert<T, E> extends AbstractAssert<ResultAssert<T, E>,
     /**
      * Verifies that the actual {@code Result} is in success state with a
      * value satisfying the given requirements.
+     * <p>
+     * Unlike {@link #value()}, which switches to an assertion object on the
+     * success value, this returns this assertion object, so further
+     * assertions can be chained on the {@code Result}. The requirements also
+     * receive the value as {@code T}, so {@code assertThat(value)} inside
+     * them gives the type-specific assertion object without needing
+     * {@link #value(InstanceOfAssertFactory)}.
+     *
+     * {@snippet lang="java" :
+     * Result<String, String> result = Result.success("hello");
+     * assertThat(result).hasValueSatisfying(value -> assertThat(value).startsWith("he"));
+     * }
      *
      * @param requirements the requirements, expressed as assertions on the
      * success value
@@ -82,8 +110,38 @@ public final class ResultAssert<T, E> extends AbstractAssert<ResultAssert<T, E>,
     }
 
     /**
+     * Verifies that the actual {@code Result} is in success state with a
+     * value satisfying the given condition.
+     *
+     * {@snippet lang="java" :
+     * Result<Integer, String> result = Result.success(42);
+     * Condition<Integer> positive = new Condition<>(value -> value > 0, "positive");
+     * assertThat(result).hasValueSatisfying(positive);
+     * }
+     *
+     * @param condition the condition the success value must satisfy
+     * @return this assertion object
+     * @throws NullPointerException if the given condition is {@code null}
+     * @throws AssertionError if the actual {@code Result} is {@code null}, in
+     * error state, or the success value does not satisfy the condition
+     */
+    public ResultAssert<T, E> hasValueSatisfying(Condition<? super T> condition) {
+        Objects.requireNonNull(condition);
+        T value = successValue();
+        if (!condition.matches(value)) {
+            throw failure("%nExpecting Result value:%n  %s%nto satisfy:%n  %s", value, condition);
+        }
+        return myself;
+    }
+
+    /**
      * Verifies that the actual {@code Result} is in error state with an error
      * value equal to the given one.
+     *
+     * {@snippet lang="java" :
+     * Result<Integer, String> result = Result.error("failed");
+     * assertThat(result).hasError("failed");
+     * }
      *
      * @param expected the expected error value
      * @return this assertion object
@@ -103,6 +161,11 @@ public final class ResultAssert<T, E> extends AbstractAssert<ResultAssert<T, E>,
      * Verifies that the actual {@code Result} is in error state with an error
      * value satisfying the given requirements.
      *
+     * {@snippet lang="java" :
+     * Result<Integer, String> result = Result.error("failed");
+     * assertThat(result).hasErrorSatisfying(error -> assertThat(error).contains("fail"));
+     * }
+     *
      * @param requirements the requirements, expressed as assertions on the
      * error value
      * @return this assertion object
@@ -120,6 +183,11 @@ public final class ResultAssert<T, E> extends AbstractAssert<ResultAssert<T, E>,
      * Verifies that the actual {@code Result} is in success state, and returns
      * a new assertion object on the success value.
      *
+     * {@snippet lang="java" :
+     * Result<Integer, String> result = Result.success(42);
+     * assertThat(result).value().isEqualTo(42);
+     * }
+     *
      * @return an assertion object on the success value
      * @throws AssertionError if the actual {@code Result} is {@code null} or
      * in error state
@@ -132,6 +200,11 @@ public final class ResultAssert<T, E> extends AbstractAssert<ResultAssert<T, E>,
      * Verifies that the actual {@code Result} is in success state, and returns
      * a new assertion object on the success value narrowed by the given
      * factory, for example {@code value(InstanceOfAssertFactories.STRING)}.
+     *
+     * {@snippet lang="java" :
+     * Result<String, String> result = Result.success("hello");
+     * assertThat(result).value(InstanceOfAssertFactories.STRING).startsWith("he");
+     * }
      *
      * @param assertFactory the factory used to create the assertion object
      * @param <ASSERT> the type of the returned assertion object
@@ -148,6 +221,11 @@ public final class ResultAssert<T, E> extends AbstractAssert<ResultAssert<T, E>,
      * Verifies that the actual {@code Result} is in error state, and returns a
      * new assertion object on the error value.
      *
+     * {@snippet lang="java" :
+     * Result<Integer, String> result = Result.error("failed");
+     * assertThat(result).error().isEqualTo("failed");
+     * }
+     *
      * @return an assertion object on the error value
      * @throws AssertionError if the actual {@code Result} is {@code null} or
      * in success state
@@ -160,6 +238,11 @@ public final class ResultAssert<T, E> extends AbstractAssert<ResultAssert<T, E>,
      * Verifies that the actual {@code Result} is in error state, and returns a
      * new assertion object on the error value narrowed by the given factory,
      * for example {@code error(InstanceOfAssertFactories.THROWABLE)}.
+     *
+     * {@snippet lang="java" :
+     * Result<Integer, Exception> result = Result.error(new IllegalStateException("boom"));
+     * assertThat(result).error(InstanceOfAssertFactories.THROWABLE).hasMessage("boom");
+     * }
      *
      * @param assertFactory the factory used to create the assertion object
      * @param <ASSERT> the type of the returned assertion object

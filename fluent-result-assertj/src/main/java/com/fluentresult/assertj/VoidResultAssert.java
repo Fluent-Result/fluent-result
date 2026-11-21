@@ -24,6 +24,11 @@ public final class VoidResultAssert<E> extends AbstractAssert<VoidResultAssert<E
     /**
      * Verifies that the actual {@code VoidResult} is in success state.
      *
+     * {@snippet lang="java" :
+     * VoidResult<String> result = VoidResult.success();
+     * assertThat(result).isSuccess();
+     * }
+     *
      * @return this assertion object
      * @throws AssertionError if the actual {@code VoidResult} is {@code null}
      * or in error state
@@ -39,6 +44,11 @@ public final class VoidResultAssert<E> extends AbstractAssert<VoidResultAssert<E
     /**
      * Verifies that the actual {@code VoidResult} is in error state.
      *
+     * {@snippet lang="java" :
+     * VoidResult<String> result = VoidResult.error("failed");
+     * assertThat(result).isError();
+     * }
+     *
      * @return this assertion object
      * @throws AssertionError if the actual {@code VoidResult} is {@code null} or
      * in success state
@@ -51,6 +61,11 @@ public final class VoidResultAssert<E> extends AbstractAssert<VoidResultAssert<E
     /**
      * Verifies that the actual {@code VoidResult} is in error state with an error
      * value equal to the given one.
+     *
+     * {@snippet lang="java" :
+     * VoidResult<String> result = VoidResult.error("failed");
+     * assertThat(result).hasError("failed");
+     * }
      *
      * @param expected the expected error value
      * @return this assertion object
@@ -70,6 +85,11 @@ public final class VoidResultAssert<E> extends AbstractAssert<VoidResultAssert<E
      * Verifies that the actual {@code VoidResult} is in error state with an error
      * value satisfying the given requirements.
      *
+     * {@snippet lang="java" :
+     * VoidResult<String> result = VoidResult.error("failed");
+     * assertThat(result).hasErrorSatisfying(error -> assertThat(error).contains("fail"));
+     * }
+     *
      * @param requirements the requirements, expressed as assertions on the
      * error value
      * @return this assertion object
@@ -87,6 +107,11 @@ public final class VoidResultAssert<E> extends AbstractAssert<VoidResultAssert<E
      * Verifies that the actual {@code VoidResult} is in error state, and returns a
      * new assertion object on the error value.
      *
+     * {@snippet lang="java" :
+     * VoidResult<String> result = VoidResult.error("failed");
+     * assertThat(result).error().isEqualTo("failed");
+     * }
+     *
      * @return an assertion object on the error value
      * @throws AssertionError if the actual {@code VoidResult} is {@code null} or
      * in success state
@@ -99,6 +124,11 @@ public final class VoidResultAssert<E> extends AbstractAssert<VoidResultAssert<E
      * Verifies that the actual {@code VoidResult} is in error state, and returns a
      * new assertion object on the error value narrowed by the given factory,
      * for example {@code error(InstanceOfAssertFactories.THROWABLE)}.
+     *
+     * {@snippet lang="java" :
+     * VoidResult<Exception> result = VoidResult.error(new IllegalStateException("boom"));
+     * assertThat(result).error(InstanceOfAssertFactories.THROWABLE).hasMessage("boom");
+     * }
      *
      * @param assertFactory the factory used to create the assertion object
      * @param <ASSERT> the type of the returned assertion object

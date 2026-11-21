@@ -24,6 +24,11 @@ public final class BooleanResultAssert<E> extends AbstractAssert<BooleanResultAs
     /**
      * Verifies that the actual {@code BooleanResult} is in success state.
      *
+     * {@snippet lang="java" :
+     * BooleanResult<String> result = BooleanResult.successFalse();
+     * assertThat(result).isSuccess();
+     * }
+     *
      * @return this assertion object
      * @throws AssertionError if the actual {@code BooleanResult} is
      * {@code null} or in error state
@@ -36,6 +41,11 @@ public final class BooleanResultAssert<E> extends AbstractAssert<BooleanResultAs
     /**
      * Verifies that the actual {@code BooleanResult} is in success state with
      * the value {@code true}.
+     *
+     * {@snippet lang="java" :
+     * BooleanResult<String> result = BooleanResult.successTrue();
+     * assertThat(result).isTrue();
+     * }
      *
      * @return this assertion object
      * @throws AssertionError if the actual {@code BooleanResult} is
@@ -52,6 +62,11 @@ public final class BooleanResultAssert<E> extends AbstractAssert<BooleanResultAs
      * Verifies that the actual {@code BooleanResult} is in success state with
      * the value {@code false}.
      *
+     * {@snippet lang="java" :
+     * BooleanResult<String> result = BooleanResult.successFalse();
+     * assertThat(result).isFalse();
+     * }
+     *
      * @return this assertion object
      * @throws AssertionError if the actual {@code BooleanResult} is
      * {@code null}, in error state, or has the value {@code true}
@@ -66,6 +81,11 @@ public final class BooleanResultAssert<E> extends AbstractAssert<BooleanResultAs
     /**
      * Verifies that the actual {@code BooleanResult} is in error state.
      *
+     * {@snippet lang="java" :
+     * BooleanResult<String> result = BooleanResult.error("failed");
+     * assertThat(result).isError();
+     * }
+     *
      * @return this assertion object
      * @throws AssertionError if the actual {@code BooleanResult} is {@code null} or
      * in success state
@@ -78,6 +98,11 @@ public final class BooleanResultAssert<E> extends AbstractAssert<BooleanResultAs
     /**
      * Verifies that the actual {@code BooleanResult} is in error state with an error
      * value equal to the given one.
+     *
+     * {@snippet lang="java" :
+     * BooleanResult<String> result = BooleanResult.error("failed");
+     * assertThat(result).hasError("failed");
+     * }
      *
      * @param expected the expected error value
      * @return this assertion object
@@ -97,6 +122,11 @@ public final class BooleanResultAssert<E> extends AbstractAssert<BooleanResultAs
      * Verifies that the actual {@code BooleanResult} is in error state with an error
      * value satisfying the given requirements.
      *
+     * {@snippet lang="java" :
+     * BooleanResult<String> result = BooleanResult.error("failed");
+     * assertThat(result).hasErrorSatisfying(error -> assertThat(error).contains("fail"));
+     * }
+     *
      * @param requirements the requirements, expressed as assertions on the
      * error value
      * @return this assertion object
@@ -114,6 +144,11 @@ public final class BooleanResultAssert<E> extends AbstractAssert<BooleanResultAs
      * Verifies that the actual {@code BooleanResult} is in error state, and returns a
      * new assertion object on the error value.
      *
+     * {@snippet lang="java" :
+     * BooleanResult<String> result = BooleanResult.error("failed");
+     * assertThat(result).error().isEqualTo("failed");
+     * }
+     *
      * @return an assertion object on the error value
      * @throws AssertionError if the actual {@code BooleanResult} is {@code null} or
      * in success state
@@ -126,6 +161,11 @@ public final class BooleanResultAssert<E> extends AbstractAssert<BooleanResultAs
      * Verifies that the actual {@code BooleanResult} is in error state, and returns a
      * new assertion object on the error value narrowed by the given factory,
      * for example {@code error(InstanceOfAssertFactories.THROWABLE)}.
+     *
+     * {@snippet lang="java" :
+     * BooleanResult<Exception> result = BooleanResult.error(new IllegalStateException("boom"));
+     * assertThat(result).error(InstanceOfAssertFactories.THROWABLE).hasMessage("boom");
+     * }
      *
      * @param assertFactory the factory used to create the assertion object
      * @param <ASSERT> the type of the returned assertion object
