@@ -2,6 +2,7 @@ package com.fluentresult;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Callable;
@@ -138,6 +139,36 @@ class GenericsTest {
         Optional<Type> orElse = result.orElse(other);
         Function<String, Optional<SubType>> function = e -> Optional.of(new SubType());
         Optional<Type> orElseGet = result.orElseGet(function);
+    }
+
+    @Test
+    void result_traverse() {
+        List<SubType> items = List.of(new SubType());
+        Function<ParentType, Result<SubType, SubType>> function = p -> Result.success(new SubType());
+        Result<List<Type>, Type> traversed = Result.traverse(items, function);
+        Result<List<Type>, List<Type>> traversedAll = Result.traverseAll(items, function);
+    }
+
+    @Test
+    void result_sequence() {
+        List<Result<SubType, SubType>> results = List.of(Result.success(new SubType()));
+        Result<List<Type>, Type> sequenced = Result.sequence(results);
+        Result<List<Type>, List<Type>> sequencedAll = Result.sequenceAll(results);
+    }
+
+    @Test
+    void voidResult_traverse() {
+        List<SubType> items = List.of(new SubType());
+        Function<ParentType, VoidResult<SubType>> function = p -> VoidResult.success();
+        VoidResult<Type> traversed = VoidResult.traverse(items, function);
+        VoidResult<List<Type>> traversedAll = VoidResult.traverseAll(items, function);
+    }
+
+    @Test
+    void voidResult_sequence() {
+        List<VoidResult<SubType>> results = List.of(VoidResult.success());
+        VoidResult<Type> sequenced = VoidResult.sequence(results);
+        VoidResult<List<Type>> sequencedAll = VoidResult.sequenceAll(results);
     }
 
     private static class ParentType {}

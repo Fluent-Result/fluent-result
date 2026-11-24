@@ -364,6 +364,33 @@ if (getCustomer(id) instanceof Result.Error(String errorMsg)) {
 The component types may be replaced with `var`, for example `case Result.Success(var customer)`. The record classes are public so that they can be used in patterns, but prefer the static factory methods like `Result.success` and `OptionalResult.successNullable` over calling the record constructors directly.
 
 
+### Combining Results
+
+When each iteration of a loop returns a Result, the static methods `traverse`, `sequence`, `traverseAll` and `sequenceAll` combine them into a single Result. `traverse` applies a function to each item, while `sequence` combines Results you already have.
+
+`traverse` and `sequence` stop at the first error. The function is not applied to the remaining items:
+```java
+public Result<List<Customer>, String> getCustomers(List<String> ids) {
+    return Result.traverse(ids, id -> getCustomer(id)); // getCustomer returns Result<Customer, String>
+}
+```
+
+`traverseAll` and `sequenceAll` process every item and collect all the errors, which is useful for validation:
+```java
+public Result<List<Customer>, List<String>> getCustomers(List<String> ids) {
+    return Result.traverseAll(ids, id -> getCustomer(id));
+}
+```
+
+The same methods exist on _VoidResult_, returning `VoidResult<E>` and `VoidResult<List<E>>`:
+```java
+public VoidResult<String> deleteCustomers(List<String> ids) {
+    return VoidResult.traverse(ids, id -> deleteCustomer(id)); // deleteCustomer returns VoidResult<String>
+}
+```
+
+The returned lists are unmodifiable and keep the order of the items.
+
 ## API
     
 ### [Result](https://fluent-result.github.io/fluent-result/com/fluentresult/fluentresult/Result.html)
@@ -375,6 +402,11 @@ The component types may be replaced with `var`, for example `case Result.Success
 
 [`handle(Callable<T> callable)`](https://fluent-result.github.io/fluent-result/com/fluentresult/fluentresult/Result.html#handle(java.util.concurrent.Callable))<br/>
 [`handle(Callable<T> callable, Function<Exception, E> exceptionMapper)`](https://fluent-result.github.io/fluent-result/com/fluentresult/fluentresult/Result.html#handle(java.util.concurrent.Callable,java.util.function.Function)))
+
+[`traverse(Iterable<A> items, Function<A, Result<T, E>> function)`](https://fluent-result.github.io/fluent-result/com/fluentresult/fluentresult/Result.html#traverse(java.lang.Iterable,java.util.function.Function))<br/>
+[`sequence(Iterable<Result<T, E>> results)`](https://fluent-result.github.io/fluent-result/com/fluentresult/fluentresult/Result.html#sequence(java.lang.Iterable))<br/>
+[`traverseAll(Iterable<A> items, Function<A, Result<T, E>> function)`](https://fluent-result.github.io/fluent-result/com/fluentresult/fluentresult/Result.html#traverseAll(java.lang.Iterable,java.util.function.Function))<br/>
+[`sequenceAll(Iterable<Result<T, E>> results)`](https://fluent-result.github.io/fluent-result/com/fluentresult/fluentresult/Result.html#sequenceAll(java.lang.Iterable))
 
 #### Instance Methods
 
@@ -559,6 +591,11 @@ The component types may be replaced with `var`, for example `case Result.Success
 
 [`handle(CheckedRunnable runnable)`](https://fluent-result.github.io/fluent-result/com/fluentresult/fluentresult/VoidResult.html#handle(com.fluentresult.fluentresult.CheckedRunnable))<br/>
 [`handle(CheckedRunnable runnable, Function<Exception, E> exceptionMapper)`](https://fluent-result.github.io/fluent-result/com/fluentresult/fluentresult/VoidResult.html#handle(com.fluentresult.fluentresult.CheckedRunnable,java.util.function.Function))
+
+[`traverse(Iterable<A> items, Function<A, VoidResult<E>> function)`](https://fluent-result.github.io/fluent-result/com/fluentresult/fluentresult/VoidResult.html#traverse(java.lang.Iterable,java.util.function.Function))<br/>
+[`sequence(Iterable<VoidResult<E>> results)`](https://fluent-result.github.io/fluent-result/com/fluentresult/fluentresult/VoidResult.html#sequence(java.lang.Iterable))<br/>
+[`traverseAll(Iterable<A> items, Function<A, VoidResult<E>> function)`](https://fluent-result.github.io/fluent-result/com/fluentresult/fluentresult/VoidResult.html#traverseAll(java.lang.Iterable,java.util.function.Function))<br/>
+[`sequenceAll(Iterable<VoidResult<E>> results)`](https://fluent-result.github.io/fluent-result/com/fluentresult/fluentresult/VoidResult.html#sequenceAll(java.lang.Iterable))
 
 #### Instance Methods
 

@@ -1,5 +1,7 @@
 package com.fluentresult;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -392,6 +394,104 @@ public sealed interface VoidResult<E> {
         Objects.requireNonNull(runnable);
         Objects.requireNonNull(exceptionMapper);
         return handle(runnable).mapError(exceptionMapper);
+    }
+
+    /**
+     * Applies the given function to each of the given items in order,
+     * stopping at the first {@code VoidResult} in error state. If all the
+     * {@code VoidResult}s are in success state, the returned
+     * {@code VoidResult} will be in success state. Otherwise the returned
+     * {@code VoidResult} will be in error state containing the first error
+     * value, and the function is not applied to the remaining items.
+     *
+     * @param items the items to apply the function to
+     * @param function the function mapping each item to a {@code VoidResult}
+     * @param <A> the type of the items
+     * @param <E> the type of the error value
+     * @return a {@code VoidResult} either in success state, or in error state
+     * containing the first error value
+     * @throws NullPointerException if the given items are {@code null}, or the
+     * given function is {@code null} or returns {@code null}
+     */
+    static <A, E> VoidResult<E> traverse(Iterable<? extends A> items,
+                                         Function<? super A, ? extends VoidResult<? extends E>> function) {
+        Objects.requireNonNull(items);
+        Objects.requireNonNull(function);
+        for (A item : items) {
+            if (Objects.requireNonNull(function.apply(item)) instanceof Error<? extends E> error) {
+                return VoidResult.error(error.error());
+            }
+        }
+        return VoidResult.success();
+    }
+
+    /**
+     * Combines the given {@code VoidResult}s, stopping at the first one in
+     * error state. If all the {@code VoidResult}s are in success state, the
+     * returned {@code VoidResult} will be in success state. Otherwise the
+     * returned {@code VoidResult} will be in error state containing the first
+     * error value.
+     *
+     * @param results the {@code VoidResult}s to combine
+     * @param <E> the type of the error value
+     * @return a {@code VoidResult} either in success state, or in error state
+     * containing the first error value
+     * @throws NullPointerException if the given results are {@code null} or
+     * contain {@code null}
+     */
+    static <E> VoidResult<E> sequence(Iterable<? extends VoidResult<? extends E>> results) {
+        return traverse(results, result -> result);
+    }
+
+    /**
+     * Applies the given function to each of the given items in order,
+     * collecting all the error values. If all the {@code VoidResult}s are in
+     * success state, the returned {@code VoidResult} will be in success state.
+     * Otherwise the returned {@code VoidResult} will be in error state
+     * containing an unmodifiable list of all the error values, in the same
+     * order as the items.
+     *
+     * @param items the items to apply the function to
+     * @param function the function mapping each item to a {@code VoidResult}
+     * @param <A> the type of the items
+     * @param <E> the type of the error values
+     * @return a {@code VoidResult} either in success state, or in error state
+     * containing a list of all the error values
+     * @throws NullPointerException if the given items are {@code null}, or the
+     * given function is {@code null} or returns {@code null}
+     */
+    static <A, E> VoidResult<List<E>> traverseAll(Iterable<? extends A> items,
+                                                  Function<? super A, ? extends VoidResult<? extends E>> function) {
+        Objects.requireNonNull(items);
+        Objects.requireNonNull(function);
+        List<E> errors = new ArrayList<>();
+        for (A item : items) {
+            if (Objects.requireNonNull(function.apply(item)) instanceof Error<? extends E> error) {
+                errors.add(error.error());
+            }
+        }
+        if (errors.isEmpty()) {
+            return VoidResult.success();
+        }
+        return VoidResult.error(List.copyOf(errors));
+    }
+
+    /**
+     * Combines the given {@code VoidResult}s, collecting all the error values.
+     * If all the {@code VoidResult}s are in success state, the returned
+     * {@code VoidResult} will be in success state. Otherwise the returned
+     * {@code VoidResult} will be in error state containing an unmodifiable
+     * list of all the error values, in the same order.
+     *
+     * @param results the {@code VoidResult}s to combine
+     * @param <E> the type of the error values
+     * @return a {@code VoidResult} either in success state, or in error state
+     * containing a list of all the error values
+     * @throws NullPointerException if the given results are {@code null} or
+     * contain {@code null}
+     */
+    static <E> VoidResult<List<E>> sequenceAll(Iterable<? extends VoidResult<? extends E>> results) {
+        return traverseAll(results, result -> result);
     }
 
     record Success<E>() implements VoidResult<E> {

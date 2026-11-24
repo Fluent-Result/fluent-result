@@ -1,5 +1,7 @@
 package com.fluentresult;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Callable;
@@ -526,6 +528,123 @@ public sealed interface Result<T, E> {
         Objects.requireNonNull(callable);
         Objects.requireNonNull(exceptionMapper);
         return Result.<T>handle(callable).mapError(exceptionMapper);
+    }
+
+    /**
+     * Applies the given function to each of the given items in order,
+     * stopping at the first {@code Result} in error state. If all the
+     * {@code Result}s are in success state, the returned {@code Result} will
+     * be in success state containing an unmodifiable list of the success
+     * values, in the same order as the items. Otherwise the returned
+     * {@code Result} will be in error state containing the first error value,
+     * and the function is not applied to the remaining items.
+     *
+     * @param items the items to apply the function to
+     * @param function the function mapping each item to a {@code Result}
+     * @param <A> the type of the items
+     * @param <T> the type of the success values
+     * @param <E> the type of the error value
+     * @return a {@code Result} either in success state containing a list of
+     * all the success values, or in error state containing the first error
+     * value
+     * @throws NullPointerException if the given items are {@code null}, or the
+     * given function is {@code null} or returns {@code null}
+     */
+    static <A, T, E> Result<List<T>, E> traverse(Iterable<? extends A> items,
+                                                 Function<? super A, ? extends Result<? extends T, ? extends E>> function) {
+        Objects.requireNonNull(items);
+        Objects.requireNonNull(function);
+        List<T> values = new ArrayList<>();
+        for (A item : items) {
+            switch (Objects.requireNonNull(function.apply(item))) {
+                case Success<? extends T, ? extends E> success -> values.add(success.value());
+                case Error<? extends T, ? extends E> error -> {
+                    return Result.error(error.error());
+                }
+            }
+        }
+        return Result.success(List.copyOf(values));
+    }
+
+    /**
+     * Combines the given {@code Result}s, stopping at the first one in error
+     * state. If all the {@code Result}s are in success state, the returned
+     * {@code Result} will be in success state containing an unmodifiable list
+     * of the success values, in the same order. Otherwise the returned
+     * {@code Result} will be in error state containing the first error value.
+     *
+     * @param results the {@code Result}s to combine
+     * @param <T> the type of the success values
+     * @param <E> the type of the error value
+     * @return a {@code Result} either in success state containing a list of
+     * all the success values, or in error state containing the first error
+     * value
+     * @throws NullPointerException if the given results are {@code null} or
+     * contain {@code null}
+     */
+    static <T, E> Result<List<T>, E> sequence(
+            Iterable<? extends Result<? extends T, ? extends E>> results) {
+        return traverse(results, result -> result);
+    }
+
+    /**
+     * Applies the given function to each of the given items in order,
+     * collecting all the error values. If all the {@code Result}s are in
+     * success state, the returned {@code Result} will be in success state
+     * containing an unmodifiable list of the success values, in the same order
+     * as the items. Otherwise the returned {@code Result} will be in error
+     * state containing an unmodifiable list of all the error values, in the
+     * same order as the items.
+     *
+     * @param items the items to apply the function to
+     * @param function the function mapping each item to a {@code Result}
+     * @param <A> the type of the items
+     * @param <T> the type of the success values
+     * @param <E> the type of the error values
+     * @return a {@code Result} either in success state containing a list of
+     * all the success values, or in error state containing a list of all the
+     * error values
+     * @throws NullPointerException if the given items are {@code null}, or the
+     * given function is {@code null} or returns {@code null}
+     */
+    static <A, T, E> Result<List<T>, List<E>> traverseAll(Iterable<? extends A> items,
+                                                          Function<? super A, ? extends Result<? extends T, ? extends E>> function) {
+        Objects.requireNonNull(items);
+        Objects.requireNonNull(function);
+        List<T> values = new ArrayList<>();
+        List<E> errors = new ArrayList<>();
+        for (A item : items) {
+            switch (Objects.requireNonNull(function.apply(item))) {
+                case Success<? extends T, ? extends E> success -> values.add(success.value());
+                case Error<? extends T, ? extends E> error -> errors.add(error.error());
+            }
+        }
+        if (errors.isEmpty()) {
+            return Result.success(List.copyOf(values));
+        }
+        return Result.error(List.copyOf(errors));
+    }
+
+    /**
+     * Combines the given {@code Result}s, collecting all the error values. If
+     * all the {@code Result}s are in success state, the returned
+     * {@code Result} will be in success state containing an unmodifiable list
+     * of the success values, in the same order. Otherwise the returned
+     * {@code Result} will be in error state containing an unmodifiable list of
+     * all the error values, in the same order.
+     *
+     * @param results the {@code Result}s to combine
+     * @param <T> the type of the success values
+     * @param <E> the type of the error values
+     * @return a {@code Result} either in success state containing a list of
+     * all the success values, or in error state containing a list of all the
+     * error values
+     * @throws NullPointerException if the given results are {@code null} or
+     * contain {@code null}
+     */
+    static <T, E> Result<List<T>, List<E>> sequenceAll(
+            Iterable<? extends Result<? extends T, ? extends E>> results) {
+        return traverseAll(results, result -> result);
     }
 
     record Success<T, E>(T value) implements Result<T, E> {
