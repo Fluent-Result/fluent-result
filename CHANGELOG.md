@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- New module `fluent-result-assertj` (`com.fluentresult:fluent-result-assertj`) with AssertJ assertions for `Result`, `OptionalResult`, `BooleanResult` and `VoidResult`, available through `FluentResultAssertions.assertThat`.
 - `module-info.java` declaring the module `com.fluentresult`, replacing the `Automatic-Module-Name` manifest entry. The module name is unchanged.
 
 ### Changed

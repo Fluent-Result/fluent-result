@@ -1,0 +1,24 @@
+<project xmlns="http://maven.apache.org/POM/4.1.0">
+
+    <parent/>
+
+    <artifactId>fluent-result-assertj</artifactId>
+    <name>Fluent Result AssertJ</name>
+    <description>AssertJ assertions for Fluent Result.</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.fluentresult</groupId>
+            <artifactId>fluent-result</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>

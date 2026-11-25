@@ -30,7 +30,7 @@ class GenericsTest {
         Result<Type, Type> result = Result.error(new SubType());
         Function<ParentType, Result<SubType, Type>> function = p -> Result.success(new SubType());
         Result<Type, Type> mapped = result.flatMap(function);
-    }
+}
 
     @Test
     void result_successToError_flatMap() {

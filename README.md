@@ -15,6 +15,7 @@ A Java result library helping you get rid of exceptions, enabling a more fluent 
   - [Verifying the Value](#verifying-the-value)
   - [Extracting the Value](#extracting-the-value)
   - [Pattern Matching](#pattern-matching)
+  - [Testing with AssertJ](#testing-with-assertj)
 - [API](#api)
   - [Result](#result)
     - [Static Factory Methods](#static-factory-methods)
@@ -362,6 +363,45 @@ if (getCustomer(id) instanceof Result.Error(String errorMsg)) {
 ```
 
 The component types may be replaced with `var`, for example `case Result.Success(var customer)`. The record classes are public so that they can be used in patterns, but prefer the static factory methods like `Result.success` and `OptionalResult.successNullable` over calling the record constructors directly.
+
+
+### Testing with AssertJ
+
+The separate module `fluent-result-assertj` provides [AssertJ](https://assertj.github.io/doc/) assertions for all the Result classes. Add it as a test dependency:
+
+```xml
+<dependency>
+    <groupId>com.fluentresult</groupId>
+    <artifactId>fluent-result-assertj</artifactId>
+    <version>${fluent-result.version}</version>
+    <scope>test</scope>
+</dependency>
+```
+
+The entry point is `FluentResultAssertions.assertThat`. It can be statically imported together with AssertJ's own `Assertions.assertThat`:
+```java
+import static com.fluentresult.assertj.FluentResultAssertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.STRING;
+
+assertThat(getCustomer(id)).isSuccess();
+assertThat(getCustomer(id)).hasValueSatisfying(customer -> assertThat(customer.getAge()).isGreaterThan(17));
+assertThat(getCustomer(id)).hasError("Customer not found");
+assertThat(getCustomer(id)).error(STRING).startsWith("Customer");
+
+assertThat(findCustomer(id)).isEmpty();   // OptionalResult
+assertThat(isCustomerAdult(id)).isTrue(); // BooleanResult
+assertThat(deleteCustomer(id)).isError(); // VoidResult
+```
+
+| Class | Assertions |
+|-------|------------|
+| _Result_ | `isSuccess`, `hasValue`, `hasValueSatisfying`, `value`, `isError`, `hasError`, `hasErrorSatisfying`, `error` |
+| _OptionalResult_ | `isSuccess` (value or empty), `isPresent`, `isEmpty`, `hasValue`, `hasValueSatisfying`, `value`, `isError`, `hasError`, `hasErrorSatisfying`, `error` |
+| _BooleanResult_ | `isSuccess`, `isTrue`, `isFalse`, `isError`, `hasError`, `hasErrorSatisfying`, `error` |
+| _VoidResult_ | `isSuccess`, `isError`, `hasError`, `hasErrorSatisfying`, `error` |
+
+`value()` and `error()` return an AssertJ `ObjectAssert` for further chaining, and `value(InstanceOfAssertFactory)` and `error(InstanceOfAssertFactory)` return a typed assertion, for example `value(InstanceOfAssertFactories.LIST)`.
 
 
 ## API
